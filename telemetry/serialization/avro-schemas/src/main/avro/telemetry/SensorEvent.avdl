@@ -1,4 +1,69 @@
 @namespace("ru.yandex.practicum.kafka.telemetry.event")
-protocol SensorEventProtocol {
+protocol SensorAvroProtocol {
 
+	/**
+	 * Represents data from a climate sensor.
+	 * Includes temperature, humidity, and CO2 levels.
+	 */
+	record ClimateSensorAvro {
+		int temperature_c; // Temperature in Celsius.
+		int humidity; // Humidity level in percentage.
+		int co2_level; // CO2 level in parts per million (ppm).
+	}
+
+	/**
+	 * Represents data from a light sensor.
+	 * Includes link quality and luminosity.
+	 */
+	record LightSensorAvro {
+		int link_quality; // Signal quality indicator.
+		int luminosity; // Light intensity level.
+	}
+
+	/**
+	 * Represents data from a motion sensor.
+	 * Includes link quality, motion detection, and voltage level.
+	 */
+	record MotionSensorAvro {
+		int link_quality; // Signal quality indicator.
+		boolean motion; // Indicates if motion is detected.
+		int voltage; // Voltage level in millivolts.
+	}
+
+	/**
+	 * Represents data from a switch sensor.
+	 * Includes the state of the switch.
+	 */
+	record SwitchSensorAvro {
+		boolean state; // Current state of the switch (true for ON, false for OFF).
+	}
+
+	/**
+	 * Represents data from a temperature sensor.
+	 * Includes temperature in Celsius and Fahrenheit.
+	 */
+	record TemperatureSensorAvro {
+		string id; // Unique identifier of the sensor.
+		string hubId; // Hub to which the sensor is connected.
+		timestamp_ms timestamp; // Timestamp of the telemetry event.
+		int temperature_c; // Temperature in Celsius.
+		int temperature_f; // Temperature in Fahrenheit.
+	}
+
+	/**
+	 * Represents a telemetry event for sensors.
+	 * Contains one of the sensor data records.
+	 */
+	record SensorEventAvro {
+		string id; // Unique identifier of the sensor.
+		string hubId; // Hub to which the sensor is connected.
+		timestamp_ms timestamp; // Timestamp of the event.
+		union {
+			ClimateSensorAvro,
+			LightSensorAvro,
+			MotionSensorAvro,
+			SwitchSensorAvro,
+			TemperatureSensorAvro
+		} payload; // Sensor-specific data payload.
+	}
 }

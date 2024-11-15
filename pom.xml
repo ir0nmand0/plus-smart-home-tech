@@ -30,6 +30,10 @@
         <grpc-spring-boot-starter.version>3.1.0.RELEASE</grpc-spring-boot-starter.version>
         <protobuf.version>3.23.4</protobuf.version>
         <grpc.version>1.63.0</grpc.version>
+<!--        Kafka-клиент пока что работает только с версиями 1.x-->
+        <slf4j.version>1.7.36</slf4j.version>
+        <lombok.version>1.18.32</lombok.version>
+<!--        <mapstruct.version>1.5.5.Final</mapstruct.version>-->
 
         <!--       Plugins       -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
