@@ -6,7 +6,7 @@ import ru.yandex.practicum.model.sensor.EventProcessorVisitor;
 import ru.yandex.practicum.model.sensor.SensorEvent;
 
 public interface EventProcessingService extends HubEventProcessorVisitor, EventProcessorVisitor {
-    void processSensorEvent(SensorEvent event);
+    void publishKafka(SensorEvent event);
 
-    void processHubEvent(HubEvent event);
+    void publishKafka(HubEvent event);
 }

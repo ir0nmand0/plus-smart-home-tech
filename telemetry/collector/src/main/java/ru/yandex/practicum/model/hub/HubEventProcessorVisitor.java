@@ -1,11 +1,11 @@
 package ru.yandex.practicum.model.hub;
 
 public interface HubEventProcessorVisitor {
-    void process(DeviceAddedEvent event);
+    void visit(DeviceAddedEvent event);
 
-    void process(DeviceRemovedEvent event);
+    void visit(DeviceRemovedEvent event);
 
-    void process(ScenarioAddedEvent event);
+    void visit(ScenarioAddedEvent event);
 
-    void process(ScenarioRemovedEvent event);
+    void visit(ScenarioRemovedEvent event);
 }

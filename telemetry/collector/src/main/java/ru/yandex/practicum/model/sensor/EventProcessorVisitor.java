@@ -1,13 +1,13 @@
 package ru.yandex.practicum.model.sensor;
 
 public interface EventProcessorVisitor {
-    void process(LightSensorEvent event);
+    void visit(LightSensorEvent event);
 
-    void process(TemperatureSensorEvent event);
+    void visit(TemperatureSensorEvent event);
 
-    void process(SwitchSensorEvent event);
+    void visit(SwitchSensorEvent event);
 
-    void process(ClimateSensorEvent event);
+    void visit(ClimateSensorEvent event);
 
-    void process(MotionSensorEvent event);
+    void visit(MotionSensorEvent event);
 }

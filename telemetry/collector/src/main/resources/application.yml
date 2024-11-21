@@ -7,6 +7,11 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
 
+endpoints:
+  root: /events
+  sensors: /sensors
+  hubs: /hubs
+
 kafka:
   topics:
     sensors: telemetry.sensors.v1
@@ -15,4 +20,4 @@ kafka:
 logging:
   level:
     root: INFO
-    ru.yandex.practicum: DEBUG
+    ru.yandex.practicum: INFO

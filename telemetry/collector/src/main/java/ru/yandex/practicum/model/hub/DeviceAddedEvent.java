@@ -1,30 +1,30 @@
 package ru.yandex.practicum.model.hub;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.constraints.NotBlank;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import ru.yandex.practicum.model.sensor.DeviceType;
+
+import static ru.yandex.practicum.model.hub.HubEventTypeString.DEVICE_ADDED;
 
 @Getter
 @Setter
 @ToString(callSuper = true)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true, callSuper = true)
+@SuperBuilder
+@NoArgsConstructor
+@JsonTypeName(DEVICE_ADDED)
 public class DeviceAddedEvent extends HubEvent {
     @NotBlank
-    @EqualsAndHashCode.Exclude
+    @EqualsAndHashCode.Include
     private String id;
-    @NotBlank
-    private DeviceType deviceType;
-
-    @Override
-    public HubEventType getType() {
-        return HubEventType.DEVICE_ADDED;
-    }
+    @NotNull
+    private DeviceType type;
 
     @Override
     public void accept(HubEventProcessorVisitor visitor) {
-        visitor.process(this);
+        visitor.visit(this);
     }
 }
