@@ -1,4 +1,113 @@
 @namespace("ru.yandex.practicum.kafka.telemetry.event")
 protocol HubEventProtocol {
 
+	/**
+	 * Enumeration of device types supported in the hub.
+	 */
+	enum DeviceTypeAvro {
+		MOTION_SENSOR,      // Motion detection sensor.
+		TEMPERATURE_SENSOR, // Temperature measurement sensor.
+		LIGHT_SENSOR,       // Light intensity sensor.
+		CLIMATE_SENSOR,     // Sensor measuring climate parameters (e.g., CO2, humidity).
+		SWITCH_SENSOR       // Switch sensor (e.g., ON/OFF state).
+	}
+
+	/**
+	 * Enumeration of condition types used for scenario activation.
+	 */
+	enum ConditionTypeAvro {
+		MOTION,     // Based on motion detection.
+		LUMINOSITY, // Based on light intensity.
+		SWITCH,     // Based on switch state.
+		TEMPERATURE,// Based on temperature.
+		CO2LEVEL,   // Based on CO2 levels.
+		HUMIDITY    // Based on humidity levels.
+	}
+
+	/**
+	 * Enumeration of operations for scenario conditions.
+	 */
+	enum ConditionOperationAvro {
+		EQUALS,        // Equality comparison.
+		GREATER_THAN,  // Greater than comparison.
+		LOWER_THAN     // Lower than comparison.
+	}
+
+	/**
+	 * Enumeration of actions to be executed by devices.
+	 */
+	enum ActionTypeAvro {
+		ACTIVATE,   // Activate the device.
+		DEACTIVATE, // Deactivate the device.
+		INVERSE,    // Invert the state of the device.
+		SET_VALUE   // Set a specific value for the device.
+	}
+
+	/**
+	 * Represents an event for adding a device to the hub.
+	 */
+	record DeviceAddedEventAvro {
+		string id; // Unique identifier of the device.
+		DeviceTypeAvro type; // Type of the added device.
+	}
+
+	/**
+	 * Represents an event for removing a device from the hub.
+	 */
+	record DeviceRemovedEventAvro {
+		string id; // Unique identifier of the device.
+	}
+
+	/**
+	 * Represents a condition used in a scenario.
+	 * Contains sensor ID, condition type, operation, and optional value.
+	 */
+	record ScenarioConditionAvro {
+		string sensor_id; // Unique identifier of the sensor.
+		ConditionTypeAvro type; // Type of condition.
+		ConditionOperationAvro operation; // Operation applied to the condition.
+		union {null, int, boolean} value = null; // Value for comparison (optional).
+	}
+
+	/**
+	 * Represents an action performed by a device in a scenario.
+	 * Contains sensor ID, action type, and optional value.
+	 */
+	record DeviceActionAvro {
+		string sensor_id; // Unique identifier of the sensor.
+		ActionTypeAvro type; // Type of action to be performed.
+		int? value = null; // Value to be set during the action (optional).
+	}
+
+	/**
+	 * Represents an event for adding a scenario to the hub.
+	 * Contains scenario name, conditions, and actions.
+	 */
+	record ScenarioAddedEventAvro {
+		string name; // Unique name of the scenario.
+		array<ScenarioConditionAvro> conditions; // Conditions for activating the scenario.
+		array<DeviceActionAvro> actions; // Actions to execute when the scenario activates.
+	}
+
+	/**
+	 * Represents an event for removing a scenario from the hub.
+	 */
+	record ScenarioRemovedEventAvro {
+		string name; // Name of the scenario to be removed.
+	}
+
+	/**
+	 * Represents a general hub event.
+	 * Contains a hub ID, timestamp, and payload.
+	 */
+	record HubEventAvro {
+		string hub_id; // Unique identifier of the hub.
+		timestamp_ms timestamp; // Timestamp of the event.
+		union {
+			DeviceAddedEventAvro,
+			DeviceRemovedEventAvro,
+			ScenarioAddedEventAvro,
+			ScenarioRemovedEventAvro
+		} payload; // Event-specific payload.
+	}
 }
