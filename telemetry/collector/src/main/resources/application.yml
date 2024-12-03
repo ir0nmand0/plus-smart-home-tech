@@ -1,23 +1,43 @@
 spring:
   kafka:
+    # Указываем адрес Kafka-брокеров
     bootstrap-servers: localhost:9092
+
     properties:
+      # URL для Schema Registry, необходим для сериализации и десериализации Avro-сообщений
       schema.registry.url: http://localhost:8081
+
     producer:
+      # Сериализация ключей сообщений в Kafka
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # Сериализация значений сообщений в Kafka с использованием Avro
+      # Пусть все консьюмеры работают с Avro, что унифицирует внутреннюю логику обработки, те
+      # нет смысла в KafkaProtobufSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
 
+  logging:
+    level:
+      # Общий уровень логирования
+      root: INFO
+      # Логирование для пакета ru.yandex.practicum
+      ru.yandex.practicum: INFO
+
 endpoints:
+  # Базовый URL для обработки REST-запросов
   root: /events
+  # URL для обработки запросов, связанных с сенсорами
   sensors: /sensors
+  # URL для обработки запросов, связанных с хабами
   hubs: /hubs
 
 kafka:
   topics:
+    # Название топика для событий от сенсоров
     sensors: telemetry.sensors.v1
+    # Название топика для событий от хабов
     hubs: telemetry.hubs.v1
 
-logging:
-  level:
-    root: INFO
-    ru.yandex.practicum: INFO
+grpc:
+  server:
+    # Порт для gRPC сервера
+    port: 9090

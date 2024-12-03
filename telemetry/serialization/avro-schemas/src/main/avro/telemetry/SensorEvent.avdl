@@ -2,68 +2,65 @@
 protocol SensorAvroProtocol {
 
 	/**
-	 * Represents data from a climate sensor.
-	 * Includes temperature, humidity, and CO2 levels.
+	 * Описание данных климатического сенсора.
+	 * Включает температуру, влажность и уровень CO2.
 	 */
 	record ClimateSensorAvro {
-		int temperature_c; // Temperature in Celsius.
-		int humidity; // Humidity level in percentage.
-		int co2_level; // CO2 level in parts per million (ppm).
+		int temperature_c; // Температура в градусах Цельсия.
+		int humidity; // Уровень влажности в процентах.
+		int co2_level; // Уровень CO2 в частях на миллион (ppm).
 	}
 
 	/**
-	 * Represents data from a light sensor.
-	 * Includes link quality and luminosity.
+	 * Описание данных сенсора освещенности.
+	 * Включает качество связи и уровень освещенности.
 	 */
 	record LightSensorAvro {
-		int link_quality; // Signal quality indicator.
-		int luminosity; // Light intensity level.
+		int link_quality; // Индикатор качества сигнала.
+		int luminosity; // Уровень освещенности.
 	}
 
 	/**
-	 * Represents data from a motion sensor.
-	 * Includes link quality, motion detection, and voltage level.
+	 * Описание данных сенсора движения.
+	 * Включает качество связи, обнаружение движения и уровень напряжения.
 	 */
 	record MotionSensorAvro {
-		int link_quality; // Signal quality indicator.
-		boolean motion; // Indicates if motion is detected.
-		int voltage; // Voltage level in millivolts.
+		int link_quality; // Индикатор качества сигнала.
+		boolean motion; // Обнаружено ли движение.
+		int voltage; // Уровень напряжения в милливольтах.
 	}
 
 	/**
-	 * Represents data from a switch sensor.
-	 * Includes the state of the switch.
+	 * Описание данных сенсора переключателя.
+	 * Включает состояние переключателя.
 	 */
 	record SwitchSensorAvro {
-		boolean state; // Current state of the switch (true for ON, false for OFF).
+		boolean state; // Текущее состояние переключателя (true - ВКЛ, false - ВЫКЛ).
 	}
 
 	/**
-	 * Represents data from a temperature sensor.
-	 * Includes temperature in Celsius and Fahrenheit.
+	 * Описание данных температурного сенсора.
+	 * Включает температуру в градусах Цельсия и Фаренгейта.
 	 */
 	record TemperatureSensorAvro {
-		string id; // Unique identifier of the sensor.
-		string hubId; // Hub to which the sensor is connected.
-		timestamp_ms timestamp; // Timestamp of the telemetry event.
-		int temperature_c; // Temperature in Celsius.
-		int temperature_f; // Temperature in Fahrenheit.
+		int temperature_c; // Температура в градусах Цельсия.
+		int temperature_f; // Температура в градусах Фаренгейта.
 	}
 
 	/**
-	 * Represents a telemetry event for sensors.
-	 * Contains one of the sensor data records.
+	 * Телеметрическое событие для сенсоров.
+	 * Содержит данные одного из сенсоров.
 	 */
 	record SensorEventAvro {
-		string id; // Unique identifier of the sensor.
-		string hubId; // Hub to which the sensor is connected.
-		timestamp_ms timestamp; // Timestamp of the event.
+		string id; // Уникальный идентификатор сенсора.
+		string hubId; // Хаб, к которому подключен сенсор.
+		timestamp_ms timestamp; // Временная метка события.
 		union {
 			ClimateSensorAvro,
 			LightSensorAvro,
 			MotionSensorAvro,
 			SwitchSensorAvro,
 			TemperatureSensorAvro
-		} payload; // Sensor-specific data payload.
+		} payload; // Полезная нагрузка с данными сенсора.
 	}
 }

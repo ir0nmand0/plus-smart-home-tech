@@ -31,13 +31,19 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
         <avro.version>1.11.3</avro.version>
+        <grpc.version>1.57.2</grpc.version>
+        <protobuf.version>3.24.3</protobuf.version>
         <confluent.version>7.3.0</confluent.version>
+        <grpc-server-spring-boot-starter.verison>3.1.0.RELEASE</grpc-server-spring-boot-starter.verison>
         <!-- Используем версию SLF4J, совместимую с Avro -->
         <slf4j.version>1.7.36</slf4j.version>
         <lombok.version>1.18.34</lombok.version>
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
         <junit-jupiter.version>5.11.3</junit-jupiter.version>
         <org.mockito.version>5.14.2</org.mockito.version>
+        <kafka-protobuf-serializer.version>7.7.1</kafka-protobuf-serializer.version>
+        <!-- Путь для сгенерированного кода -->
+        <generated-sources>${project.build.directory}/generated-sources</generated-sources>
     </properties>
 
     <repositories>
@@ -117,6 +123,55 @@
             <groupId>ru.yandex.practicum</groupId>
             <artifactId>avro-schemas</artifactId>
             <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!-- Proto Schemas -->
+        <dependency>
+            <groupId>ru.yandex.practicum</groupId>
+            <artifactId>proto-schemas</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
+
+        <!--
+    Сервер для gRPC-клиента с интеграцией в Spring Boot.
+    Позволяет легко настроить и использовать gRPC-сервер в приложении Spring Boot.
+    обеспечивает интеграцию gRPC с Spring Boot, упрощая конфигурацию.
+    -->
+
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-server-spring-boot-starter</artifactId>
+            <version>${grpc-server-spring-boot-starter.verison}</version>
+        </dependency>
+
+        <!-- Зависимости для gRPC -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+
+        <!-- Зависимость для Protobuf -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-protobuf-serializer</artifactId>
+            <version>${kafka-protobuf-serializer.version}</version>
         </dependency>
 
         <!-- SLF4J API версии 1.7.x для совместимости с Avro -->
@@ -251,7 +306,7 @@
                             </goals>
                             <configuration>
                                 <sourceDirectory>${project.basedir}/src/main/avro/</sourceDirectory>
-                                <outputDirectory>${project.build.directory}/generated-sources</outputDirectory>
+                                <outputDirectory>${generated-sources.avro}</outputDirectory>
                                 <stringType>String</stringType>
                             </configuration>
                         </execution>
@@ -272,7 +327,7 @@
                             </goals>
                             <configuration>
                                 <sources>
-                                    <source>${project.build.directory}/generated-sources</source>
+                                    <source>${generated-sources}</source>
                                 </sources>
                             </configuration>
                         </execution>

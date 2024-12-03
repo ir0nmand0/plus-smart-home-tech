@@ -4,105 +4,115 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
+        <!-- Родительский POM Spring Boot с предустановленными зависимостями и плагинами -->
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.3.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <!-- Основная информация о проекте -->
     <groupId>ru.yandex.practicum</groupId>
     <artifactId>smart-home-tech</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <!-- Модули проекта -->
     <modules>
+        <!-- Telemetry модуль: отвечает за сбор и обработку телеметрии -->
         <module>telemetry</module>
+        <!-- Infra модуль: предоставляет инфраструктурные компоненты (например, базы данных, брокеры сообщений) -->
         <module>infra</module>
+        <!-- Commerce модуль: отвечает за бизнес-логику электронной коммерции -->
         <module>commerce</module>
     </modules>
 
+    <!-- Общие свойства для всех модулей -->
     <properties>
+        <!-- Версия Java для компиляции -->
         <java.version>21</java.version>
 
-        <avro.version>1.11.3</avro.version>
-        <kafka-clients.version>3.6.1</kafka-clients.version>
-        <springdoc-openapi-starter.version>2.6.0</springdoc-openapi-starter.version>
-        <grpc-spring-boot-starter.version>3.1.0.RELEASE</grpc-spring-boot-starter.version>
-        <protobuf.version>3.23.4</protobuf.version>
-        <grpc.version>1.63.0</grpc.version>
-<!--        Kafka-клиент пока что работает только с версиями 1.x-->
-        <slf4j.version>1.7.36</slf4j.version>
-        <lombok.version>1.18.32</lombok.version>
-<!--        <mapstruct.version>1.5.5.Final</mapstruct.version>-->
+        <!-- Версии зависимостей -->
+        <avro.version>1.11.3</avro.version> <!-- Apache Avro: сериализация данных -->
+        <kafka-clients.version>3.6.1</kafka-clients.version> <!-- Kafka-клиент для работы с Apache Kafka -->
+        <springdoc-openapi-starter.version>2.6.0</springdoc-openapi-starter.version> <!-- OpenAPI для документации API -->
+        <grpc-spring-boot-starter.version>3.1.0.RELEASE</grpc-spring-boot-starter.version> <!-- gRPC для микросервисов -->
+        <protobuf.version>3.23.4</protobuf.version> <!-- Google Protocol Buffers для сериализации данных -->
+        <grpc.version>1.63.0</grpc.version> <!-- Библиотеки gRPC -->
+        <slf4j.version>1.7.36</slf4j.version> <!-- Логирование через SLF4J -->
+        <lombok.version>1.18.32</lombok.version> <!-- Lombok: уменьшение шаблонного кода -->
 
-        <!--       Plugins       -->
-        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
-        <avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version>
-        <protobuf-plugin.version>2.4.0</protobuf-plugin.version>
+        <!-- Версии Maven-плагинов -->
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version> <!-- Компиляция Java -->
+        <avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version> <!-- Плагин для работы с Avro -->
+        <protobuf-plugin.version>2.4.0</protobuf-plugin.version> <!-- Плагин для обработки .proto файлов -->
     </properties>
 
+    <!-- Централизованное управление версиями зависимостей -->
     <dependencyManagement>
         <dependencies>
+            <!-- Apache Avro для сериализации данных -->
             <dependency>
                 <groupId>org.apache.avro</groupId>
                 <artifactId>avro</artifactId>
                 <version>${avro.version}</version>
             </dependency>
 
+            <!-- Kafka-клиент для работы с Apache Kafka -->
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-clients</artifactId>
                 <version>${kafka-clients.version}</version>
             </dependency>
 
+            <!-- OpenAPI для генерации документации REST API -->
             <dependency>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
                 <version>${springdoc-openapi-starter.version}</version>
             </dependency>
 
-            <!--    GRPC dependencies management        -->
+            <!-- GRPC: библиотеки для построения RPC (удаленных вызовов) -->
             <dependency>
                 <groupId>net.devh</groupId>
                 <artifactId>grpc-spring-boot-starter</artifactId>
                 <version>${grpc-spring-boot-starter.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>net.devh</groupId>
                 <artifactId>grpc-server-spring-boot-starter</artifactId>
                 <version>${grpc-spring-boot-starter.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
-
             <dependency>
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
-
-            <!--    / GRPC dependencies management        -->
         </dependencies>
     </dependencyManagement>
 
+    <!-- Централизованное управление версиями Maven-плагинов -->
     <build>
         <pluginManagement>
             <plugins>
+                <!-- Плагин для компиляции Java-кода -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>${maven-compiler-plugin.version}</version>
                 </plugin>
+                <!-- Плагин для обработки Avro-схем -->
                 <plugin>
                     <groupId>org.apache.avro</groupId>
                     <artifactId>avro-maven-plugin</artifactId>
                     <version>${avro-maven-plugin.version}</version>
                 </plugin>
+                <!-- Плагин для генерации Java-кода из .proto файлов -->
                 <plugin>
                     <groupId>io.github.ascopes</groupId>
                     <artifactId>protobuf-maven-plugin</artifactId>
