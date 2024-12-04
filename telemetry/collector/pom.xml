@@ -26,7 +26,6 @@
     <artifactId>collector</artifactId>
 
     <properties>
-        <!-- Сохраняем современную версию Java -->
         <java.version>21</java.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>

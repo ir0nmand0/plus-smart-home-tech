@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.CollectorApp;
 import ru.yandex.practicum.config.AppConfig;
 import ru.yandex.practicum.config.EndpointConfig;
-import ru.yandex.practicum.config.KafkaProducerConfig;
 import ru.yandex.practicum.model.hub.*;
 import ru.yandex.practicum.model.sensor.*;
 
@@ -46,7 +45,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest(classes = CollectorApp.class) // Запускает полный контекст Spring Boot для тестирования
 @AutoConfigureMockMvc // Автоматически настраивает MockMvc для имитации HTTP-запросов
 @EnableConfigurationProperties // Включает поддержку @ConfigurationProperties
-@Import(KafkaProducerConfig.class) // Импортирует дополнительную конфигурацию KafkaProducerConfig
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // Использует один экземпляр тестового класса для всех тестов
 @Slf4j
 public class RestCollectorControllerIntegrationTest {

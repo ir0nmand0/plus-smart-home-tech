@@ -1,19 +1,17 @@
 spring:
   kafka:
-    # Указываем адрес Kafka-брокеров
-    bootstrap-servers: localhost:9092
-
+    bootstrap-servers: localhost:9092 # Адрес брокеров Kafka
     properties:
-      # URL для Schema Registry, необходим для сериализации и десериализации Avro-сообщений
-      schema.registry.url: http://localhost:8081
-
+      schema.registry.url: http://localhost:8081 # Добавляем schema.registry.url
+      linger.ms: 5 # Задержка для повышения пропускной способности
+      compression.type: lz4 # Компрессия сообщений
+      acks: all # Подтверждение всеми репликами
     producer:
-      # Сериализация ключей сообщений в Kafka
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      # Сериализация значений сообщений в Kafka с использованием Avro
-      # Пусть все консьюмеры работают с Avro, что унифицирует внутреннюю логику обработки, те
-      # нет смысла в KafkaProtobufSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    topics:
+      sensors: telemetry.sensors.v1
+      hubs: telemetry.hubs.v1
 
   logging:
     level:
@@ -29,13 +27,6 @@ endpoints:
   sensors: /sensors
   # URL для обработки запросов, связанных с хабами
   hubs: /hubs
-
-kafka:
-  topics:
-    # Название топика для событий от сенсоров
-    sensors: telemetry.sensors.v1
-    # Название топика для событий от хабов
-    hubs: telemetry.hubs.v1
 
 grpc:
   server:
