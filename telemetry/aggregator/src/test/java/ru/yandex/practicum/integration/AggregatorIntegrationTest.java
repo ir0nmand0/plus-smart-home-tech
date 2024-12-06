@@ -37,7 +37,7 @@ public class AggregatorIntegrationTest {
     private AppConfig appConfig;
 
     @Test
-    @Disabled("Тест не проходит в github")
+    @Disabled("Тест не проходит на github")
     void testAggregationAndSnapshotPublishing() {
         // Создаём тестовое событие датчика
         SensorEventAvro sensorEvent = createTestSensorEvent();
