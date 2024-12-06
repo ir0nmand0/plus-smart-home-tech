@@ -307,14 +307,22 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.2.5</version>
                 <configuration>
-                    <!-- Настройки поиска тестов, если нужно -->
+                    <!-- Указываем директорию для отчетов -->
+                    <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                    <!-- Настройки поиска тестов -->
                     <includes>
                         <include>**/*Test.java</include>
                         <include>**/*Tests.java</include>
                         <include>**/*IT.java</include>
                     </includes>
+                    <!-- Генерация XML и TXT отчетов -->
+                    <systemPropertyVariables>
+                        <surefire.reportFormat>xml</surefire.reportFormat>
+                        <surefire.printSummary>true</surefire.printSummary>
+                    </systemPropertyVariables>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

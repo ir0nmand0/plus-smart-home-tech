@@ -306,6 +306,7 @@
                         </annotationProcessorPaths>
                     </configuration>
                 </plugin>
+
             </plugins>
         </pluginManagement>
     </build>
