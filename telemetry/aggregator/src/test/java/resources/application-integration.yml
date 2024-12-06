@@ -1,18 +1,24 @@
 spring:
+  profiles: integration
   kafka:
-    bootstrap-servers: localhost:9092
+    # bootstrap-servers устанавливаем через placeholder встроенной Kafka из @EmbeddedKafka
+    # spring-kafka-test сам подставит адрес
+    bootstrap-servers: ${spring.embedded.kafka.brokers}
+
     consumer:
       group-id: aggregator-group
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
       properties:
-        schema.registry.url: http://localhost:8081
-        specific.avro.reader: true
+        # Используем mock schema registry
+        schema.registry.url: mock://test-schema-registry
+
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
       properties:
-        schema.registry.url: http://localhost:8081
+        schema.registry.url: mock://test-schema-registry
+
     topics:
       telemetry:
         sensors: telemetry.sensors.v1
@@ -20,6 +26,7 @@ spring:
 
 application:
   name: aggregator
+
 logging:
   level:
     root: INFO

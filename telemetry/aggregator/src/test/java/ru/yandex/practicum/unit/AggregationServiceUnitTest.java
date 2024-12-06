@@ -1,4 +1,4 @@
-package ru.yandex.practicum;
+package ru.yandex.practicum.unit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

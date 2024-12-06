@@ -24,8 +24,8 @@ public class LoggingAspect {
      * Pointcut, соответствующий всем методам в пакетах service и controller.
      * Охватывает все методы внутри этих пакетов и их подпакетов.
      */
-    @Pointcut("execution(* ru.yandex.practicum.aggregator.service..*(..)) "
-            + "|| execution(* ru.yandex.practicum.aggregator.consumer..*(..))")
+    @Pointcut("execution(* ru.yandex.practicum.service..*(..)) "
+            + "|| execution(* ru.yandex.practicum.consumer..*(..))")
     public void applicationMethods() {
         // Метод пустой, так как он служит только для определения pointcut.
     }

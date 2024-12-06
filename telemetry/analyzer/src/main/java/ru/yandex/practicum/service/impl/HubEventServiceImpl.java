@@ -12,7 +12,9 @@ import ru.yandex.practicum.repository.SensorRepository;
 import ru.yandex.practicum.service.HubEventService;
 
 /**
- * Реализация сервиса для обработки событий хабов.
+ * Сервис для обработки событий хаба.
+ * Обрабатывает добавление/удаление устройств (сенсоров) и сценариев.
+ * Сохраняет или удаляет данные из БД, чтобы Analyzer мог использовать актуальную конфигурацию хаба.
  */
 @Service
 @RequiredArgsConstructor
@@ -39,6 +41,7 @@ public class HubEventServiceImpl implements HubEventService {
 
     private void handleDeviceAdded(HubEventProto hubEvent) {
         Sensor sensor = sensorMapper.toEntity(hubEvent);
+        // Если датчика нет в БД, добавляем его.
         if (!sensorRepository.existsById(sensor.getId())) {
             sensorRepository.save(sensor);
         }
@@ -46,12 +49,14 @@ public class HubEventServiceImpl implements HubEventService {
 
     private void handleDeviceRemoved(HubEventProto hubEvent) {
         String sensorId = hubEvent.getDeviceRemoved().getId();
+        // Удаляем датчик, если есть.
         sensorRepository.deleteById(sensorId);
     }
 
     private void handleScenarioAdded(HubEventProto hubEvent) {
         var scenario = scenarioMapper.toEntity(hubEvent.getScenarioAdded());
         scenario.setHubId(hubEvent.getHubId());
+        // Добавляем сценарий, если не существует.
         if (scenarioRepository.findByHubIdAndName(hubEvent.getHubId(), scenario.getName()).isEmpty()) {
             scenarioRepository.save(scenario);
         }
