@@ -1,6 +1,61 @@
+// Определяем версию синтаксиса Protobuf.
 syntax = "proto3";
 
+// Указываем пакет для сообщений, относящихся к событиям датчиков.
 package telemetry.message.event;
 
+// Импортируем необходимые файлы: well-known types и общие сообщения.
+import "google/protobuf/timestamp.proto";
+
+// Указываем дополнительные опции для генерации Java-кода.
+// - `java_multiple_files`: каждый тип будет генерироваться в отдельный файл.
+// - `java_package`: указывает пакет в сгенерированном Java-коде.
 option java_multiple_files = true;
 option java_package = "ru.yandex.practicum.grpc.telemetry.event";
+
+// Сообщение для представления события датчика движения.
+message MotionSensorProto {
+  int32 link_quality = 1; // Качество связи: чем выше значение, тем лучше.
+  bool motion = 2;        // Признак движения: true — движение обнаружено, false — нет.
+  int32 voltage = 3;      // Напряжение, используемое для оценки состояния сенсора.
+}
+
+// Сообщение для представления события температурного датчика.
+message TemperatureSensorProto {
+  int32 temperature_c = 1; // Температура в градусах Цельсия.
+  int32 temperature_f = 2; // Температура в градусах Фаренгейта (альтернативное значение).
+}
+
+// Сообщение для представления события датчика освещённости.
+message LightSensorProto {
+  int32 link_quality = 1; // Качество сигнала.
+  int32 luminosity = 2;   // Уровень освещённости.
+}
+
+// Сообщение для представления события климатического датчика.
+message ClimateSensorProto {
+  int32 temperature_c = 1; // Температура в градусах Цельсия.
+  int32 humidity = 2;      // Влажность в процентах.
+  int32 co2_level = 3;     // Уровень углекислого газа (CO2).
+}
+
+// Сообщение для представления события переключателя.
+message SwitchSensorProto {
+  bool state = 1; // Состояние переключателя: true — включён, false — выключен.
+}
+
+// Сообщение для представления события датчика.
+message SensorEventProto {
+  string id = 1;                         // Уникальный идентификатор датчика.
+  google.protobuf.Timestamp timestamp = 2; // Таймстемп события (дата и время).
+  string hubId = 3;                      // Идентификатор связанного хаба.
+
+  // Поле типа `oneof` позволяет выбрать одно из нескольких возможных вариантов данных.
+  oneof payload {
+    MotionSensorProto motion_sensor_event = 4;            // Событие от датчика движения.
+    TemperatureSensorProto temperature_sensor_event = 5;  // Событие от температурного датчика.
+    LightSensorProto light_sensor_event = 6;              // Событие от датчика освещённости.
+    ClimateSensorProto climate_sensor_event = 7;          // Событие от климатического датчика.
+    SwitchSensorProto switch_sensor_event = 8;            // Событие от переключателя.
+  }
+}

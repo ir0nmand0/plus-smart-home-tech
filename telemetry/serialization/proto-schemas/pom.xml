@@ -1,52 +1,94 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!-- Модель проекта Maven -->
     <modelVersion>4.0.0</modelVersion>
+
+    <!-- Родительский проект -->
     <parent>
         <groupId>ru.yandex.practicum</groupId>
         <artifactId>serialization</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <!-- Идентификатор текущего модуля -->
     <artifactId>proto-schemas</artifactId>
 
+    <!-- Свойства проекта -->
+    <properties>
+        <!-- Версия Java для компиляции -->
+        <java.version>21</java.version>
+        <!-- Версия Protobuf для генерации кода -->
+        <protobuf.version>3.23.4</protobuf.version>
+        <!-- Версия gRPC для работы с клиентским и серверным кодом -->
+        <grpc.version>1.54.0</grpc.version>
+        <!-- Версия Jakarta Annotations для обеспечения совместимости -->
+        <jakarta.annotation.version>1.3.5</jakarta.annotation.version>
+        <!-- Версия Maven Compiler Plugin для компиляции Java-кода -->
+        <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
+        <!-- Версия Protobuf Maven Plugin для обработки .proto файлов -->
+        <protobuf-maven-plugin.version>2.7.1</protobuf-maven-plugin.version>
+        <!-- Версия Build Helper Maven Plugin для добавления сгенерированного кода -->
+        <build-helper-maven-plugin.version>3.5.0</build-helper-maven-plugin.version>
+        <!-- Путь для сгенерированного кода -->
+        <generated-sources>${project.build.directory}/generated-sources/protobuf</generated-sources>
+    </properties>
+
     <dependencies>
+        <!-- gRPC Stub: библиотека для генерации клиентского и серверного кода gRPC -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
 
+        <!-- gRPC Protobuf: интеграция между Protobuf и gRPC -->
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
 
-        <!-- Until gRPC generator library moves to generated jakarta instead of javax -->
-        <!-- https://github.com/grpc/grpc-java/issues/9179 -->
+        <!-- Jakarta Annotations: содержит необходимые аннотации -->
+        <!-- Используем версию 1.3.5, чтобы обеспечить наличие javax.annotation.Generated -->
+        <!-- До тех пор, пока gRPC не перейдет на использование jakarta.annotation.Generated -->
+        <!-- Подробнее: https://github.com/grpc/grpc-java/issues/9179 -->
         <dependency>
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
-            <version>1.3.5</version>
+            <version>${jakarta.annotation.version}</version>
             <optional>true</optional>
         </dependency>
+
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Maven Compiler Plugin: плагин для компиляции Java-кода с заданной версией -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin.version}</version>
+                <configuration>
+                    <!-- Версия исходного Java-кода -->
+                    <source>${java.version}</source>
+                    <!-- Целевая версия Java-кода -->
+                    <target>${java.version}</target>
+                </configuration>
             </plugin>
 
+            <!-- Protobuf Maven Plugin: плагин для обработки .proto файлов и генерации Java-классов -->
             <plugin>
                 <groupId>io.github.ascopes</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
-
+                <version>${protobuf-maven-plugin.version}</version>
                 <configuration>
+                    <!-- Указание версии компилятора Protobuf -->
                     <protocVersion>${protobuf.version}</protocVersion>
-
                     <binaryMavenPlugins>
+                        <!-- Плагин для генерации gRPC-клиента и сервера -->
                         <binaryMavenPlugin>
                             <groupId>io.grpc</groupId>
                             <artifactId>protoc-gen-grpc-java</artifactId>
@@ -54,9 +96,10 @@
                         </binaryMavenPlugin>
                     </binaryMavenPlugins>
                 </configuration>
-
                 <executions>
                     <execution>
+                        <!-- Фаза сборки, на которой происходит генерация кода -->
+                        <phase>generate-sources</phase>
                         <goals>
                             <goal>generate</goal>
                         </goals>
@@ -64,10 +107,11 @@
                 </executions>
             </plugin>
 
+            <!-- Build Helper Plugin: добавляет директорию с сгенерированным кодом в исходники -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.5.0</version>
+                <version>${build-helper-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>add-source</id>
@@ -76,8 +120,9 @@
                             <goal>add-source</goal>
                         </goals>
                         <configuration>
+                            <!-- Директория с сгенерированным кодом -->
                             <sources>
-                                <source>${project.build.directory}/generated-sources/protobuf</source>
+                                <source>${generated-sources}</source>
                             </sources>
                         </configuration>
                     </execution>

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+import "google/protobuf/empty.proto";
+import "telemetry/messages/sensor_event.proto";
+import "telemetry/messages/hub_event.proto";
+
+package telemetry.service.collector;
+
+option java_package = "ru.yandex.practicum.grpc.telemetry.collector";
+
+// Сервис для обработки событий сенсоров и хабов.
+// Возвращаемые коды статуса:
+// - OK: успешная обработка.
+// - INVALID_ARGUMENT: некорректные параметры.
+// - INTERNAL: внутренняя ошибка сервера.
+service CollectorController {
+  // Обработка событий сенсоров.
+  rpc CollectSensorEvent (message.event.SensorEventProto)
+      returns (google.protobuf.Empty);
+
+  // Обработка событий хабов.
+  rpc CollectHubEvent (message.event.HubEventProto)
+      returns (google.protobuf.Empty);
+}

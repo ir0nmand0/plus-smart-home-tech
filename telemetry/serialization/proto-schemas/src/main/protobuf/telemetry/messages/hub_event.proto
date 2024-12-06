@@ -1,6 +1,115 @@
+// Определяем версию синтаксиса Protobuf.
+// "proto3" упрощает описание протоколов и является современным стандартом.
 syntax = "proto3";
 
+// Указываем пакет для сообщений, относящихся к событиям хабов.
+// Используется для группировки классов в сгенерированном коде.
 package telemetry.message.event;
 
+// Импортируем стандартные библиотеки:
+// - Timestamp — well-known type для работы с временными метками.
+import "google/protobuf/timestamp.proto";
+
+// Опции для генерации Java-кода:
+// - java_multiple_files: каждый класс будет в отдельном файле.
+// - java_package: указывает Java-пакет для сгенерированных классов.
 option java_multiple_files = true;
 option java_package = "ru.yandex.practicum.grpc.telemetry.event";
+
+// Сообщение для представления событий хаба.
+message HubEventProto {
+  string hub_id = 1;                         // Уникальный идентификатор хаба.
+  google.protobuf.Timestamp timestamp = 2;   // Временная метка события.
+
+  // Поле типа `oneof` для выбора одного из возможных событий.
+  oneof payload {
+    DeviceAddedEventProto device_added = 3;      // Событие добавления устройства.
+    DeviceRemovedEventProto device_removed = 4;  // Событие удаления устройства.
+    ScenarioAddedEventProto scenario_added = 5;  // Событие добавления сценария.
+    ScenarioRemovedEventProto scenario_removed = 6; // Событие удаления сценария.
+  }
+}
+
+// Перечисление для типов устройств.
+enum DeviceTypeProto {
+  MOTION_SENSOR = 0;      // Датчик движения.
+  TEMPERATURE_SENSOR = 1; // Датчик температуры.
+  LIGHT_SENSOR = 2;       // Датчик освещённости.
+  CLIMATE_SENSOR = 3;     // Датчик климата.
+  SWITCH_SENSOR = 4;      // Переключатель.
+}
+
+// Сообщение для представления события добавления устройства.
+message DeviceAddedEventProto {
+  string id = 1;        // Уникальный идентификатор устройства.
+  DeviceTypeProto type = 2; // Тип устройства (например, переключатель, датчик движения).
+}
+
+// Сообщение для представления события удаления устройства.
+message DeviceRemovedEventProto {
+  string id = 1; // Уникальный идентификатор устройства.
+}
+
+// Перечисление для типов условий сценария.
+enum ConditionTypeProto {
+  MOTION = 0;       // Движение.
+  LUMINOSITY = 1;   // Освещённость.
+  SWITCH = 2;       // Состояние переключателя.
+  TEMPERATURE = 3;  // Температура.
+  CO2LEVEL = 4;     // Уровень CO2.
+  HUMIDITY = 5;     // Влажность.
+}
+
+// Перечисление для операций сравнения в условиях сценария.
+enum ConditionOperationProto {
+  EQUALS = 0;        // Равенство.
+  GREATER_THAN = 1;  // Больше.
+  LOWER_THAN = 2;    // Меньше.
+}
+
+// Сообщение для описания условий сценария.
+message ScenarioConditionProto {
+  string sensor_id = 1;                 // Уникальный идентификатор сенсора.
+  ConditionTypeProto type = 2;          // Тип условия (например, температура, движение).
+  ConditionOperationProto operation = 3; // Операция сравнения (например, больше, меньше).
+
+  // Поле `oneof` для хранения значения условия.
+  oneof value {
+    bool bool_value = 4;                // Булево значение (например, состояние переключателя).
+    int32 int_value = 5;                // Числовое значение (например, температура).
+  }
+}
+
+// Перечисление для типов действий сценария.
+enum ActionTypeProto {
+  ACTIVATE = 0;    // Активировать.
+  DEACTIVATE = 1;  // Деактивировать.
+  INVERSE = 2;     // Инвертировать состояние.
+  SET_VALUE = 3;   // Установить значение.
+}
+
+// Сообщение для описания действия в сценарии.
+message DeviceActionProto {
+  string sensor_id = 1; // Уникальный идентификатор устройства.
+  ActionTypeProto type = 2; // Тип действия (например, активировать, инвертировать).
+  optional int32 value = 3; // Значение для установки (если применимо).
+}
+
+// Сообщение для передачи запроса на выполнение действия устройства.
+message DeviceActionRequest {
+  string sensor_id = 1; // Уникальный идентификатор устройства.
+  ActionTypeProto type = 2; // Тип действия.
+  optional int32 value = 3; // Значение для действия (если требуется).
+}
+
+// Сообщение для представления события добавления сценария.
+message ScenarioAddedEventProto {
+  string name = 1; // Название сценария (уникальное в рамках хаба).
+  repeated ScenarioConditionProto conditions = 2; // Список условий сценария.
+  repeated DeviceActionProto actions = 3; // Список действий при активации сценария.
+}
+
+// Сообщение для представления события удаления сценария.
+message ScenarioRemovedEventProto {
+  string name = 1; // Название сценария (уникальное в рамках хаба).
+}

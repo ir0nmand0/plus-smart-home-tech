@@ -1,23 +1,34 @@
 spring:
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9092 # Адрес брокеров Kafka
     properties:
-      schema.registry.url: http://localhost:8081
+      schema.registry.url: http://localhost:8081 # Добавляем schema.registry.url
+      linger.ms: 5 # Задержка для повышения пропускной способности
+      compression.type: lz4 # Компрессия сообщений
+      acks: all # Подтверждение всеми репликами
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    topics:
+      sensors: telemetry.sensors.v1
+      hubs: telemetry.hubs.v1
+
+  logging:
+    level:
+      # Общий уровень логирования
+      root: INFO
+      # Логирование для пакета ru.yandex.practicum
+      ru.yandex.practicum: INFO
 
 endpoints:
+  # Базовый URL для обработки REST-запросов
   root: /events
+  # URL для обработки запросов, связанных с сенсорами
   sensors: /sensors
+  # URL для обработки запросов, связанных с хабами
   hubs: /hubs
 
-kafka:
-  topics:
-    sensors: telemetry.sensors.v1
-    hubs: telemetry.hubs.v1
-
-logging:
-  level:
-    root: INFO
-    ru.yandex.practicum: INFO
+grpc:
+  server:
+    # Порт для gRPC сервера
+    port: 9090

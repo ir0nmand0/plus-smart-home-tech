@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-@ConfigurationProperties(prefix = "kafka.topics")
+@ConfigurationProperties(prefix = "spring.kafka.topics")
 @Data
 public class AppConfig {
     private String sensors;
