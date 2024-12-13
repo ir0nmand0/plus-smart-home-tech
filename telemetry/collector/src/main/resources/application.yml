@@ -1,34 +1,27 @@
 spring:
-  kafka:
-    bootstrap-servers: localhost:9092 # Адрес брокеров Kafka
-    properties:
-      schema.registry.url: http://localhost:8081 # Добавляем schema.registry.url
-      linger.ms: 5 # Задержка для повышения пропускной способности
-      compression.type: lz4 # Компрессия сообщений
-      acks: all # Подтверждение всеми репликами
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-    topics:
-      sensors: telemetry.sensors.v1
-      hubs: telemetry.hubs.v1
+  application:
+    name: collector  # Имя сервиса для Config Server.
+      # По умолчанию Config Server вернёт collector.yml для профиля default.
+    # При запросе http://localhost:8888/collector/default отдаст collector.yml.
+    # Если обратиться к http://localhost:8888/collector/test,
+    # попытается вернуть collector-test.yml + подмешать collector.yml.
 
-  logging:
-    level:
-      # Общий уровень логирования
-      root: INFO
-      # Логирование для пакета ru.yandex.practicum
-      ru.yandex.practicum: INFO
+  config:
+    # Подключение к Config Server через псевдосхему "configserver:".
+    # Если CONFIG_SERVER_URL не задана, используется http://localhost:8888.
+    # Пример:
+    #  - default профиль: http://localhost:8888/collector/default
+    #  - test профиль:    http://localhost:8888/collector/test
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
 
-endpoints:
-  # Базовый URL для обработки REST-запросов
-  root: /events
-  # URL для обработки запросов, связанных с сенсорами
-  sensors: /sensors
-  # URL для обработки запросов, связанных с хабами
-  hubs: /hubs
+  cloud:
+    config:
+      # Если конфиг не загружен, приложение сразу падает (fail-fast).
+      fail-fast: true
 
-grpc:
-  server:
-    # Порт для gRPC сервера
-    port: 9090
+      # Настройка повторных попыток запроса к Config Server:
+      retry:
+        max-attempts: 5       # Кол-во попыток подключения
+        initial-interval: 2000 # Пауза (мс) перед первой повторной попыткой
+        max-interval: 10000    # Максимальный интервал пауз при экспоненциальном росте
+

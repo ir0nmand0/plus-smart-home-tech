@@ -1,25 +1,26 @@
 spring:
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: aggregator-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
-      properties:
-        schema.registry.url: http://localhost:8081
-        specific.avro.reader: true
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-      properties:
-        schema.registry.url: http://localhost:8081
-    topics:
-      telemetry:
-        sensors: telemetry.sensors.v1
-        snapshots: telemetry.snapshots.v1
+  application:
+    name: aggregator  # Имя сервиса для Config Server.
+      # По умолчанию Config Server вернёт aggregator.yml для профиля default.
+      # При запросе http://localhost:8888/aggregator/default отдаст aggregator.yml.
+      # Если обратиться к http://localhost:8888/aggregator/test,
+    # попытается вернуть aggregator-test.yml + подмешать aggregator.yml.
 
-application:
-  name: aggregator
-logging:
-  level:
-    root: INFO
+  config:
+    # Подключение к Config Server через псевдосхему "configserver:".
+    # Если CONFIG_SERVER_URL не задана, используется http://localhost:8888.
+    # Пример:
+    #  - default профиль: http://localhost:8888/aggregator/default
+    #  - test профиль:    http://localhost:8888/aggregator/test
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+
+  cloud:
+    config:
+      # Если конфиг не загружен, приложение сразу падает (fail-fast).
+      fail-fast: true
+
+      # Настройка повторных попыток запроса к Config Server:
+      retry:
+        max-attempts: 5       # Кол-во попыток подключения
+        initial-interval: 2000 # Пауза (мс) перед первой повторной попыткой
+        max-interval: 10000    # Максимальный интервал пауз при экспоненциальном росте

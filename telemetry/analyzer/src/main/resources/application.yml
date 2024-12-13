@@ -1,40 +1,26 @@
 spring:
-  kafka:
-    consumer:
-      group-id: analyzer-group # Идентификатор группы для Kafka-консьюмера, обеспечивает обработку сообщений одной группой
-      properties:
-        specific.avro.reader: true # Использование Avro-десериализации для чтения сообщений с конкретной схемой
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer # Ключи сообщений сериализуются в строки
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer # Значения сообщений сериализуются в формате Avro
-    properties:
-      schema.registry.url: http://localhost:8081 # URL для схемы Avro, используемой для сериализации и десериализации
-    topics:
-      telemetry:
-        snapshots: telemetry.snapshots.v1 # Топик для снапшотов состояния хабов
-        sensors: telemetry.sensors.v1 # Топик для событий от сенсоров
-        hubs: telemetry.hubs.v1 # Топик для событий, связанных с хабами
+  application:
+    name: analyzer  # Имя сервиса для Config Server.
+      # По умолчанию Config Server вернёт analyzer.yml для профиля default.
+      # При запросе http://localhost:8888/analyzer/default отдаст analyzer.yml.
+    # Если обратиться к http://localhost:8888/analyzer/test,
+    # попытается вернуть analyzer-test.yml + подмешать analyzer.yml.
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/analyzer # URL подключения к базе данных PostgreSQL
-    username: analyzer_user # Имя пользователя для доступа к базе данных
-    password: analyzer_pass # Пароль для подключения к базе данных
-    driver-class-name: org.postgresql.Driver # JDBC-драйвер PostgreSQL
-    jpa:
-      hibernate:
-        ddl-auto: none # Отключение автоматического изменения структуры таблиц
-    properties:
-      hibernate:
-        format_sql: true # Форматирует SQL-запросы для удобства чтения
-        show_sql: true # Показывает SQL-запросы в логах
-        jdbc:
-          lob:
-            non_contextual_creation: true # Ускорение работы с большими объектами (LOB)
+  config:
+    # Подключение к Config Server через псевдосхему "configserver:".
+    # Если CONFIG_SERVER_URL не задана, используется http://localhost:8888.
+    # Пример:
+    #  - default профиль: http://localhost:8888/analyzer/default
+    #  - test профиль:    http://localhost:8888/analyzer/test
+    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
 
-grpc:
-  client:
-    hub-router:
-      address: 'static://localhost:59090' # Адрес gRPC-сервера для отправки команд хабу
-      enableKeepAlive: true # Включает KeepAlive для поддержания соединения
-      keepAliveWithoutCalls: true # Поддерживает KeepAlive даже без активных вызовов
-      negotiationType: plaintext # Устанавливает нешифрованное соединение (plaintext)
+  cloud:
+    config:
+      # Если конфиг не загружен, приложение сразу падает (fail-fast).
+      fail-fast: true
+
+      # Настройка повторных попыток запроса к Config Server:
+      retry:
+        max-attempts: 5       # Кол-во попыток подключения
+        initial-interval: 2000 # Пауза (мс) перед первой повторной попыткой
+        max-interval: 10000    # Максимальный интервал пауз при экспоненциальном росте
