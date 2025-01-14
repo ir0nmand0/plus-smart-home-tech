@@ -1,0 +1,11 @@
+server:
+  port: 8761  # Порт, на котором будет запущен Eureka Server
+
+eureka:
+  instance:
+    hostname: localhost  # Имя хоста для Eureka Server (локальная машина)
+  client:
+    register-with-eureka: false  # Eureka Server не регистрируется сам в себе
+    fetch-registry: false  # Eureka Server не загружает реестр сервисов, он сам является реестром
+    service-url:
+      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/  # URL, по которому Eureka доступен другим сервисам

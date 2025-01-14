@@ -1,6 +1,9 @@
+server:
+  port: 0  # Случайный свободный порт
+
 spring:
   application:
-    name: analyzer  # Имя сервиса для Config Server.
+    name: analyzer  # Имя сервиса для Config/Eureka Server.
       # По умолчанию Config Server вернёт analyzer.yml для профиля default.
       # При запросе http://localhost:8888/analyzer/default отдаст analyzer.yml.
     # Если обратиться к http://localhost:8888/analyzer/test,
@@ -12,10 +15,14 @@ spring:
     # Пример:
     #  - default профиль: http://localhost:8888/analyzer/default
     #  - test профиль:    http://localhost:8888/analyzer/test
-    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+#    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
+    import: "configserver:"  # Используем discovery-first подход - адрес Config Server будет получен из Eureka
 
   cloud:
     config:
+      discovery:
+        enabled: true  # Включаем поиск Config Server через Eureka
+        service-id: config-server  # Имя Config Server в Eureka
       # Если конфиг не загружен, приложение сразу падает (fail-fast).
       fail-fast: true
 
@@ -24,3 +31,15 @@ spring:
         max-attempts: 5       # Кол-во попыток подключения
         initial-interval: 2000 # Пауза (мс) перед первой повторной попыткой
         max-interval: 10000    # Максимальный интервал пауз при экспоненциальном росте
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/  # URL Eureka Server
+    register-with-eureka: true  # Включаем регистрацию сервиса в Eureka
+    fetch-registry: true        # Включаем получение реестра сервисов
+
+  instance:
+    prefer-ip-address: true     # Регистрировать сервис с IP-адресом, а не с hostname
+    lease-renewal-interval-in-seconds: 10  # Интервал обновления регистрации
+    lease-expiration-duration-in-seconds: 30  # Таймаут недоступности сервиса

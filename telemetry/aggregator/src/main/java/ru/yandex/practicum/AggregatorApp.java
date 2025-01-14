@@ -2,6 +2,7 @@ package ru.yandex.practicum;
 
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 /**
  * Главный класс сервиса Aggregator.
@@ -33,6 +34,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
  */
 @SpringBootApplication
 @ConfigurationPropertiesScan
+@EnableDiscoveryClient
 public class AggregatorApp {
     public static void main(String[] args) {
         org.springframework.boot.SpringApplication.run(AggregatorApp.class, args);
