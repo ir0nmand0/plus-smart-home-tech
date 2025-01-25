@@ -1,0 +1,400 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://192.168.1.125:55905",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Корзина для онлайн-магазина",
+      "description": "API для обеспечения работы корзины онлайн магазина"
+    }
+  ],
+  "paths": {
+    "/api/v1/shopping-cart": {
+      "get": {
+        "tags": [
+          "Корзина для онлайн-магазина"
+        ],
+        "description": "Получить актуальную корзину для авторизованного пользователя.",
+        "operationId": "getShoppingCart",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Ранее созданная или новая (если корзины ещё нет) корзина в онлайн магазине",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Имя пользователя не должно быть пустым",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Корзина для онлайн-магазина"
+        ],
+        "description": "Добавить товар в корзину.",
+        "operationId": "addProductToShoppingCart",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "products",
+            "in": "query",
+            "description": "Отображение идентификатора товара на количество.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "description": "Отображение идентификатора товара на отобранное количество."
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Корзина товаров с изменениями",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Имя пользователя не должно быть пустым",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Корзина для онлайн-магазина"
+        ],
+        "description": "Деактивация корзины товаров для пользователя.",
+        "operationId": "deactivateCurrentShoppingCart",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Имя пользователя не должно быть пустым",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shopping-cart/remove": {
+      "post": {
+        "tags": [
+          "Корзина для онлайн-магазина"
+        ],
+        "description": "Изменить состав товаров в корзине (удалить выбранные).",
+        "operationId": "removeFromShoppingCart",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "products",
+            "in": "query",
+            "description": "Отображение идентификатора товара на количество.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "type": "integer",
+                      "format": "int64"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "format": "int64"
+                },
+                "description": "Отображение идентификатора товара на отобранное количество."
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Нет искомых товаров в корзине",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoProductsInShoppingCartExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Корзина товаров с изменениями",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Имя пользователя не должно быть пустым",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shopping-cart/change-quantity": {
+      "post": {
+        "tags": [
+          "Корзина для онлайн-магазина"
+        ],
+        "description": "Изменить количество товаров в корзине.",
+        "operationId": "changeProductQuantity",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "changeProductQuantityRequest",
+            "in": "query",
+            "description": "Отображение идентификатора товара на его новое количество.",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChangeProductQuantityRequest"
+                }
+              }
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeProductQuantityRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Нет искомых товаров в корзине",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoProductsInShoppingCartExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Актуальный товар со всеми сведениями из БД",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Имя пользователя не должно быть пустым",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shopping-cart/booking": {
+      "post": {
+        "tags": [
+          "Корзина для онлайн-магазина"
+        ],
+        "description": "Зарезервировать товары на складе.",
+        "operationId": "bookingProductsFromShoppingCart",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Ошибка, товар(ы) уже нет на складе",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductInShoppingCartNotInWarehouseDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Описательный объект со сведениями о бронировании",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/BookedProductsDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Имя пользователя не должно быть пустым",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ChangeProductQuantityRequest": {
+        "required": [
+          "newQuantity",
+          "productId"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Идентификатор товара",
+            "format": "uuid"
+          },
+          "newQuantity": {
+            "type": "integer",
+            "description": "Новое количество товара",
+            "format": "int64"
+          }
+        },
+        "description": "Запрос на изменение количества единиц товара"
+      }
+    }
+  }
+}

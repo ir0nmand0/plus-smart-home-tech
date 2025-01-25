@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Реализация REST-контроллеров для Warehouse.
+  Включает Spring Boot, Bean Validation, Jackson, и т.д.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+        Родитель - это codegen-api, который сам "дочерний" от codegen.
+        В нём уже прописаны общие dependencyManagement и т.д.
+    -->
+    <parent>
+        <groupId>ru.yandex.practicum</groupId>
+        <artifactId>codegen-api</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>warehouse-api</artifactId>
+    <packaging>jar</packaging>
+
+    <dependencies>
+        <!-- Общий модуль с моделями -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>codegen-common</artifactId>
+        </dependency>
+
+        <!-- Spring Boot (Web + Validation) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Swagger/OpenAPI аннотации -->
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>${swagger-annotations.version}</version>
+        </dependency>
+
+        <!-- Jakarta EE аннотации -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+        </dependency>
+
+        <!-- Jackson для сериализации -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+        </dependency>
+
+        <!-- Lombok (только для удобства, без билдера) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Генерация API (интерфейсы, модели) из warehouse.json -->
+            <plugin>
+                <groupId>org.openapitools</groupId>
+                <artifactId>openapi-generator-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-warehouse-api</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Путь к спецификации warehouse -->
+                            <inputSpec>${project.parent.parent.basedir}/specs/warehouse.json</inputSpec>
+
+                            <!-- Генератор Spring Boot -->
+                            <generatorName>spring</generatorName>
+
+                            <!-- Пакеты для сгенерированных API и моделей -->
+                            <apiPackage>ru.yandex.practicum.warehouse.api</apiPackage>
+                            <modelPackage>ru.yandex.practicum.common.model</modelPackage>
+
+                            <configOptions>
+                                <useSpringBoot3>true</useSpringBoot3>
+                                <useJakartaEe>true</useJakartaEe>
+                                <library>spring-boot</library>
+                                <interfaceOnly>true</interfaceOnly>
+                                <skipDefaultInterface>true</skipDefaultInterface>
+                                <generateApis>true</generateApis>
+                                <generateModels>true</generateModels>
+
+                                <!-- Валидация моделей -->
+                                <useBeanValidation>true</useBeanValidation>
+                                <beanValidationModel>true</beanValidationModel>
+                            </configOptions>
+
+                            <!-- Можно настроить typeMappings, если нужно -->
+                            <globalProperties>
+                                <!-- Если нужно, можно генерировать вспомогательные файлы типа ApiUtil -->
+                                <supportingFiles>ApiUtil.java</supportingFiles>
+                            </globalProperties>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Подключаем сгенерированный код в исходники -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.build.directory}/generated-sources/openapi</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Компилятор -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,84 @@
+{{! Генерируем или исключение, или обычный POJO в зависимости от x-exception }}
+{{#vendorExtensions.x-exception}}
+package {{package}};
+
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.http.HttpStatus;
+import lombok.Getter;
+import lombok.Setter;
+import jakarta.validation.constraints.*;
+import io.swagger.v3.oas.annotations.media.Schema;
+
+{{#description}}
+/**
+ * {{{description}}}
+ */
+{{/description}}
+@Getter
+@Setter
+@Schema(name = "{{classname}}", description = "{{{description}}}")
+{{#vendorExtensions.x-exception.httpStatus}}
+@ResponseStatus(HttpStatus.{{vendorExtensions.x-exception.httpStatus}})
+{{/vendorExtensions.x-exception.httpStatus}}
+{{#vendorExtensions.x-exception.abstract}}
+public abstract class {{classname}} extends RuntimeException {
+{{/vendorExtensions.x-exception.abstract}}
+{{^vendorExtensions.x-exception.abstract}}
+public class {{classname}} extends AbstractApiException {
+{{/vendorExtensions.x-exception.abstract}}
+
+    private static final long serialVersionUID = 1L;
+
+    {{#vars}}
+    {{#description}}
+    /**
+     * {{{description}}}
+     */
+    {{/description}}
+    @JsonProperty("{{baseName}}")
+    {{#required}}
+    @NotNull
+    {{/required}}
+    private {{{datatypeWithEnum}}} {{name}};
+
+    {{/vars}}
+    public {{classname}}(String message) {
+        super(message);
+    }
+
+    public {{classname}}(String message, Throwable cause) {
+        super(message, cause);
+    }
+}
+{{/vendorExtensions.x-exception}}
+{{^vendorExtensions.x-exception}}
+package {{package}};
+
+import lombok.Data;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+{{#description}}
+/**
+ * {{{description}}}
+ */
+{{/description}}
+@Data
+@Schema(name = "{{classname}}", description = "{{{description}}}")
+public class {{classname}} {
+    {{#vars}}
+    {{#description}}
+    /**
+     * {{{description}}}
+     */
+    {{/description}}
+    @JsonProperty("{{baseName}}")
+    {{#required}}
+    @NotNull
+    {{/required}}
+    private {{{datatypeWithEnum}}} {{name}};
+    {{/vars}}
+}
+{{/vendorExtensions.x-exception}}

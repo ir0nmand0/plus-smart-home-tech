@@ -1,0 +1,372 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Common Schemas",
+    "version": "1.0",
+    "description": "Общие схемы данных для микросервисов Smart Home Technologies"
+  },
+  "paths": {},
+  "components": {
+    "x-tagGroups": [
+      {
+        "name": "Exceptions",
+        "tags": ["Исключения и их DTO представления"]
+      },
+      {
+        "name": "DTOs",
+        "tags": ["Общие DTO модели"]
+      },
+      {
+        "name": "Enums",
+        "tags": ["Общие перечисления"]
+      }
+    ],
+    "schemas": {
+      "HttpStatusEnum": {
+        "type": "string",
+        "description": "Список всех поддерживаемых HTTP-статусов в системе",
+        "enum": [
+          "100 CONTINUE",
+          "101 SWITCHING_PROTOCOLS",
+          "102 PROCESSING",
+          "103 EARLY_HINTS",
+          "103 CHECKPOINT",
+          "200 OK",
+          "201 CREATED",
+          "202 ACCEPTED",
+          "203 NON_AUTHORITATIVE_INFORMATION",
+          "204 NO_CONTENT",
+          "205 RESET_CONTENT",
+          "206 PARTIAL_CONTENT",
+          "207 MULTI_STATUS",
+          "208 ALREADY_REPORTED",
+          "226 IM_USED",
+          "300 MULTIPLE_CHOICES",
+          "301 MOVED_PERMANENTLY",
+          "302 FOUND",
+          "302 MOVED_TEMPORARILY",
+          "303 SEE_OTHER",
+          "304 NOT_MODIFIED",
+          "305 USE_PROXY",
+          "307 TEMPORARY_REDIRECT",
+          "308 PERMANENT_REDIRECT",
+          "400 BAD_REQUEST",
+          "401 UNAUTHORIZED",
+          "402 PAYMENT_REQUIRED",
+          "403 FORBIDDEN",
+          "404 NOT_FOUND",
+          "405 METHOD_NOT_ALLOWED",
+          "406 NOT_ACCEPTABLE",
+          "407 PROXY_AUTHENTICATION_REQUIRED",
+          "408 REQUEST_TIMEOUT",
+          "409 CONFLICT",
+          "410 GONE",
+          "411 LENGTH_REQUIRED",
+          "412 PRECONDITION_FAILED",
+          "413 PAYLOAD_TOO_LARGE",
+          "413 REQUEST_ENTITY_TOO_LARGE",
+          "414 URI_TOO_LONG",
+          "414 REQUEST_URI_TOO_LONG",
+          "415 UNSUPPORTED_MEDIA_TYPE",
+          "416 REQUESTED_RANGE_NOT_SATISFIABLE",
+          "417 EXPECTATION_FAILED",
+          "418 I_AM_A_TEAPOT",
+          "419 INSUFFICIENT_SPACE_ON_RESOURCE",
+          "420 METHOD_FAILURE",
+          "421 DESTINATION_LOCKED",
+          "422 UNPROCESSABLE_ENTITY",
+          "423 LOCKED",
+          "424 FAILED_DEPENDENCY",
+          "425 TOO_EARLY",
+          "426 UPGRADE_REQUIRED",
+          "428 PRECONDITION_REQUIRED",
+          "429 TOO_MANY_REQUESTS",
+          "431 REQUEST_HEADER_FIELDS_TOO_LARGE",
+          "451 UNAVAILABLE_FOR_LEGAL_REASONS",
+          "500 INTERNAL_SERVER_ERROR",
+          "501 NOT_IMPLEMENTED",
+          "502 BAD_GATEWAY",
+          "503 SERVICE_UNAVAILABLE",
+          "504 GATEWAY_TIMEOUT",
+          "505 HTTP_VERSION_NOT_SUPPORTED",
+          "506 VARIANT_ALSO_NEGOTIATES",
+          "507 INSUFFICIENT_STORAGE",
+          "508 LOOP_DETECTED",
+          "509 BANDWIDTH_LIMIT_EXCEEDED",
+          "510 NOT_EXTENDED",
+          "511 NETWORK_AUTHENTICATION_REQUIRED"
+        ]
+      },
+
+      "AbstractApiExceptionDto": {
+        "type": "object",
+        "description": "Базовый DTO класс для передачи информации об исключениях между сервисами",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Сообщение об ошибке"
+          },
+          "status": {
+            "type": "string",
+            "description": "HTTP статус",
+            "enum": [
+              "BAD_REQUEST",
+              "UNAUTHORIZED",
+              "FORBIDDEN",
+              "NOT_FOUND",
+              "INTERNAL_SERVER_ERROR"
+            ]
+          }
+        },
+        "required": [
+          "message",
+          "status"
+        ]
+      },
+
+      "NotAuthorizedUserExceptionDto": {
+        "type": "object",
+        "description": "DTO для передачи информации об исключении при отсутствии авторизации",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ],
+        "example": {
+          "message": "User authentication required",
+          "status": "UNAUTHORIZED"
+        }
+      },
+
+      "NoProductsInShoppingCartExceptionDto": {
+        "type": "object",
+        "description": "DTO для передачи информации об исключении при отсутствии товаров в корзине",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ],
+        "example": {
+          "message": "Shopping cart is empty",
+          "status": "BAD_REQUEST"
+        }
+      },
+
+      "ProductInShoppingCartNotInWarehouseDto": {
+        "type": "object",
+        "description": "DTO для передачи информации об исключении, когда товар из корзины отсутствует на складе",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ],
+        "example": {
+          "message": "Product from shopping cart not found in warehouse",
+          "status": "BAD_REQUEST"
+        }
+      },
+
+      "ProductNotFoundExceptionDto": {
+        "type": "object",
+        "description": "DTO для передачи информации об исключении при отсутствии товара",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID товара, который не найден"
+          }
+        },
+        "required": ["productId"],
+        "example": {
+          "message": "Product not found",
+          "status": "NOT_FOUND",
+          "productId": "123e4567-e89b-12d3-a456-426614174000"
+        }
+      },
+
+      "SpecifiedProductAlreadyInWarehouseExceptionDto": {
+        "type": "object",
+        "description": "DTO для передачи информации об исключении, когда добавляемый товар уже есть на складе",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ],
+        "example": {
+          "message": "Product already exists in warehouse",
+          "status": "BAD_REQUEST"
+        }
+      },
+
+      "ProductInShoppingCartLowQuantityInWarehouseDto": {
+        "type": "object",
+        "description": "DTO для передачи информации об исключении, когда товаров в корзине больше, чем на складе",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ],
+        "example": {
+          "message": "Insufficient product quantity in warehouse",
+          "status": "BAD_REQUEST"
+        }
+      },
+
+      "NoSpecifiedProductInWarehouseExceptionDto": {
+        "type": "object",
+        "description": "DTO для передачи информации об исключении, когда запрашиваемого товара нет на складе",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ],
+        "example": {
+          "message": "Product not found in warehouse",
+          "status": "BAD_REQUEST"
+        }
+      },
+
+      "ProductCategory": {
+        "type": "string",
+        "description": "Категория товара, используемая для классификации в каталоге",
+        "enum": [
+          "LIGHTING",
+          "CONTROL",
+          "SENSORS"
+        ]
+      },
+
+      "ProductState": {
+        "type": "string",
+        "description": "Статус товара в системе (активен/деактивирован)",
+        "enum": [
+          "ACTIVE",
+          "DEACTIVATE"
+        ]
+      },
+
+      "QuantityState": {
+        "type": "string",
+        "description": "Состояние остатка товара на складе",
+        "enum": [
+          "ENDED",
+          "FEW",
+          "ENOUGH",
+          "MANY"
+        ]
+      },
+
+      "ProductDto": {
+        "type": "object",
+        "description": "DTO товара, продаваемого в интернет-магазине",
+        "required": [
+          "productId",
+          "productName",
+          "description",
+          "price",
+          "productState",
+          "quantityState",
+          "rating"
+        ],
+        "properties": {
+          "productId": {
+            "type": "string",
+            "description": "Идентификатор товара в БД",
+            "format": "uuid",
+            "nullable": true
+          },
+          "productName": {
+            "type": "string",
+            "description": "Наименование товара"
+          },
+          "description": {
+            "type": "string",
+            "description": "Описание товара"
+          },
+          "imageSrc": {
+            "type": "string",
+            "description": "Ссылка на картинку во внешнем хранилище или SVG",
+            "nullable": true
+          },
+          "quantityState": {
+            "$ref": "#/components/schemas/QuantityState"
+          },
+          "productState": {
+            "$ref": "#/components/schemas/ProductState"
+          },
+          "rating": {
+            "type": "number",
+            "description": "Рейтинг товара на основе оценок пользователей",
+            "format": "double",
+            "minimum": 1,
+            "maximum": 5
+          },
+          "productCategory": {
+            "$ref": "#/components/schemas/ProductCategory"
+          },
+          "price": {
+            "type": "number",
+            "description": "Цена товара",
+            "minimum": 1
+          }
+        }
+      },
+
+      "ShoppingCartDto": {
+        "type": "object",
+        "description": "DTO корзины товаров в онлайн-магазине",
+        "required": [
+          "shoppingCartId",
+          "products"
+        ],
+        "properties": {
+          "shoppingCartId": {
+            "type": "string",
+            "description": "Уникальный идентификатор корзины в БД",
+            "format": "uuid"
+          },
+          "products": {
+            "type": "object",
+            "description": "Отображение: идентификатор товара -> количество единиц",
+            "additionalProperties": {
+              "type": "integer",
+              "description": "Количество товара",
+              "format": "int64"
+            }
+          }
+        }
+      },
+
+      "BookedProductsDto": {
+        "type": "object",
+        "description": "DTO с общими сведениями о зарезервированных товарах по корзине",
+        "required": [
+          "deliveryVolume",
+          "deliveryWeight",
+          "fragile"
+        ],
+        "properties": {
+          "deliveryWeight": {
+            "type": "number",
+            "description": "Общий вес доставки",
+            "format": "double"
+          },
+          "deliveryVolume": {
+            "type": "number",
+            "description": "Объём доставки",
+            "format": "double"
+          },
+          "fragile": {
+            "type": "boolean",
+            "description": "Есть ли хрупкие товары среди зарезервированных"
+          }
+        }
+      }
+    }
+  }
+}

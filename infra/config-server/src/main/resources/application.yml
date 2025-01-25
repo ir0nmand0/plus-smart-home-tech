@@ -3,11 +3,9 @@ server:
 
 spring:
   application:
-    name: config-server  # Имя сервиса для Eureka и клиентов
-
+    name: config-server
   profiles:
     active: native  # используем native-профиль, чтобы читать конфиги с файловой системы (или из classpath)
-
   cloud:
     config:
       server:
@@ -15,12 +13,22 @@ spring:
           # Перечисляем все варианты поиска конфигов
           # Можно использовать список директорий
           searchLocations:
+            # Существующие пути для телеметрии
             - classpath:config/telemetry/${app.aggregator}
             - classpath:config/telemetry/${app.analyzer}
             - classpath:config/telemetry/${app.collector}
+            # Добавляем пути для commerce
+            - classpath:config/commerce/${app.shopping-store}
+            - classpath:config/commerce/${app.shopping-cart}
+            - classpath:config/commerce/${app.warehouse}
 
 # Определим переменные с именами проектов в этом же файле
 app:
+  # Существующие сервисы телеметрии
   aggregator: aggregator
   analyzer: analyzer
   collector: collector
+  # Добавляем сервисы commerce
+  shopping-store: shopping-store
+  shopping-cart: shopping-cart
+  warehouse: warehouse

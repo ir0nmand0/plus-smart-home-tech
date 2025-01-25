@@ -1,0 +1,262 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:38081",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Склад магазина",
+      "description": "API для обеспечения работы склада онлайн магазина"
+    }
+  ],
+  "paths": {
+    "/api/v1/warehouse": {
+      "put": {
+        "tags": [
+          "Склад магазина"
+        ],
+        "description": "Добавить новый товар на склад.",
+        "operationId": "newProductInWarehouse",
+        "requestBody": {
+          "description": "Описание нового товара для обработки складом.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NewProductInWarehouseRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Ошибка, товар с таким описанием уже зарегистрирован на складе",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/SpecifiedProductAlreadyInWarehouseExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/warehouse/check": {
+      "post": {
+        "tags": [
+          "Склад магазина"
+        ],
+        "description": "Предварительно проверить, что количество товаров на складе достаточно для данной корзины продуктов.",
+        "operationId": "checkProductQuantityEnoughForShoppingCart",
+        "requestBody": {
+            "description": "Корзина товаров.",
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+                    }
+                }
+            },
+            "required": true
+        },
+        "responses": {
+            "200": {
+                "description": "Общие сведения по бронированию",
+                "content": {
+                    "*/*": {
+                        "schema": {
+                            "$ref": "common-schemas.json#/components/schemas/BookedProductsDto"
+                        }
+                    }
+                }
+            },
+            "400": {
+                "description": "Ошибка, товар из корзины не находится в требуемом количестве на складе",
+                "content": {
+                    "*/*": {
+                        "schema": {
+                            "$ref": "common-schemas.json#/components/schemas/ProductInShoppingCartLowQuantityInWarehouseDto"
+                        }
+                    }
+                }
+            }
+        }
+      }
+    },
+    "/api/v1/warehouse/add": {
+        "post": {
+            "tags": [
+                "Склад магазина"
+            ],
+            "description": "Принять товар на склад.",
+            "operationId": "addProductToWarehouse",
+            "requestBody": {
+                "description": "Запрос на добавление определенного количества определенного товара.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/AddProductToWarehouseRequest"
+                        }
+                    }
+                },
+                "required": true
+            },
+            "responses": {
+                "400": {
+                    "description": "Нет информации о товаре на складе",
+                    "content": {
+                        "*/*": {
+                            "schema": {
+                                "$ref": "common-schemas.json#/components/schemas/NoSpecifiedProductInWarehouseExceptionDto"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "/api/v1/warehouse/address": {
+        "get": {
+            "tags": [
+                "Склад магазина"
+            ],
+            "description": "Предоставить адрес склада для расчёта доставки.",
+            "operationId": "getWarehouseAddress",
+            "responses": {
+                "200": {
+                    "description": "Актуальный адрес склада",
+                    "content": {
+                        "*/*": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddressDto"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+  },
+  "components": {
+      "schemas": {
+          "NewProductInWarehouseRequest": {
+              "required": [
+                  "dimension",
+                  "productId",
+                  "weight"
+              ],
+              "type": "object",
+              "properties": {
+                  "productId": {
+                      "type": "string",
+                      "description": "Идентификатор товара в БД",
+                      "format": "uuid"
+                  },
+                  "fragile": {
+                      "type": "boolean",
+                      "description": "Признак хрупкости"
+                  },
+                  "dimension": {
+                      "$ref": "#/components/schemas/DimensionDto"
+                  },
+                  "weight": {
+                      "minimum": 1,
+                      "type": "number",
+                      "description": "Вес товара",
+                      "format": "double"
+                  }
+              },
+              "description": "Запрос на добавление нового товара на склад"
+          },
+
+          "AddProductToWarehouseRequest": {
+              "required": [
+                  "quantity"
+              ],
+              "type": "object",
+              "properties": {
+                  "productId": {
+                      "type": "string",
+                      "description": "Идентификатор товара в БД",
+                      "format": "uuid"
+                  },
+                  "quantity": {
+                      "minimum": 1,
+                      "type": "integer",
+                      "description": "Количество единиц товара для добавления на склад",
+                      "format": "int64"
+                  }
+              },
+              "description": "Запрос на увеличение единиц товара по его идентификатору"
+          },
+
+          "DimensionDto": {
+              "required": [
+                  "depth",
+                  "height",
+                  "width"
+              ],
+              "type": "object",
+              "properties": {
+                  "width": {
+                      "minimum": 1,
+                      "type": "number",
+                      "description": "Ширина",
+                      "format": "double"
+                  },
+                  "height": {
+                      "minimum": 1,
+                      "type": "number",
+                      "description": "Высота",
+                      "format": "double"
+                  },
+                  "depth": {
+                      "minimum": 1,
+                      "type": "number",
+                      "description": "Глубина",
+                      "format": "double"
+                  }
+              },
+              "description": "Размеры товара"
+          },
+
+          "AddressDto": {
+              "type": "object",
+              "properties": {
+                  "country": {
+                      "type": "string",
+                      "description": "Страна."
+                  },
+                  "city": {
+                      "type": "string",
+                      "description": "Город."
+                  },
+                  "street": {
+                      "type": "string",
+                      "description": "Улица."
+                  },
+                  "house": {
+                      "type": "string",
+                      "description": "Дом."
+                  },
+                  "flat": {
+                      "type": "string",
+                      "description": "Квартира."
+                  }
+              },
+              "description": "Представление адреса в системе."
+          }
+      }
+  }
+}
