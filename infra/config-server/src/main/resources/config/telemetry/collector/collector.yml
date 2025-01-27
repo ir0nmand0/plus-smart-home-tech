@@ -1,34 +1,54 @@
+server:
+  port: ${SERVER_PORT:8080}
+
 spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:collector}
+  cloud:
+    config:
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
+      retry:
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
   kafka:
-    bootstrap-servers: localhost:9092 # Адрес брокеров Kafka
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
     properties:
-      schema.registry.url: http://localhost:8081 # Добавляем schema.registry.url
-      linger.ms: 5 # Задержка для повышения пропускной способности
-      compression.type: lz4 # Компрессия сообщений
-      acks: all # Подтверждение всеми репликами
+      schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL:http://localhost:8081}
+      linger.ms: ${KAFKA_LINGER_MS:5}
+      compression.type: ${KAFKA_COMPRESSION:lz4}
+      acks: ${KAFKA_ACKS:all}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
     topics:
-      sensors: telemetry.sensors.v1
-      hubs: telemetry.hubs.v1
+      sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
+      hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
 
-  logging:
-    level:
-      # Общий уровень логирования
-      root: INFO
-      # Логирование для пакета ru.yandex.practicum
-      ru.yandex.practicum: INFO
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+    ru.yandex.practicum: ${APP_LOG_LEVEL:INFO}
 
 endpoints:
-  # Базовый URL для обработки REST-запросов
-  root: /events
-  # URL для обработки запросов, связанных с сенсорами
-  sensors: /sensors
-  # URL для обработки запросов, связанных с хабами
-  hubs: /hubs
+  root: ${COLLECTOR_ROOT:/events}
+  sensors: ${COLLECTOR_SENSORS:/sensors}
+  hubs: ${COLLECTOR_HUBS:/hubs}
 
 grpc:
   server:
-    # Порт для gRPC сервера
-    port: 9090
+    port: ${GRPC_PORT:9090}

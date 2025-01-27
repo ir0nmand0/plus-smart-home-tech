@@ -1,17 +1,17 @@
 server:
-  port: 0
+  # 0 означает случайный свободный порт. Можно переопределять SERVER_PORT.
+  port: ${SERVER_PORT:0}
 
 spring:
   application:
-    name: shopping-store
-  config:
-    import: "configserver:"
+    name: ${SPRING_APPLICATION_NAME:shopping-store}
+
   cloud:
     config:
       discovery:
-        enabled: true
-        service-id: config-server
-      fail-fast: true
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
       retry:
         max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
         initial-interval: ${CONFIG_RETRY_INITIAL:2000}
@@ -27,6 +27,7 @@ spring:
             registerHealthIndicator: true
 
   datasource:
+    # Настройки подключения к PostgreSQL
     url: jdbc:postgresql://${SHOPPING_STORE_DB_HOST:localhost}:${SHOPPING_STORE_DB_PORT:5432}/${SHOPPING_STORE_DB_NAME:shopping_store}
     username: ${SHOPPING_STORE_DB_USER:store_user}
     password: ${SHOPPING_STORE_DB_PASSWORD:store_pass}
@@ -43,12 +44,12 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
-    register-with-eureka: true
-    fetch-registry: true
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
   instance:
-    prefer-ip-address: true
-    lease-renewal-interval-in-seconds: 10
-    lease-expiration-duration-in-seconds: 30
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
 
 feign:
   circuitbreaker:
@@ -62,6 +63,8 @@ feign:
 
 logging:
   level:
+    # Общий уровень логирования
     root: ${LOG_LEVEL:INFO}
+    # Дополнительная детализация в нужных пакетах
     ru.yandex.practicum: ${APP_LOG_LEVEL:DEBUG}
     ru.yandex.practicum.warehouse.client.ApiApi: ${FEIGN_LOG_LEVEL:DEBUG}

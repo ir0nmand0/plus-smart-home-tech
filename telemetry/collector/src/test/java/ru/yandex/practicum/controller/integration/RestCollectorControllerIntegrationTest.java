@@ -11,10 +11,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.CollectorApp;
 import ru.yandex.practicum.config.AppConfig;
@@ -43,6 +44,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * Используем интеграционный тест, чтобы загрузить полный контекст Spring и протестировать взаимодействие между компонентами.
  */
 @SpringBootTest(classes = CollectorApp.class) // Запускает полный контекст Spring Boot для тестирования
+@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application.yml")
 @AutoConfigureMockMvc // Автоматически настраивает MockMvc для имитации HTTP-запросов
 @EnableConfigurationProperties // Включает поддержку @ConfigurationProperties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // Использует один экземпляр тестового класса для всех тестов

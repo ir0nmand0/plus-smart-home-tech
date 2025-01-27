@@ -11,6 +11,7 @@ import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import ru.yandex.practicum.AggregatorApp;
 import ru.yandex.practicum.config.AppConfig;
 import ru.yandex.practicum.kafka.telemetry.event.MotionSensorAvro;
@@ -24,6 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(classes = AggregatorApp.class)
 @ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application.yml")
 @EmbeddedKafka(partitions = 1, topics = {"telemetry.sensors.v1", "telemetry.snapshots.v1"})
 public class AggregatorIntegrationTest {
 

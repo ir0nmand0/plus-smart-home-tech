@@ -3,7 +3,7 @@ server:
 
 spring:
   application:
-    name: ${SPRING_APPLICATION_NAME:analyzer}
+    name: ${SPRING_APPLICATION_NAME:shopping-store}
   config:
     import: "configserver:"
   cloud:

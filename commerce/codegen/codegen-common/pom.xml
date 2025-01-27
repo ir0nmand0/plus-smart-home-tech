@@ -6,8 +6,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <!--
-      Модуль, содержащий общие модели, конфигурации, иное.
-      Собирается в JAR-библиотеку, которую используют другие модули.
+    Родительский POM, от которого наследуются версии зависимостей и плагинов.
+    Это важно для согласованности версий между модулями.
     -->
     <parent>
         <groupId>ru.yandex.practicum</groupId>
@@ -15,29 +15,41 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
+    <!--
+    Основные координаты модуля:
+    - artifactId: уникальный идентификатор артефакта
+    - packaging: тип упаковки (jar - библиотека)
+    -->
     <artifactId>codegen-common</artifactId>
     <packaging>jar</packaging>
 
+    <!--
+    Зависимости проекта.
+    Все версии управляются через родительский POM (отсюда их отсутствие здесь)
+    -->
     <dependencies>
-        <!-- Jackson для сериализации JSON -->
+        <!-- Jackson для работы с JSON -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- Поддержка nullable-аннотаций -->
+        <!-- Расширение Jackson для поддержки @Nullable аннотаций -->
         <dependency>
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
         </dependency>
 
-        <!-- Jakarta Validation (Bean Validation) -->
+        <!-- API для валидации бинов (Jakarta EE) -->
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
 
-        <!-- Lombok (без генерации билдера) -->
+        <!--
+        Lombok для генерации кода. Scope provided означает, что библиотека
+        нужна только на этапе компиляции и не будет включена в итоговый JAR
+        -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -45,11 +57,12 @@
         </dependency>
     </dependencies>
 
+    <!-- Конфигурация сборки проекта -->
     <build>
         <plugins>
             <!--
-              Генерируем модели из common-schemas.json.
-              Включаем валидацию, но убираем @Builder и генBuilders.
+            OpenAPI Generator - генерирует Java классы из OpenAPI спецификации.
+            Выполняется на фазе generate-sources.
             -->
             <plugin>
                 <groupId>org.openapitools</groupId>
@@ -62,17 +75,15 @@
                             <goal>generate</goal>
                         </goals>
                         <configuration>
-                            <!-- Путь к спецификации, которая описывает общие схемы -->
+                            <!-- Путь к файлу спецификации относительно родительского POM -->
                             <inputSpec>${project.parent.basedir}/specs/common-schemas.json</inputSpec>
                             <generatorName>spring</generatorName>
                             <output>${project.build.directory}/generated-sources/openapi</output>
                             <modelPackage>ru.yandex.practicum.common.model</modelPackage>
 
+                            <!-- Настройки генерации кода -->
                             <configOptions>
-                                <!-- Включаем Lombok (но без builder) -->
                                 <useLombok>true</useLombok>
-
-                                <!-- Прочие настройки -->
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useJakartaEe>true</useJakartaEe>
                                 <generateModels>true</generateModels>
@@ -81,28 +92,15 @@
                                 <sourceFolder>src/main/java</sourceFolder>
                                 <library>spring-boot</library>
                                 <serializationLibrary>jackson</serializationLibrary>
-
-                                <!-- Важно для аннотаций валидации -->
                                 <useBeanValidation>true</useBeanValidation>
                                 <beanValidationModel>true</beanValidationModel>
-
-                                <!-- Генерация конструктора с обязательными полями -->
                                 <generateConstructorWithRequiredProperties>true</generateConstructorWithRequiredProperties>
-
-                                <!-- Не используем Optional, чтобы поля были понятнее -->
                                 <useOptional>false</useOptional>
-
-                                <!-- Генерировать аннотацию @Generated для полей -->
                                 <fieldGenerated>true</fieldGenerated>
-
-                                <!-- Отключаем использование геттеров как аксессоров -->
                                 <gettersAsAccessors>false</gettersAsAccessors>
-
-                                <!-- Убираем упоминание билдеров -->
-                                <!-- (Удалили additionalModelTypeAnnotations>@lombok.Builder</additionalModelTypeAnnotations>) -->
                             </configOptions>
 
-                            <!-- Какие файлы генерировать -->
+                            <!-- Управление генерацией различных типов файлов -->
                             <globalProperties>
                                 <modelTests>false</modelTests>
                                 <apis>false</apis>
@@ -114,7 +112,10 @@
                 </executions>
             </plugin>
 
-            <!-- Добавляем сгенерированный код в пути исходников -->
+            <!--
+            Build Helper - добавляет сгенерированные исходники в путь компиляции.
+            Без этого плагина Maven не будет видеть сгенерированные классы.
+            -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -134,14 +135,50 @@
                 </executions>
             </plugin>
 
-            <!-- Плагин компиляции -->
+            <!-- Стандартный компилятор Maven -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
 
-            <!-- Плагин упаковки в JAR -->
+            <!--
+            Resources Plugin - копирует ресурсы в выходной каталог.
+            В нашем случае копирует сгенерированные исходники, чтобы они попали в JAR.
+            -->
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-generated-sources</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/generated-sources/openapi/src/main/java</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--
+            JAR Plugin - создает JAR файл.
+            Явно указываем включение .class файлов, чтобы избежать пустого JAR.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*.class</include>
+                    </includes>
+                </configuration>
             </plugin>
         </plugins>
     </build>
