@@ -51,23 +51,23 @@ jobs:
           echo "Config Server не ответил за 10 попыток!"
           exit 1
 
-      # 7) Ждём Eureka (порт 8761)
+      # 7) Ждём Eureka (порт 8761) – таймаут увеличен до 20 попыток * 10с
       - name: Wait for Eureka
         run: |
           echo "Ожидание http://localhost:8761/actuator/health"
-          for i in {1..10}; do
+          for i in {1..20}; do
             if curl --silent --fail http://localhost:8761/actuator/health \
                | grep -q "\"status\":\"UP\""; then
               echo "Eureka UP!"
               exit 0
             fi
-            echo "Eureka пока не готов, спим 5с..."
-            sleep 5
+            echo "Eureka пока не готов, спим 10с..."
+            sleep 10
           done
-          echo "Eureka не ответил за 10 попыток!"
+          echo "Eureka не ответил за 20 попыток!"
           exit 1
 
-      # 8) Ждём Shopping Cart (8180)
+      # 8) Ждём Shopping Cart (порт 8180)
       - name: Wait for Shopping Cart
         run: |
           echo "Ожидание http://localhost:8180/actuator/health"
@@ -84,16 +84,12 @@ jobs:
           docker compose -f compose.yaml logs shopping-cart
           exit 1
 
-      # 8.1) Проверяем регистрацию Shopping Cart в Eureka
+      # 8.1) Проверяем регистрацию shopping-cart в Eureka
       - name: Wait for Shopping Cart in Eureka
         run: |
-          # Важна правильная строка: /SHOPPING-CART или /SHOPPING_CART
-          # зависят от eureka.instance.appname, по умолчанию: uppercase( spring.application.name )
-          # Допустим, у нас spring.application.name=shopping-cart => в Eureka будет SHOPPING-CART
-          EUREKA_URL="http://localhost:8761/eureka/apps/SHOPPING-CART"
-          echo "Проверяем регистрацию Shopping Cart в Eureka: $EUREKA_URL"
+          EUREKA_URL="http://localhost:8761/eureka/apps/shopping-cart"
+          echo "Проверяем регистрацию shopping-cart в Eureka: $EUREKA_URL"
           for i in {1..20}; do
-            # ждем, пока в ответе увидим <instanceId> или "status":"UP"
             if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
               echo "Shopping Cart присутствует в Eureka!"
               exit 0
@@ -104,7 +100,7 @@ jobs:
           echo "Shopping Cart не зарегистрировался в Eureka за 20 попыток!"
           exit 1
 
-      # 9) Ждём Shopping Store (8181)
+      # 9) Ждём Shopping Store (порт 8181)
       - name: Wait for Shopping Store
         run: |
           echo "Ожидание http://localhost:8181/actuator/health"
@@ -121,11 +117,11 @@ jobs:
           docker compose -f compose.yaml logs shopping-store
           exit 1
 
-      # 9.1) Проверяем регистрацию Shopping Store в Eureka
+      # 9.1) Проверяем регистрацию shopping-store в Eureka
       - name: Wait for Shopping Store in Eureka
         run: |
-          EUREKA_URL="http://localhost:8761/eureka/apps/SHOPPING-STORE"
-          echo "Проверяем регистрацию Shopping Store в Eureka: $EUREKA_URL"
+          EUREKA_URL="http://localhost:8761/eureka/apps/shopping-store"
+          echo "Проверяем регистрацию shopping-store в Eureka: $EUREKA_URL"
           for i in {1..20}; do
             if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
               echo "Shopping Store присутствует в Eureka!"
@@ -137,7 +133,7 @@ jobs:
           echo "Shopping Store не зарегистрировался в Eureka за 20 попыток!"
           exit 1
 
-      # 10) Ждём Warehouse (8182)
+      # 10) Ждём Warehouse (порт 8182)
       - name: Wait for Warehouse
         run: |
           echo "Ожидание http://localhost:8182/actuator/health"
@@ -154,11 +150,11 @@ jobs:
           docker compose -f compose.yaml logs warehouse
           exit 1
 
-      # 10.1) Проверяем регистрацию Warehouse в Eureka
+      # 10.1) Проверяем регистрацию warehouse в Eureka
       - name: Wait for Warehouse in Eureka
         run: |
-          EUREKA_URL="http://localhost:8761/eureka/apps/WAREHOUSE"
-          echo "Проверяем регистрацию Warehouse в Eureka: $EUREKA_URL"
+          EUREKA_URL="http://localhost:8761/eureka/apps/warehouse"
+          echo "Проверяем регистрацию warehouse в Eureka: $EUREKA_URL"
           for i in {1..20}; do
             if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
               echo "Warehouse присутствует в Eureka!"
@@ -169,12 +165,6 @@ jobs:
           done
           echo "Warehouse не зарегистрировался в Eureka за 20 попыток!"
           exit 1
-
-      # >>> ДОПОЛНИТЕЛЬНАЯ ПАУЗА (если нужно)
-      - name: Extra pause (2 minutes)
-        run: |
-          echo "Ожидаем дополнительно 2 минуты, чтобы сервисы точно прогрелись..."
-          sleep 120
 
       # 11) Установка Node.js
       - name: Setup Node
@@ -190,7 +180,7 @@ jobs:
       - name: Run Postman tests
         run: |
           newman run ./postman/commerce.json --reporters cli
-          # Если нужна среда: --environment ./postman/env.json
+          # newman run ./postman/commerce.json --environment ./postman/env.json --reporters cli
 
       # 14) Остановка контейнеров (выполняется всегда)
       - name: Stop Docker containers
