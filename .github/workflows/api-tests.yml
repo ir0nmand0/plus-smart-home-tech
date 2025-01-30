@@ -16,18 +16,18 @@ jobs:
         uses: actions/checkout@v3
 
       # 2) Настройка JDK 21
-      - name: Set up JDK 21
+      - name: Set up Amazon Corretto 21
         uses: actions/setup-java@v3
         with:
-          distribution: temurin
+          distribution: corretto
           java-version: "21"
           cache: maven
 
-      # 3) Собрать проект с помощью Maven (чтобы target/*.jar появились, тесты пропускаем)
+      # 3) Собрать проект с помощью Maven (чтобы target/*.jar появились), без тестов
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
-      # 4) Собрать Docker-образы: каждый Dockerfile возьмет target/*.jar
+      # 4) Собрать Docker-образы
       - name: Build Docker images
         run: docker compose -f compose.yaml build
 
@@ -35,7 +35,7 @@ jobs:
       - name: Start Docker containers
         run: docker compose -f compose.yaml up -d
 
-      # 6) Ждём, пока Config Server станет UP (порт 8888, actuator/health)
+      # 6) Ждём Config Server (8888)
       - name: Wait for Config Server
         run: |
           echo "Ожидание http://localhost:8888/actuator/health"
@@ -50,7 +50,7 @@ jobs:
           echo "Config Server не ответил за 10 попыток!"
           exit 1
 
-      # 7) Ждем, пока Eureka (порт 8761) станет UP
+      # 7) Ждём Eureka (8761)
       - name: Wait for Eureka
         run: |
           echo "Ожидание http://localhost:8761/actuator/health"
@@ -65,34 +65,37 @@ jobs:
           echo "Eureka не ответил за 10 попыток!"
           exit 1
 
-      # 8) Ждем, пока Shopping Store (порт 8181) станет UP
+      # 8) Ждём Shopping Store (8181) - увеличиваем кол-во попыток и паузу
       - name: Wait for Shopping Store
         run: |
           echo "Ожидание http://localhost:8181/actuator/health"
-          for i in {1..10}; do
+          for i in {1..20}; do    # Было 10, теперь 20
             if curl --silent --fail http://localhost:8181/actuator/health | grep -q "\"status\":\"UP\""; then
               echo "Shopping Store UP!"
               exit 0
             fi
-            echo "Shopping Store пока не готов, спим 5с..."
-            sleep 5
+            echo "Shopping Store пока не готов, спим 10с..."
+            sleep 10            # Было 5, теперь 10
           done
-          echo "Shopping Store не ответил за 10 попыток!"
+          echo "Shopping Store не ответил за 20 попыток!"
+          # перед выходом выведем логи для отладки
+          docker compose -f compose.yaml logs shopping-store
           exit 1
 
-      # 9) Ждем, пока Warehouse (порт 8182) станет UP
+      # 9) Ждём Warehouse (8182) - аналогично
       - name: Wait for Warehouse
         run: |
           echo "Ожидание http://localhost:8182/actuator/health"
-          for i in {1..10}; do
+          for i in {1..20}; do
             if curl --silent --fail http://localhost:8182/actuator/health | grep -q "\"status\":\"UP\""; then
               echo "Warehouse UP!"
               exit 0
             fi
-            echo "Warehouse пока не готов, спим 5с..."
-            sleep 5
+            echo "Warehouse пока не готов, спим 10с..."
+            sleep 10
           done
-          echo "Warehouse не ответил за 10 попыток!"
+          echo "Warehouse не ответил за 20 попыток!"
+          docker compose -f compose.yaml logs warehouse
           exit 1
 
       # 10) Установка Node.js
@@ -101,7 +104,7 @@ jobs:
         with:
           node-version: "16"
 
-      # 11) Установка Newman (для запуска Postman-тестов)
+      # 11) Установка Newman (Postman CLI)
       - name: Install Newman
         run: npm install -g newman
 
@@ -109,8 +112,9 @@ jobs:
       - name: Run Postman tests
         run: |
           newman run ./postman/commerce.json --reporters cli
-          # Если нужно окружение, можно добавить:
-          # newman run ./postman/commerce.json --environment ./postman/env.json --reporters cli
+          # Если нужна среда:
+          # newman run ./postman/commerce.json \
+          #   --environment ./postman/env.json --reporters cli
 
       # 13) Остановка контейнеров (выполняется всегда)
       - name: Stop Docker containers
