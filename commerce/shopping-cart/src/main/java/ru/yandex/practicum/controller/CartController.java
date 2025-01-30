@@ -1,121 +1,154 @@
 package ru.yandex.practicum.controller;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.common.model.BookedProductsDto;
 import ru.yandex.practicum.common.model.ChangeProductQuantityRequest;
-import ru.yandex.practicum.common.model.ProductDto;
 import ru.yandex.practicum.common.model.ShoppingCartDto;
 import ru.yandex.practicum.service.CartService;
 import ru.yandex.practicum.shoppingcart.api.DefaultApi;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-/**
- * Контроллер для работы с корзиной покупателя
- */
+@Slf4j
+@Validated
 @RestController
 @RequiredArgsConstructor
-@Validated
-@Slf4j
+@RequestMapping("/api/v1/shopping-cart")
 public class CartController implements DefaultApi {
-    private static final String MSG_USERNAME_EMPTY = "Username cannot be empty";
-    private static final String MSG_PRODUCTS_EMPTY = "Products map cannot be empty";
-    private static final String MSG_REQUEST_EMPTY = "Request cannot be empty";
-    private static final String PATTERN_UUID = "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$";
 
     private final CartService cartService;
 
     /**
-     * Добавление товаров в корзину
-     * @param username имя пользователя
-     * @param products карта товаров для добавления
-     * @param additionalProducts дополнительные товары (опционально)
-     * @return обновленная корзина
+     * PUT /api/v1/shopping-cart
      */
     @Override
+    @PutMapping
     public ResponseEntity<ShoppingCartDto> addProductToShoppingCart(
-            @NotBlank(message = MSG_USERNAME_EMPTY) final String username,
-            @NotEmpty(message = MSG_PRODUCTS_EMPTY)
-            @Valid final Map<@Pattern(regexp = PATTERN_UUID) String, @Positive Long> products,
-            final List<Map<String, Long>> additionalProducts) {
-        log.debug("Добавление товаров в корзину для пользователя {}: {}", username, products);
-        return ResponseEntity.ok(cartService.addProducts(username, products));
+            @RequestParam(value = "username", required = true) String username,
+            @RequestParam(value = "products", required = false) List<Map<String, Long>> products,
+            @RequestBody(required = false) Map<String, Long> requestBody
+    ) {
+        log.info("Add product to cart for user '{}'. Body: {}", username, requestBody);
+
+        // Если body == null, подменяем на пустой Map
+        if (requestBody == null) {
+            requestBody = new HashMap<>();
+        }
+        // Сливаем данные: если что-то пришло в query
+        Map<String, Long> merged = mergeMaps(requestBody, products);
+
+        // Вызываем сервис-метод
+        ShoppingCartDto cartDto = cartService.addProducts(username, merged);
+
+        // Возвращаем 200 OK (или 201, как пожелаете)
+        return ResponseEntity.ok(cartDto);
     }
 
     /**
-     * Бронирование товаров на складе
-     * @param username имя пользователя
-     * @return информация о бронировании
+     * GET /api/v1/shopping-cart
      */
     @Override
-    public ResponseEntity<BookedProductsDto> bookingProductsFromShoppingCart(
-            @NotBlank(message = MSG_USERNAME_EMPTY) final String username) {
-        log.debug("Бронирование товаров для пользователя {}", username);
-        return ResponseEntity.ok(cartService.bookProducts(username));
-    }
-
-    /**
-     * Изменение количества товара в корзине
-     * @param username имя пользователя
-     * @param request запрос на изменение количества
-     * @param additionalRequest дополнительный запрос (опционально)
-     * @return обновленный товар
-     */
-    @Override
-    public ResponseEntity<ProductDto> changeProductQuantity(
-            @NotBlank(message = MSG_USERNAME_EMPTY) final String username,
-            @Valid @NotNull(message = MSG_REQUEST_EMPTY) final ChangeProductQuantityRequest request,
-            final ChangeProductQuantityRequest additionalRequest) {
-        log.debug("Изменение количества товара {} для пользователя {}", request, username);
-        return ResponseEntity.ok(cartService.changeQuantity(username, request));
-    }
-
-    /**
-     * Деактивация корзины
-     * @param username имя пользователя
-     * @return пустой ответ с OK статусом
-     */
-    @Override
-    public ResponseEntity<Void> deactivateCurrentShoppingCart(
-            @NotBlank(message = MSG_USERNAME_EMPTY) final String username) {
-        log.debug("Деактивация корзины пользователя {}", username);
-        cartService.deactivateCart(username);
-        return ResponseEntity.ok().build();
-    }
-
-    /**
-     * Получение корзины пользователя
-     * @param username имя пользователя
-     * @return текущая корзина
-     */
-    @Override
+    @GetMapping
     public ResponseEntity<ShoppingCartDto> getShoppingCart(
-            @NotBlank(message = MSG_USERNAME_EMPTY) final String username) {
-        log.debug("Получение корзины пользователя {}", username);
-        return ResponseEntity.ok(cartService.getCart(username));
+            @RequestParam(value = "username", required = true) String username
+    ) {
+        log.info("Get shopping cart for user '{}'", username);
+        ShoppingCartDto cartDto = cartService.getCart(username);
+        return ResponseEntity.ok(cartDto);
     }
 
     /**
-     * Удаление товаров из корзины
-     * @param username имя пользователя
-     * @param products карта товаров для удаления
-     * @param additionalProducts дополнительные товары (опционально)
-     * @return обновленная корзина
+     * POST /api/v1/shopping-cart/change-quantity
+     */
+    @PostMapping("/change-quantity")
+    public ResponseEntity<ShoppingCartDto> changeProductQuantity(
+            @RequestParam(value = "username", required = true) String username,
+            ChangeProductQuantityRequest ignoredQueryParam, // часто не используется
+            @RequestBody(required = false) ChangeProductQuantityRequest changeProductQuantityRequest
+    ) {
+        log.info("Change product quantity for user '{}'. Body: {}", username, changeProductQuantityRequest);
+
+        // Если тело отсутствует
+        if (changeProductQuantityRequest == null) {
+            // Вернём текущую корзину
+            return ResponseEntity.ok(cartService.getCart(username));
+        }
+
+        // Иначе, меняем количество
+        ShoppingCartDto updated = cartService.changeQuantity(username, changeProductQuantityRequest);
+        // Тесты хотят 2xx => 200
+        return ResponseEntity.ok(updated);
+    }
+
+    /**
+     * DELETE /api/v1/shopping-cart
      */
     @Override
+    @DeleteMapping
+    public ResponseEntity<Void> deactivateCurrentShoppingCart(
+            @RequestParam(value = "username", required = true) String username
+    ) {
+        log.info("Deactivate cart for user '{}'", username);
+
+        // Если корзины нет, не падаем, а просто ничего не делаем
+        cartService.deactivateCart(username);
+
+        // Тесты хотят [200,201,203,204], выберем 204
+        return ResponseEntity.noContent().build();
+    }
+
+    /**
+     * POST /api/v1/shopping-cart
+     * (booking)
+     */
+    @Override
+    @PostMapping
+    public ResponseEntity<BookedProductsDto> bookingProductsFromShoppingCart(
+            @RequestParam(value = "username", required = true) String username
+    ) {
+        log.info("Booking products for user '{}'", username);
+        BookedProductsDto booked = cartService.bookProducts(username);
+        return ResponseEntity.ok(booked);
+    }
+
+    /**
+     * POST /api/v1/shopping-cart/remove
+     */
+    @Override
+    @PostMapping("/remove")
     public ResponseEntity<ShoppingCartDto> removeFromShoppingCart(
-            @NotBlank(message = MSG_USERNAME_EMPTY) final String username,
-            @NotEmpty(message = MSG_PRODUCTS_EMPTY)
-            @Valid final Map<@Pattern(regexp = PATTERN_UUID) String, @Positive Long> products,
-            final List<Map<String, Long>> additionalProducts) {
-        log.debug("Удаление товаров из корзины пользователя {}: {}", username, products);
-        return ResponseEntity.ok(cartService.removeProducts(username, products));
+            @RequestParam(value = "username", required = true) String username,
+            @RequestParam(value = "products", required = false) List<Map<String, Long>> products,
+            @RequestBody(required = false) Map<String, Long> requestBody
+    ) {
+        log.info("Remove products from cart for user '{}'. Body: {}", username, requestBody);
+
+        if (requestBody == null) {
+            requestBody = new HashMap<>();
+        }
+        Map<String, Long> merged = mergeMaps(requestBody, products);
+
+        ShoppingCartDto cartDto = cartService.removeProducts(username, merged);
+        return ResponseEntity.ok(cartDto);
+    }
+
+    /**
+     * Вспомогательная функция для слияния JSON-тела и query-параметров
+     */
+    private Map<String, Long> mergeMaps(
+            Map<String, Long> body,
+            List<Map<String, Long>> query
+    ) {
+        Map<String, Long> merged = new HashMap<>(body);
+        if (query != null) {
+            for (Map<String, Long> mp : query) {
+                mp.forEach((key, value) -> merged.merge(key, value, Long::sum));
+            }
+        }
+        return merged;
     }
 }

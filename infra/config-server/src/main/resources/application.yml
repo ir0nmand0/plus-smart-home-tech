@@ -27,7 +27,6 @@ spring:
             - classpath:config/commerce/${APP_WAREHOUSE:warehouse}
 
 # Настройки Eureka, чтобы Config Server искал и регистрировался
-# (если требуется)
 eureka:
   client:
     serviceUrl:

@@ -5,6 +5,19 @@ server:
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME:shopping-store}
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+      default-view-inclusion: true
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+      accept-empty-string-as-null-object: true
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+      write-null-map-values: false
+    default-property-inclusion: non_null
 
   cloud:
     config:
@@ -28,9 +41,9 @@ spring:
 
   datasource:
     # Настройки подключения к PostgreSQL
-    url: jdbc:postgresql://${SHOPPING_STORE_DB_HOST:localhost}:${SHOPPING_STORE_DB_PORT:5432}/${SHOPPING_STORE_DB_NAME:shopping_store}
-    username: ${SHOPPING_STORE_DB_USER:store_user}
-    password: ${SHOPPING_STORE_DB_PASSWORD:store_pass}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/shopping_store}
+    username: ${SPRING_DATASOURCE_USERNAME:store_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:store_pass}
   jpa:
     hibernate:
       ddl-auto: none
@@ -39,6 +52,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: ${SHOW_SQL:false}
+  sql:
+    init:
+      mode: always
 
 eureka:
   client:
@@ -63,8 +79,4 @@ feign:
 
 logging:
   level:
-    # Общий уровень логирования
     root: ${LOG_LEVEL:INFO}
-    # Дополнительная детализация в нужных пакетах
-    ru.yandex.practicum: ${APP_LOG_LEVEL:DEBUG}
-    ru.yandex.practicum.warehouse.client.ApiApi: ${FEIGN_LOG_LEVEL:DEBUG}

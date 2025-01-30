@@ -7,6 +7,19 @@ spring:
   application:
     # Имя сервиса "shopping-cart", переопределяется через SPRING_APPLICATION_NAME
     name: ${SPRING_APPLICATION_NAME:shopping-cart}
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+      default-view-inclusion: true
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+      accept-empty-string-as-null-object: true
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+      write-null-map-values: false
+    default-property-inclusion: non_null
 
   cloud:
     config:
@@ -30,9 +43,9 @@ spring:
 
   # Настройки подключения к базе данных
   datasource:
-    url: jdbc:postgresql://${SHOPPING_CART_DB_HOST:localhost}:${SHOPPING_CART_DB_PORT:5432}/${SHOPPING_CART_DB_NAME:shopping_cart}
-    username: ${SHOPPING_CART_DB_USER:cart_user}
-    password: ${SHOPPING_CART_DB_PASSWORD:cart_pass}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/shopping_cart}
+    username: ${SPRING_DATASOURCE_USERNAME:cart_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:cart_pass}
   jpa:
     hibernate:
       ddl-auto: none
@@ -41,6 +54,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: ${SHOW_SQL:false}
+  sql:
+    init:
+      mode: always
 
 eureka:
   client:
@@ -64,8 +80,5 @@ feign:
         loggerLevel: ${FEIGN_LOGGER_LEVEL:basic}
 
 logging:
-  # Общий уровень логирования и специфический для нужных пакетов
   level:
     root: ${LOG_LEVEL:INFO}
-    ru.yandex.practicum: ${APP_LOG_LEVEL:DEBUG}
-    ru.yandex.practicum.warehouse.client.ApiApi: ${FEIGN_LOG_LEVEL:DEBUG}

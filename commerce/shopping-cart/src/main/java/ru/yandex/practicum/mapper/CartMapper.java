@@ -12,28 +12,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = {})
+@Mapper(componentModel = "spring")
 public interface CartMapper {
-    /**
-     * Преобразование корзины в DTO
-     * @param cart сущность корзины
-     * @return DTO корзины
-     */
+
     @Mapping(target = "shoppingCartId", source = "id")
     @Mapping(target = "products", expression = "java(mapCartProducts(cart.getProducts()))")
     ShoppingCartDto toDto(Cart cart);
 
-    /**
-     * Преобразование товаров корзины в Map
-     * @param products список товаров
-     * @return Map (ID товара -> количество)
-     */
     default Map<String, Long> mapCartProducts(Set<CartProduct> products) {
-        if (products == null) return Collections.emptyMap();
+        if (products == null) {
+            return new HashMap<>();
+        }
         return products.stream()
+                .filter(p -> p != null && p.getId() != null && p.getId().getProductId() != null)
                 .collect(Collectors.toMap(
-                        p -> p.getId().getProductId().toString(), // Конвертация UUID в строку
-                        CartProduct::getQuantity
+                        p -> p.getId().getProductId().toString(),
+                        CartProduct::getQuantity,
+                        (v1, v2) -> v1, // В случае дубликатов берем первое значение
+                        HashMap::new
                 ));
     }
 }

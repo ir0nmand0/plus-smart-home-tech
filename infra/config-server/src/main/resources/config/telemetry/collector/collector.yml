@@ -42,7 +42,6 @@ eureka:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
-    ru.yandex.practicum: ${APP_LOG_LEVEL:INFO}
 
 endpoints:
   root: ${COLLECTOR_ROOT:/events}
@@ -51,4 +50,4 @@ endpoints:
 
 grpc:
   server:
-    port: ${GRPC_PORT:9090}
+    port: ${GRPC_SERVER_PORT:9090}

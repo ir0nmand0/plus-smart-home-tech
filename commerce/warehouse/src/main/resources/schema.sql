@@ -1,10 +1,7 @@
-CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
 CREATE SCHEMA IF NOT EXISTS warehouse;
 
--- Products in warehouse
 CREATE TABLE IF NOT EXISTS warehouse.products (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id UUID PRIMARY KEY,
     product_id UUID NOT NULL UNIQUE,
     fragile BOOLEAN DEFAULT false,
     weight DOUBLE PRECISION NOT NULL CHECK (weight > 0),
@@ -14,4 +11,5 @@ CREATE TABLE IF NOT EXISTS warehouse.products (
     quantity BIGINT DEFAULT 0 CHECK (quantity >= 0)
 );
 
-CREATE INDEX IF NOT EXISTS idx_warehouse_product_id ON warehouse.products(product_id);
+CREATE INDEX IF NOT EXISTS idx_warehouse_product_id
+    ON warehouse.products(product_id);

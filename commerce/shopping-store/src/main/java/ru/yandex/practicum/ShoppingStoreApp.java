@@ -6,7 +6,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
-@EnableFeignClients(basePackages = "ru.yandex.practicum.warehouse.client")
+@EnableFeignClients(basePackages = "ru.yandex.practicum.client")
 @EnableDiscoveryClient
 public class ShoppingStoreApp {
     public static void main(String[] args) {

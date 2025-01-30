@@ -3,9 +3,11 @@ package ru.yandex.practicum.service.impl;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.client.WarehouseClient;
 import ru.yandex.practicum.common.model.NewProductInWarehouseRequest;
 import ru.yandex.practicum.common.model.ProductCategory;
 import ru.yandex.practicum.common.model.ProductState;
@@ -16,7 +18,6 @@ import ru.yandex.practicum.exception.ProductAlreadyExistsInWarehouseException;
 import ru.yandex.practicum.exception.ProductNotFoundException;
 import ru.yandex.practicum.repository.ProductRepository;
 import ru.yandex.practicum.service.ProductService;
-import ru.yandex.practicum.warehouse.client.ApiApi;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,11 +41,17 @@ public class ProductServiceImpl implements ProductService {
     private static final boolean DEFAULT_FRAGILE = false;
 
     private final ProductRepository productRepository;
-    private final ApiApi warehouseClient;
+    private final WarehouseClient warehouseClient;
 
     @Override
-    public List<Product> getProducts(ProductCategory category, Pageable pageable) {
-        return productRepository.findByProductCategoryAndProductState(category, ProductState.ACTIVE, pageable);
+    @Transactional(readOnly = true)
+    public Page<Product> getProducts(ProductCategory category, Pageable pageable) {
+        log.info("Поиск товаров в категории {}, с пагинацией и сортировкой: {}", category, pageable);
+        return productRepository.findByProductCategoryAndProductState(
+                category,
+                ProductState.ACTIVE,
+                pageable
+        );
     }
 
     @Override
@@ -56,9 +63,6 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public Product createProduct(Product product) {
-        product.setProductState(ProductState.ACTIVE);
-        product.setQuantityState(QuantityState.ENDED);
-
         Product savedProduct = productRepository.save(product);
 
         try {

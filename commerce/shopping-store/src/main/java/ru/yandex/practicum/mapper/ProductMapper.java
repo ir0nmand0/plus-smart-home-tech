@@ -12,10 +12,12 @@ public interface ProductMapper {
 
     @Mapping(target = "productId", source = "id", qualifiedByName = "toJsonNullable")
     @Mapping(target = "imageSrc", source = "imageSrc", qualifiedByName = "toJsonNullable")
+    @Mapping(target = "rating", source = "rating", qualifiedByName = "toJsonNullable")
     ProductDto toDto(Product product);
 
     @Mapping(target = "id", source = "productId", qualifiedByName = "fromJsonNullable")
     @Mapping(target = "imageSrc", source = "imageSrc", qualifiedByName = "fromJsonNullable")
+    @Mapping(target = "rating", source = "rating", qualifiedByName = "fromJsonNullable")
     Product toEntity(ProductDto productDto);
 
     @Named("toJsonNullable")

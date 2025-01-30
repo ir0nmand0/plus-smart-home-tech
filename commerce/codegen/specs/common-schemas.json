@@ -10,15 +10,21 @@
     "x-tagGroups": [
       {
         "name": "Exceptions",
-        "tags": ["Исключения и их DTO представления"]
+        "tags": [
+          "Исключения и их DTO представления"
+        ]
       },
       {
         "name": "DTOs",
-        "tags": ["Общие DTO модели"]
+        "tags": [
+          "Общие DTO модели"
+        ]
       },
       {
         "name": "Enums",
-        "tags": ["Общие перечисления"]
+        "tags": [
+          "Общие перечисления"
+        ]
       }
     ],
     "schemas": {
@@ -97,7 +103,6 @@
           "511 NETWORK_AUTHENTICATION_REQUIRED"
         ]
       },
-
       "AbstractApiExceptionDto": {
         "type": "object",
         "description": "Базовый DTO класс для передачи информации об исключениях между сервисами",
@@ -123,7 +128,6 @@
           "status"
         ]
       },
-
       "NotAuthorizedUserExceptionDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении при отсутствии авторизации",
@@ -137,7 +141,6 @@
           "status": "UNAUTHORIZED"
         }
       },
-
       "NoProductsInShoppingCartExceptionDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении при отсутствии товаров в корзине",
@@ -151,7 +154,6 @@
           "status": "BAD_REQUEST"
         }
       },
-
       "ProductInShoppingCartNotInWarehouseDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении, когда товар из корзины отсутствует на складе",
@@ -165,7 +167,6 @@
           "status": "BAD_REQUEST"
         }
       },
-
       "ProductNotFoundExceptionDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении при отсутствии товара",
@@ -181,14 +182,15 @@
             "description": "ID товара, который не найден"
           }
         },
-        "required": ["productId"],
+        "required": [
+          "productId"
+        ],
         "example": {
           "message": "Product not found",
           "status": "NOT_FOUND",
           "productId": "123e4567-e89b-12d3-a456-426614174000"
         }
       },
-
       "SpecifiedProductAlreadyInWarehouseExceptionDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении, когда добавляемый товар уже есть на складе",
@@ -202,7 +204,6 @@
           "status": "BAD_REQUEST"
         }
       },
-
       "ProductInShoppingCartLowQuantityInWarehouseDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении, когда товаров в корзине больше, чем на складе",
@@ -216,7 +217,6 @@
           "status": "BAD_REQUEST"
         }
       },
-
       "NoSpecifiedProductInWarehouseExceptionDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении, когда запрашиваемого товара нет на складе",
@@ -230,7 +230,6 @@
           "status": "BAD_REQUEST"
         }
       },
-
       "ProductCategory": {
         "type": "string",
         "description": "Категория товара, используемая для классификации в каталоге",
@@ -240,7 +239,6 @@
           "SENSORS"
         ]
       },
-
       "ProductState": {
         "type": "string",
         "description": "Статус товара в системе (активен/деактивирован)",
@@ -249,7 +247,6 @@
           "DEACTIVATE"
         ]
       },
-
       "QuantityState": {
         "type": "string",
         "description": "Состояние остатка товара на складе",
@@ -260,7 +257,6 @@
           "MANY"
         ]
       },
-
       "ProductDto": {
         "type": "object",
         "description": "DTO товара, продаваемого в интернет-магазине",
@@ -270,8 +266,7 @@
           "description",
           "price",
           "productState",
-          "quantityState",
-          "rating"
+          "quantityState"
         ],
         "properties": {
           "productId": {
@@ -299,24 +294,24 @@
           "productState": {
             "$ref": "#/components/schemas/ProductState"
           },
-          "rating": {
-            "type": "number",
-            "description": "Рейтинг товара на основе оценок пользователей",
-            "format": "double",
-            "minimum": 1,
-            "maximum": 5
-          },
           "productCategory": {
             "$ref": "#/components/schemas/ProductCategory"
           },
           "price": {
             "type": "number",
             "description": "Цена товара",
-            "minimum": 1
+            "minimum": 1,
+            "format": "double"
+          },
+          "rating": {
+            "type": "integer",
+            "description": "Рейтинг товара",
+            "minimum": 0,
+            "maximum": 5,
+            "nullable": true
           }
         }
       },
-
       "ShoppingCartDto": {
         "type": "object",
         "description": "DTO корзины товаров в онлайн-магазине",
@@ -341,7 +336,6 @@
           }
         }
       },
-
       "BookedProductsDto": {
         "type": "object",
         "description": "DTO с общими сведениями о зарезервированных товарах по корзине",
@@ -364,6 +358,108 @@
           "fragile": {
             "type": "boolean",
             "description": "Есть ли хрупкие товары среди зарезервированных"
+          }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Номер страницы",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Размер страницы",
+            "minimum": 1
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Сортировка по полям"
+          }
+        }
+      },
+      "SortDto": {
+        "type": "object",
+        "description": "Элемент сортировки, хранящий поле (property) и направление (direction).",
+        "properties": {
+          "direction": {
+            "type": "string",
+            "description": "Направление сортировки. Например: ASC или DESC.",
+            "enum": [
+              "ASC",
+              "DESC"
+            ],
+            "example": "ASC"
+          },
+          "property": {
+            "type": "string",
+            "description": "Имя поля, по которому выполняется сортировка.",
+            "example": "productName"
+          }
+        },
+        "required": [
+          "direction",
+          "property"
+        ]
+      },
+      "PageOfProductDto": {
+        "type": "object",
+        "description": "Страница товаров с метаданными и сортировкой.",
+        "properties": {
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDto"
+            }
+          },
+          "pageable": {
+          },
+          "totalPages": {
+            "type": "integer",
+            "example": 5
+          },
+          "totalElements": {
+            "type": "integer",
+			"format": "int64",
+            "example": 47
+          },
+          "last": {
+            "type": "boolean",
+            "example": false
+          },
+          "size": {
+            "type": "integer",
+            "example": 10
+          },
+          "number": {
+            "type": "integer",
+            "example": 0
+          },
+          "sort": {
+            "type": "array",
+            "description": "Массив критериев сортировки",
+            "items": {
+              "$ref": "#/components/schemas/SortDto"
+            }
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "example": 10
+          },
+          "first": {
+            "type": "boolean",
+            "example": true
+          },
+          "empty": {
+            "type": "boolean",
+            "example": false
           }
         }
       }

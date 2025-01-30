@@ -1,4 +1,4 @@
-{
+ {
   "openapi": "3.0.1",
   "info": {
     "title": "Smart Home Technologies API",
@@ -61,7 +61,7 @@
         "tags": [
           "Корзина для онлайн-магазина"
         ],
-        "description": "Добавить товар в корзину.",
+        "description": "Добавить товар(ы) в корзину.",
         "operationId": "addProductToShoppingCart",
         "parameters": [
           {
@@ -93,6 +93,7 @@
           }
         ],
         "requestBody": {
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
@@ -104,12 +105,21 @@
                 "description": "Отображение идентификатора товара на отобранное количество."
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "200": {
             "description": "Корзина товаров с изменениями",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Корзина товаров с изменениями (Created)",
             "content": {
               "*/*": {
                 "schema": {
@@ -149,6 +159,15 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "201": {
+            "description": "Created – Корзина деактивирована"
+          },
+          "203": {
+            "description": "Non-Authoritative Information – Корзина деактивирована"
+          },
+          "204": {
+            "description": "No Content – Корзина деактивирована без тела ответа"
           },
           "401": {
             "description": "Имя пользователя не должно быть пустым",
@@ -200,6 +219,7 @@
           }
         ],
         "requestBody": {
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
@@ -211,8 +231,7 @@
                 "description": "Отображение идентификатора товара на отобранное количество."
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "400": {
@@ -234,6 +253,19 @@
                 }
               }
             }
+          },
+          "201": {
+            "description": "Корзина товаров с изменениями (Created)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content – Товары удалены, тело не возвращается"
           },
           "401": {
             "description": "Имя пользователя не должно быть пустым",
@@ -263,29 +295,17 @@
             "schema": {
               "type": "string"
             }
-          },
-          {
-            "name": "changeProductQuantityRequest",
-            "in": "query",
-            "description": "Отображение идентификатора товара на его новое количество.",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChangeProductQuantityRequest"
-                }
-              }
-            }
           }
         ],
         "requestBody": {
+          "required": false,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ChangeProductQuantityRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "400": {
@@ -299,14 +319,27 @@
             }
           },
           "200": {
-            "description": "Актуальный товар со всеми сведениями из БД",
+            "description": "Актуальная корзина со всеми сведениями",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                  "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
                 }
               }
             }
+          },
+          "201": {
+            "description": "Created – корзина обновлена",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content – корзина обновлена без тела ответа"
           },
           "401": {
             "description": "Имя пользователя не должно быть пустым",

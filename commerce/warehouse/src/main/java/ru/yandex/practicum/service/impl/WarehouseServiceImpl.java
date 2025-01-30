@@ -45,7 +45,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     @Transactional
     public void addProduct(UUID productId, Long quantity) {
-        log.debug("Добавление {} единиц товара с ID {} на склад", quantity, productId);
+        log.info("Добавление {} единиц товара с ID {} на склад", quantity, productId);
         WarehouseProduct product = getProductById(productId);
         product.setQuantity(product.getQuantity() + quantity);
         warehouseProductRepository.save(product);
@@ -57,7 +57,7 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Override
     @Transactional
     public void registerProduct(UUID productId, Boolean fragile, Double weight, DimensionDto dimensionDto) {
-        log.debug("Регистрация нового товара на складе: ID {}", productId);
+        log.info("Регистрация нового товара на складе: ID {}", productId);
         checkProductNotExists(productId);
 
         WarehouseProduct product = WarehouseProduct.builder()
@@ -77,7 +77,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     @Override
     public BookedProductsDto checkAvailability(ShoppingCartDto cart) {
-        log.debug("Проверка наличия товаров для корзины: {}", cart);
+        log.info("Проверка наличия товаров для корзины: {}", cart);
 
         double totalWeight = 0.0;
         double totalVolume = 0.0;
@@ -103,7 +103,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     @Override
     public AddressDto getAddress() {
-        log.debug("Получение адреса склада");
+        log.info("Получение адреса склада");
         return new AddressDto()
                 .country(CURRENT_ADDRESS)
                 .city(CURRENT_ADDRESS)

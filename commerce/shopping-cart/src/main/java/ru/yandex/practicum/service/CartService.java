@@ -10,7 +10,7 @@ public interface CartService {
     ShoppingCartDto getCart(String username);
     ShoppingCartDto addProducts(String username, Map<String, Long> products);
     ShoppingCartDto removeProducts(String username, Map<String, Long> products);
-    ProductDto changeQuantity(String username, ChangeProductQuantityRequest request);
+    ShoppingCartDto changeQuantity(String username, ChangeProductQuantityRequest request);
     BookedProductsDto bookProducts(String username);
     void deactivateCart(String username);
 }

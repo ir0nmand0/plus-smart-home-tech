@@ -49,7 +49,7 @@ public class Product {
     @Column(nullable = false)
     private ProductState productState;
 
-    private Double rating;
+    private Integer rating;
 
     private String imageSrc;
 }

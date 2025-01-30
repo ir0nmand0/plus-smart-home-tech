@@ -4,6 +4,19 @@ server:
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME:warehouse}
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+      default-view-inclusion: true
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+      accept-empty-string-as-null-object: true
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+      write-null-map-values: false
+    default-property-inclusion: non_null
   cloud:
     config:
       discovery:
@@ -16,9 +29,9 @@ spring:
         max-interval: ${CONFIG_RETRY_MAX:10000}
 
   datasource:
-    url: jdbc:postgresql://${WAREHOUSE_DB_HOST:localhost}:${WAREHOUSE_DB_PORT:5432}/${WAREHOUSE_DB_NAME:warehouse}
-    username: ${WAREHOUSE_DB_USER:warehouse_user}
-    password: ${WAREHOUSE_DB_PASSWORD:warehouse_pass}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/warehouse}
+    username: ${SPRING_DATASOURCE_USERNAME:warehouse_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:warehouse_pass}
   jpa:
     hibernate:
       ddl-auto: none
@@ -27,6 +40,9 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     show-sql: ${SHOW_SQL:false}
+  sql:
+    init:
+      mode: always
 
 eureka:
   client:

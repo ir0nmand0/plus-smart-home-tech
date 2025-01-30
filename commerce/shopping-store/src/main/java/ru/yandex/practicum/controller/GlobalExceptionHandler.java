@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
      * Обработка ошибки "Товар отсутствует на складе"
      */
     @ExceptionHandler(ProductNotInWarehouseException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public NoSpecifiedProductInWarehouseExceptionDto handleProductNotInWarehouse(ProductNotInWarehouseException ex) {
         log.error(PRODUCT_NOT_IN_WAREHOUSE, ex.getMessage());
         return ex.getExceptionDto();

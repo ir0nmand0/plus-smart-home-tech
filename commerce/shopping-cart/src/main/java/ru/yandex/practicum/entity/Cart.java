@@ -32,7 +32,7 @@ public class Cart {
     private boolean active;
 
     @CreationTimestamp
-    @Column(name = "created_at")
+    @Column
     private OffsetDateTime createdAt;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
