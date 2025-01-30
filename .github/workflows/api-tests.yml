@@ -90,7 +90,7 @@ jobs:
           EUREKA_URL="http://localhost:8761/eureka/apps/shopping-cart"
           echo "Проверяем регистрацию shopping-cart в Eureka: $EUREKA_URL"
           for i in {1..20}; do
-            if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail -s -H "Accept: application/json" "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
               echo "Shopping Cart присутствует в Eureka!"
               exit 0
             fi
@@ -123,7 +123,7 @@ jobs:
           EUREKA_URL="http://localhost:8761/eureka/apps/shopping-store"
           echo "Проверяем регистрацию shopping-store в Eureka: $EUREKA_URL"
           for i in {1..20}; do
-            if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail -s -H "Accept: application/json" "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
               echo "Shopping Store присутствует в Eureka!"
               exit 0
             fi
@@ -156,7 +156,7 @@ jobs:
           EUREKA_URL="http://localhost:8761/eureka/apps/warehouse"
           echo "Проверяем регистрацию warehouse в Eureka: $EUREKA_URL"
           for i in {1..20}; do
-            if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail -s -H "Accept: application/json" "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
               echo "Warehouse присутствует в Eureka!"
               exit 0
             fi
