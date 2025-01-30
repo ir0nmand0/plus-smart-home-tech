@@ -45,13 +45,13 @@ jobs:
               echo "Config Server UP!"
               exit 0
             fi
-            echo "Config Server пока не готов, спим 5с..."
-            sleep 5
+            echo "Config Server пока не готов, спим 10с..."
+            sleep 10
           done
           echo "Config Server не ответил за 10 попыток!"
           exit 1
 
-      # 7) Ждём Eureka (порт 8761) – таймаут увеличен до 20 попыток * 10с
+      # 7) Ждём Eureka (порт 8761)
       - name: Wait for Eureka
         run: |
           echo "Ожидание http://localhost:8761/actuator/health"
@@ -94,8 +94,8 @@ jobs:
               echo "Shopping Cart присутствует в Eureka!"
               exit 0
             fi
-            echo "Shopping Cart не появился в Eureka, спим 5с..."
-            sleep 5
+            echo "Shopping Cart не появился в Eureka, спим 10с..."
+            sleep 10
           done
           echo "Shopping Cart не зарегистрировался в Eureka за 20 попыток!"
           exit 1
@@ -127,8 +127,8 @@ jobs:
               echo "Shopping Store присутствует в Eureka!"
               exit 0
             fi
-            echo "Shopping Store не появился в Eureka, спим 5с..."
-            sleep 5
+            echo "Shopping Store не появился в Eureka, спим 10с..."
+            sleep 10
           done
           echo "Shopping Store не зарегистрировался в Eureka за 20 попыток!"
           exit 1
@@ -160,29 +160,37 @@ jobs:
               echo "Warehouse присутствует в Eureka!"
               exit 0
             fi
-            echo "Warehouse не появился в Eureka, спим 5с..."
-            sleep 5
+            echo "Warehouse не появился в Eureka, спим 10с..."
+            sleep 10
           done
           echo "Warehouse не зарегистрировался в Eureka за 20 попыток!"
           exit 1
 
-      # 11) Установка Node.js
+      # 11.1) Дополнительная задержка для «прогрева»
+      # Нужна, чтобы все сервисы Feign точно увидели друг друга
+      # и не было ошибок вида "No servers available for service: warehouse"
+      - name: Extra wait before tests
+        run: |
+          echo "Ждём дополнительные 60с для прогрева Feign/Eureka."
+          sleep 200
+
+      # 12) Установка Node.js
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "16"
 
-      # 12) Установка Newman
+      # 13) Установка Newman
       - name: Install Newman
         run: npm install -g newman
 
-      # 13) Запуск Postman-тестов
+      # 14) Запуск Postman-тестов
       - name: Run Postman tests
         run: |
           newman run ./postman/commerce.json --reporters cli
           # newman run ./postman/commerce.json --environment ./postman/env.json --reporters cli
 
-      # 14) Остановка контейнеров (выполняется всегда)
+      # 15) Остановка контейнеров (выполняется всегда)
       - name: Stop Docker containers
         if: always()
         run: docker compose -f compose.yaml down
