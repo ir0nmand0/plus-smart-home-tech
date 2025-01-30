@@ -1,8 +1,123 @@
-name: ShareIt API Tests
+name: Postman Tests
 
+# Запускать при пушах или pull-request в main
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build:
-    uses: yandex-praktikum/plus-smart-home-tech/.github/workflows/api-tests.yml@ci
+  run-postman-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Склонировать репозиторий
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      # 2. Собрать Docker-образы (если в Dockerfile есть build-процессы)
+      - name: Build Docker images
+        run: docker compose -f compose.yaml build
+
+      # 3. Поднять контейнеры
+      - name: Start Docker containers
+        run: docker compose -f compose.yaml up -d
+
+      # 4. Ожидать готовность Config Server (порт 8888)
+      - name: Wait for Config Server
+        run: |
+          echo "Ожидаем ответа http://localhost:8888/actuator/health"
+          for i in {1..10}; do
+            if curl --silent --fail http://localhost:8888/actuator/health | grep -q "\"status\":\"UP\""; then
+              echo "Config Server UP!"
+              exit 0
+            fi
+            echo "Config Server пока не поднялся, пауза 5 сек..."
+            sleep 5
+          done
+          echo "Config Server не ответил за 10 попыток!"
+          exit 1
+
+      # 5. Ожидать готовность Eureka (порт 8761)
+      - name: Wait for Eureka
+        run: |
+          echo "Ожидаем ответа http://localhost:8761/actuator/health"
+          for i in {1..10}; do
+            if curl --silent --fail http://localhost:8761/actuator/health | grep -q "\"status\":\"UP\""; then
+              echo "Eureka UP!"
+              exit 0
+            fi
+            echo "Eureka пока не поднялся, пауза 5 сек..."
+            sleep 5
+          done
+          echo "Eureka не ответил за 10 попыток!"
+          exit 1
+
+      # 6. При необходимости дождаться readiness Shopping Store (порт 8181)
+      - name: Wait for Shopping Store
+        run: |
+          echo "Ожидаем Shopping Store на http://localhost:8181/actuator/health"
+          for i in {1..12}; do
+            if curl --silent --fail http://localhost:8181/actuator/health | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Store UP!"
+              exit 0
+            fi
+            echo "Store не готов, пауза 5 сек..."
+            sleep 5
+          done
+          echo "Store не ответил за 12 попыток!"
+          exit 1
+
+      # 7. Дожидаемся Shopping Cart (порт 8180)
+      - name: Wait for Shopping Cart
+        run: |
+          echo "Ожидаем Shopping Cart на http://localhost:8180/actuator/health"
+          for i in {1..12}; do
+            if curl --silent --fail http://localhost:8180/actuator/health | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Cart UP!"
+              exit 0
+            fi
+            echo "Cart не готов, пауза 5 сек..."
+            sleep 5
+          done
+          echo "Cart не ответил за 12 попыток!"
+          exit 1
+
+      # 8. Дожидаемся Warehouse (порт 8182) - при необходимости
+      - name: Wait for Warehouse
+        run: |
+          echo "Ожидаем Warehouse на http://localhost:8182/actuator/health"
+          for i in {1..12}; do
+            if curl --silent --fail http://localhost:8182/actuator/health | grep -q "\"status\":\"UP\""; then
+              echo "Warehouse UP!"
+              exit 0
+            fi
+            echo "Warehouse не готов, пауза 5 сек..."
+            sleep 5
+          done
+          echo "Warehouse не ответил за 12 попыток!"
+          exit 1
+
+      # 9. Устанавливаем Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # 10. Установка newman
+      - name: Install Newman
+        run: npm install -g newman
+
+      # 11. Запуск Postman-тестов
+      - name: Run Postman tests
+        run: |
+          newman run ./postman/commerce.json \
+            --reporters cli
+          # Если нужно окружение:
+          #   --environment ./postman/env.json
+
+      # 12. Остановка/удаление контейнеров после тестов
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose -f compose.yaml down
