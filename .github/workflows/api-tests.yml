@@ -1,6 +1,5 @@
 name: Postman Tests
 
-# Запускать при пушах или pull-request в main
 on:
   push:
     branches: [ "main" ]
@@ -8,116 +7,104 @@ on:
     branches: [ "main" ]
 
 jobs:
-  run-postman-tests:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Склонировать репозиторий
-      - name: Check out repo
+      # 1) Клонировать репозиторий
+      - name: Check out code
         uses: actions/checkout@v3
 
-      # 2. Собрать Docker-образы (если в Dockerfile есть build-процессы)
+      # 2) Собрать проект с помощью Maven (чтобы target/*.jar появились)
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      # 3) Собрать Docker-образы: каждый Dockerfile возьмет target/*.jar
       - name: Build Docker images
         run: docker compose -f compose.yaml build
 
-      # 3. Поднять контейнеры
+      # 4) Запустить контейнеры
       - name: Start Docker containers
         run: docker compose -f compose.yaml up -d
 
-      # 4. Ожидать готовность Config Server (порт 8888)
+      # 5) Ждем, пока Config Server станет UP (порт 8888, actuator/health)
       - name: Wait for Config Server
         run: |
-          echo "Ожидаем ответа http://localhost:8888/actuator/health"
+          echo "Ожидание http://localhost:8888/actuator/health"
           for i in {1..10}; do
             if curl --silent --fail http://localhost:8888/actuator/health | grep -q "\"status\":\"UP\""; then
               echo "Config Server UP!"
               exit 0
             fi
-            echo "Config Server пока не поднялся, пауза 5 сек..."
+            echo "Config Server пока не готов, спим 5с..."
             sleep 5
           done
           echo "Config Server не ответил за 10 попыток!"
           exit 1
 
-      # 5. Ожидать готовность Eureka (порт 8761)
+      # 6) Ждем, пока Eureka (порт 8761) станет UP
       - name: Wait for Eureka
         run: |
-          echo "Ожидаем ответа http://localhost:8761/actuator/health"
+          echo "Ожидание http://localhost:8761/actuator/health"
           for i in {1..10}; do
             if curl --silent --fail http://localhost:8761/actuator/health | grep -q "\"status\":\"UP\""; then
               echo "Eureka UP!"
               exit 0
             fi
-            echo "Eureka пока не поднялся, пауза 5 сек..."
+            echo "Eureka пока не готов, спим 5с..."
             sleep 5
           done
           echo "Eureka не ответил за 10 попыток!"
           exit 1
 
-      # 6. При необходимости дождаться readiness Shopping Store (порт 8181)
+      # 7) Ждем, пока Shopping Store (порт 8181) станет UP
       - name: Wait for Shopping Store
         run: |
-          echo "Ожидаем Shopping Store на http://localhost:8181/actuator/health"
-          for i in {1..12}; do
+          echo "Ожидание http://localhost:8181/actuator/health"
+          for i in {1..10}; do
             if curl --silent --fail http://localhost:8181/actuator/health | grep -q "\"status\":\"UP\""; then
               echo "Shopping Store UP!"
               exit 0
             fi
-            echo "Store не готов, пауза 5 сек..."
+            echo "Shopping Store пока не готов, спим 5с..."
             sleep 5
           done
-          echo "Store не ответил за 12 попыток!"
+          echo "Shopping Store не ответил за 10 попыток!"
           exit 1
 
-      # 7. Дожидаемся Shopping Cart (порт 8180)
-      - name: Wait for Shopping Cart
-        run: |
-          echo "Ожидаем Shopping Cart на http://localhost:8180/actuator/health"
-          for i in {1..12}; do
-            if curl --silent --fail http://localhost:8180/actuator/health | grep -q "\"status\":\"UP\""; then
-              echo "Shopping Cart UP!"
-              exit 0
-            fi
-            echo "Cart не готов, пауза 5 сек..."
-            sleep 5
-          done
-          echo "Cart не ответил за 12 попыток!"
-          exit 1
-
-      # 8. Дожидаемся Warehouse (порт 8182) - при необходимости
+      # 8) Ждем, пока Warehouse (порт 8182) станет UP (пример)
       - name: Wait for Warehouse
         run: |
-          echo "Ожидаем Warehouse на http://localhost:8182/actuator/health"
-          for i in {1..12}; do
+          echo "Ожидание http://localhost:8182/actuator/health"
+          for i in {1..10}; do
             if curl --silent --fail http://localhost:8182/actuator/health | grep -q "\"status\":\"UP\""; then
               echo "Warehouse UP!"
               exit 0
             fi
-            echo "Warehouse не готов, пауза 5 сек..."
+            echo "Warehouse пока не готов, спим 5с..."
             sleep 5
           done
-          echo "Warehouse не ответил за 12 попыток!"
+          echo "Warehouse не ответил за 10 попыток!"
           exit 1
 
-      # 9. Устанавливаем Node.js
+      # 9) Установка Node.js
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: "16"
 
-      # 10. Установка newman
+      # 10) Установка Newman
       - name: Install Newman
         run: npm install -g newman
 
-      # 11. Запуск Postman-тестов
+      # 11) Запуск Postman-тестов
       - name: Run Postman tests
         run: |
-          newman run ./postman/commerce.json \
-            --reporters cli
-          # Если нужно окружение:
-          #   --environment ./postman/env.json
+          newman run ./postman/commerce.json --reporters cli
+          # Если нужно окружение, можно добавить:
+          # newman run ./postman/commerce.json --environment ./postman/env.json --reporters cli
 
-      # 12. Остановка/удаление контейнеров после тестов
+      # 12) Остановка контейнеров в любом случае
       - name: Stop Docker containers
         if: always()
         run: docker compose -f compose.yaml down

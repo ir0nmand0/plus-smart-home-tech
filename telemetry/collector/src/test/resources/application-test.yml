@@ -1,0 +1,56 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:collector}
+  cloud:
+    bootstrap:
+      enabled: false  # полностью вырубаем фазу bootstrap
+    config:
+      enabled: false
+      discovery:
+        enabled: false
+      import-check:
+        enabled: false
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    properties:
+      schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL:http://localhost:8081}
+      linger.ms: ${KAFKA_LINGER_MS:5}
+      compression.type: ${KAFKA_COMPRESSION:lz4}
+      acks: ${KAFKA_ACKS:all}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    topics:
+      sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
+      hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  health:
+    probes:
+      enabled: true
+
+endpoints:
+  root: ${COLLECTOR_ROOT:/events}
+  sensors: ${COLLECTOR_SENSORS:/sensors}
+  hubs: ${COLLECTOR_HUBS:/hubs}
+
+grpc:
+  server:
+    port: ${GRPC_SERVER_PORT:9090}
+
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
