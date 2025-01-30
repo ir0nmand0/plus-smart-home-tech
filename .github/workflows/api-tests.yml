@@ -23,7 +23,7 @@ jobs:
           java-version: "21"
           cache: maven
 
-      # 3) Собрать проект с помощью Maven (чтобы target/*.jar появились), без тестов
+      # 3) Собрать проект (без тестов)
       - name: Build with Maven
         run: mvn clean package -DskipTests
 
@@ -35,12 +35,13 @@ jobs:
       - name: Start Docker containers
         run: docker compose -f compose.yaml up -d
 
-      # 6) Ждём Config Server (8888)
+      # 6) Ждём Config Server (порт 8888)
       - name: Wait for Config Server
         run: |
           echo "Ожидание http://localhost:8888/actuator/health"
           for i in {1..10}; do
-            if curl --silent --fail http://localhost:8888/actuator/health | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail http://localhost:8888/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
               echo "Config Server UP!"
               exit 0
             fi
@@ -50,12 +51,13 @@ jobs:
           echo "Config Server не ответил за 10 попыток!"
           exit 1
 
-      # 7) Ждём Eureka (8761)
+      # 7) Ждём Eureka (порт 8761)
       - name: Wait for Eureka
         run: |
           echo "Ожидание http://localhost:8761/actuator/health"
           for i in {1..10}; do
-            if curl --silent --fail http://localhost:8761/actuator/health | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail http://localhost:8761/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
               echo "Eureka UP!"
               exit 0
             fi
@@ -70,7 +72,8 @@ jobs:
         run: |
           echo "Ожидание http://localhost:8180/actuator/health"
           for i in {1..20}; do
-            if curl --silent --fail http://localhost:8180/actuator/health | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail http://localhost:8180/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
               echo "Shopping Cart UP!"
               exit 0
             fi
@@ -78,8 +81,27 @@ jobs:
             sleep 10
           done
           echo "Shopping Cart не ответил за 20 попыток!"
-          # выводим логи контейнера для отладки
           docker compose -f compose.yaml logs shopping-cart
+          exit 1
+
+      # 8.1) Проверяем регистрацию Shopping Cart в Eureka
+      - name: Wait for Shopping Cart in Eureka
+        run: |
+          # Важна правильная строка: /SHOPPING-CART или /SHOPPING_CART
+          # зависят от eureka.instance.appname, по умолчанию: uppercase( spring.application.name )
+          # Допустим, у нас spring.application.name=shopping-cart => в Eureka будет SHOPPING-CART
+          EUREKA_URL="http://localhost:8761/eureka/apps/SHOPPING-CART"
+          echo "Проверяем регистрацию Shopping Cart в Eureka: $EUREKA_URL"
+          for i in {1..20}; do
+            # ждем, пока в ответе увидим <instanceId> или "status":"UP"
+            if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Cart присутствует в Eureka!"
+              exit 0
+            fi
+            echo "Shopping Cart не появился в Eureka, спим 5с..."
+            sleep 5
+          done
+          echo "Shopping Cart не зарегистрировался в Eureka за 20 попыток!"
           exit 1
 
       # 9) Ждём Shopping Store (8181)
@@ -87,7 +109,8 @@ jobs:
         run: |
           echo "Ожидание http://localhost:8181/actuator/health"
           for i in {1..20}; do
-            if curl --silent --fail http://localhost:8181/actuator/health | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail http://localhost:8181/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
               echo "Shopping Store UP!"
               exit 0
             fi
@@ -98,12 +121,29 @@ jobs:
           docker compose -f compose.yaml logs shopping-store
           exit 1
 
+      # 9.1) Проверяем регистрацию Shopping Store в Eureka
+      - name: Wait for Shopping Store in Eureka
+        run: |
+          EUREKA_URL="http://localhost:8761/eureka/apps/SHOPPING-STORE"
+          echo "Проверяем регистрацию Shopping Store в Eureka: $EUREKA_URL"
+          for i in {1..20}; do
+            if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Store присутствует в Eureka!"
+              exit 0
+            fi
+            echo "Shopping Store не появился в Eureka, спим 5с..."
+            sleep 5
+          done
+          echo "Shopping Store не зарегистрировался в Eureka за 20 попыток!"
+          exit 1
+
       # 10) Ждём Warehouse (8182)
       - name: Wait for Warehouse
         run: |
           echo "Ожидание http://localhost:8182/actuator/health"
           for i in {1..20}; do
-            if curl --silent --fail http://localhost:8182/actuator/health | grep -q "\"status\":\"UP\""; then
+            if curl --silent --fail http://localhost:8182/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
               echo "Warehouse UP!"
               exit 0
             fi
@@ -114,13 +154,35 @@ jobs:
           docker compose -f compose.yaml logs warehouse
           exit 1
 
+      # 10.1) Проверяем регистрацию Warehouse в Eureka
+      - name: Wait for Warehouse in Eureka
+        run: |
+          EUREKA_URL="http://localhost:8761/eureka/apps/WAREHOUSE"
+          echo "Проверяем регистрацию Warehouse в Eureka: $EUREKA_URL"
+          for i in {1..20}; do
+            if curl --silent --fail "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+              echo "Warehouse присутствует в Eureka!"
+              exit 0
+            fi
+            echo "Warehouse не появился в Eureka, спим 5с..."
+            sleep 5
+          done
+          echo "Warehouse не зарегистрировался в Eureka за 20 попыток!"
+          exit 1
+
+      # >>> ДОПОЛНИТЕЛЬНАЯ ПАУЗА (если нужно)
+      - name: Extra pause (2 minutes)
+        run: |
+          echo "Ожидаем дополнительно 2 минуты, чтобы сервисы точно прогрелись..."
+          sleep 120
+
       # 11) Установка Node.js
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: "16"
 
-      # 12) Установка Newman (Postman CLI)
+      # 12) Установка Newman
       - name: Install Newman
         run: npm install -g newman
 
@@ -128,9 +190,7 @@ jobs:
       - name: Run Postman tests
         run: |
           newman run ./postman/commerce.json --reporters cli
-          # Если нужна среда:
-          # newman run ./postman/commerce.json \
-          #   --environment ./postman/env.json --reporters cli
+          # Если нужна среда: --environment ./postman/env.json
 
       # 14) Остановка контейнеров (выполняется всегда)
       - name: Stop Docker containers
