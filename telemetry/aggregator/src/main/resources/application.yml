@@ -1,45 +1,44 @@
-server:
-  port: 0  # Случайный свободный порт
-
 spring:
   application:
-    name: aggregator  # Имя сервиса для Config/Eureka Server.
-      # По умолчанию Config Server вернёт aggregator.yml для профиля default.
-      # При запросе http://localhost:8888/aggregator/default отдаст aggregator.yml.
-      # Если обратиться к http://localhost:8888/aggregator/test,
-    # попытается вернуть aggregator-test.yml + подмешать aggregator.yml.
-
+    name: ${SPRING_APPLICATION_NAME:aggregator}
   config:
-    # Подключение к Config Server через псевдосхему "configserver:".
-    # Если CONFIG_SERVER_URL не задана, используется http://localhost:8888.
-    # Пример:
-    #  - default профиль: http://localhost:8888/aggregator/default
-    #  - test профиль:    http://localhost:8888/aggregator/test
-#    import: configserver:${CONFIG_SERVER_URL:http://localhost:8888}
-    import: "configserver:"  # Используем discovery-first подход - адрес Config Server будет получен из Eureka
-
+    import: "configserver:"
   cloud:
     config:
       discovery:
-        enabled: true  # Включаем поиск Config Server через Eureka
-        service-id: config-server  # Имя Config Server в Eureka
-      # Если конфиг не загружен, приложение сразу падает (fail-fast).
-      fail-fast: true
-
-      # Настройка повторных попыток запроса к Config Server:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
       retry:
-        max-attempts: 5       # Кол-во попыток подключения
-        initial-interval: 2000 # Пауза (мс) перед первой повторной попыткой
-        max-interval: 10000    # Максимальный интервал пауз при экспоненциальном росте
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
+    loadbalancer:
+      cache:
+        enabled: false
+    service-registry:
+      auto-registration:
+        enabled: true
+        fail-fast: true
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/  # URL Eureka Server
-    register-with-eureka: true  # Включаем регистрацию сервиса в Eureka
-    fetch-registry: true        # Включаем получение реестра сервисов
-
+      defaultZone: ${EUREKA_URL:http://discovery-server:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
   instance:
-    prefer-ip-address: true     # Регистрировать сервис с IP-адресом, а не с hostname
-    lease-renewal-interval-in-seconds: 10  # Интервал обновления регистрации
-    lease-expiration-duration-in-seconds: 30  # Таймаут недоступности сервиса
+    hostname: ${spring.application.name}
+    instance-id: ${spring.application.name}:${random.uuid}
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  health:
+    probes:
+      enabled: true

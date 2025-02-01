@@ -1,8 +1,196 @@
-name: ShareIt API Tests
+name: Postman Tests
 
 on:
+  push:
+    branches: [ "main" ]
   pull_request:
+    branches: [ "main" ]
 
 jobs:
-  build:
-    uses: yandex-praktikum/plus-smart-home-tech/.github/workflows/api-tests.yml@ci
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) Клонировать репозиторий
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # 2) Настройка JDK 21 (Amazon Corretto)
+      - name: Set up Amazon Corretto 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: corretto
+          java-version: "21"
+          cache: maven
+
+      # 3) Собрать проект (без тестов)
+      - name: Build with Maven
+        run: mvn clean package -DskipTests
+
+      # 4) Собрать Docker-образы
+      - name: Build Docker images
+        run: docker compose -f compose.yaml build
+
+      # 5) Запустить контейнеры
+      - name: Start Docker containers
+        run: docker compose -f compose.yaml up -d
+
+      # 6) Ждём Config Server (порт 8888)
+      - name: Wait for Config Server
+        run: |
+          echo "Ожидание http://localhost:8888/actuator/health"
+          for i in {1..10}; do
+            if curl --silent --fail http://localhost:8888/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
+              echo "Config Server UP!"
+              exit 0
+            fi
+            echo "Config Server пока не готов, спим 10с..."
+            sleep 10
+          done
+          echo "Config Server не ответил за 10 попыток!"
+          exit 1
+
+      # 7) Ждём Eureka (порт 8761)
+      - name: Wait for Eureka
+        run: |
+          echo "Ожидание http://localhost:8761/actuator/health"
+          for i in {1..20}; do
+            if curl --silent --fail http://localhost:8761/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
+              echo "Eureka UP!"
+              exit 0
+            fi
+            echo "Eureka пока не готов, спим 10с..."
+            sleep 10
+          done
+          echo "Eureka не ответил за 20 попыток!"
+          exit 1
+
+      # 8) Ждём Shopping Cart (порт 8180)
+      - name: Wait for Shopping Cart
+        run: |
+          echo "Ожидание http://localhost:8180/actuator/health"
+          for i in {1..20}; do
+            if curl --silent --fail http://localhost:8180/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Cart UP!"
+              exit 0
+            fi
+            echo "Shopping Cart пока не готов, спим 10с..."
+            sleep 10
+          done
+          echo "Shopping Cart не ответил за 20 попыток!"
+          docker compose -f compose.yaml logs shopping-cart
+          exit 1
+
+      # 8.1) Проверяем регистрацию shopping-cart в Eureka
+      - name: Wait for Shopping Cart in Eureka
+        run: |
+          EUREKA_URL="http://localhost:8761/eureka/apps/shopping-cart"
+          echo "Проверяем регистрацию shopping-cart в Eureka: $EUREKA_URL"
+          for i in {1..20}; do
+            if curl --silent --fail -s -H "Accept: application/json" "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Cart присутствует в Eureka!"
+              exit 0
+            fi
+            echo "Shopping Cart не появился в Eureka, спим 10с..."
+            sleep 10
+          done
+          echo "Shopping Cart не зарегистрировался в Eureka за 20 попыток!"
+          exit 1
+
+      # 9) Ждём Shopping Store (порт 8181)
+      - name: Wait for Shopping Store
+        run: |
+          echo "Ожидание http://localhost:8181/actuator/health"
+          for i in {1..20}; do
+            if curl --silent --fail http://localhost:8181/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Store UP!"
+              exit 0
+            fi
+            echo "Shopping Store пока не готов, спим 10с..."
+            sleep 10
+          done
+          echo "Shopping Store не ответил за 20 попыток!"
+          docker compose -f compose.yaml logs shopping-store
+          exit 1
+
+      # 9.1) Проверяем регистрацию shopping-store в Eureka
+      - name: Wait for Shopping Store in Eureka
+        run: |
+          EUREKA_URL="http://localhost:8761/eureka/apps/shopping-store"
+          echo "Проверяем регистрацию shopping-store в Eureka: $EUREKA_URL"
+          for i in {1..20}; do
+            if curl --silent --fail -s -H "Accept: application/json" "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+              echo "Shopping Store присутствует в Eureka!"
+              exit 0
+            fi
+            echo "Shopping Store не появился в Eureka, спим 10с..."
+            sleep 10
+          done
+          echo "Shopping Store не зарегистрировался в Eureka за 20 попыток!"
+          exit 1
+
+      # 10) Ждём Warehouse (порт 8182)
+      - name: Wait for Warehouse
+        run: |
+          echo "Ожидание http://localhost:8182/actuator/health"
+          for i in {1..20}; do
+            if curl --silent --fail http://localhost:8182/actuator/health \
+               | grep -q "\"status\":\"UP\""; then
+              echo "Warehouse UP!"
+              exit 0
+            fi
+            echo "Warehouse пока не готов, спим 10с..."
+            sleep 10
+          done
+          echo "Warehouse не ответил за 20 попыток!"
+          docker compose -f compose.yaml logs warehouse
+          exit 1
+
+      # 10.1) Проверяем регистрацию warehouse в Eureka
+      - name: Wait for Warehouse in Eureka
+        run: |
+          EUREKA_URL="http://localhost:8761/eureka/apps/warehouse"
+          echo "Проверяем регистрацию warehouse в Eureka: $EUREKA_URL"
+          for i in {1..20}; do
+            if curl --silent --fail -s -H "Accept: application/json" "$EUREKA_URL" | grep -q "\"status\":\"UP\""; then
+              echo "Warehouse присутствует в Eureka!"
+              exit 0
+            fi
+            echo "Warehouse не появился в Eureka, спим 10с..."
+            sleep 10
+          done
+          echo "Warehouse не зарегистрировался в Eureka за 20 попыток!"
+          exit 1
+
+      # 11.1) Дополнительная задержка для «прогрева»
+      # Нужна, чтобы все сервисы Feign точно увидели друг друга
+      # и не было ошибок вида "No servers available for service: warehouse"
+      - name: Extra wait before tests
+        run: |
+          echo "Ждём дополнительные 200с для прогрева Feign/Eureka."
+          sleep 200
+
+      # 12) Установка Node.js
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16"
+
+      # 13) Установка Newman
+      - name: Install Newman
+        run: npm install -g newman
+
+      # 14) Запуск Postman-тестов
+      - name: Run Postman tests
+        run: |
+          newman run ./postman/commerce.json --reporters cli
+          # newman run ./postman/commerce.json --environment ./postman/env.json --reporters cli
+
+      # 15) Остановка контейнеров (выполняется всегда)
+      - name: Stop Docker containers
+        if: always()
+        run: docker compose -f compose.yaml down

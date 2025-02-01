@@ -1,35 +1,372 @@
+################################################################################
+# Общие настройки и переменные
+################################################################################
+
+# Общие переменные для сервисов
+x-common-variables: &common-variables
+  CONFIG_RETRY_ATTEMPTS: ${CONFIG_RETRY_ATTEMPTS:-5}
+  CONFIG_RETRY_INITIAL: ${CONFIG_RETRY_INITIAL:-2000}
+  CONFIG_RETRY_MAX: ${CONFIG_RETRY_MAX:-10000}
+  EUREKA_URL: http://discovery-server:8761/eureka/
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  FEIGN_CONNECT_TIMEOUT: ${FEIGN_CONNECT_TIMEOUT:-5000}
+  FEIGN_READ_TIMEOUT: ${FEIGN_READ_TIMEOUT:-5000}
+  FEIGN_LOGGER_LEVEL: ${FEIGN_LOGGER_LEVEL:-basic}
+
+# Общие переменные для Kafka
+x-kafka-common: &kafka-common
+  KAFKA_BOOTSTRAP: kafka:9092
+  KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+
 services:
+  ##############################################################################
+  # Сервис PostgreSQL
+  ##############################################################################
+  postgres-service:
+    image: postgres:17.2
+    container_name: ${POSTGRES_HOST}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT:-5432}:${POSTGRES_PORT:-5432}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command:
+      - "postgres"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "shared_buffers=256MB"
+
+  ##############################################################################
+  # Сервис Kafka
+  ##############################################################################
   kafka:
-    image: confluentinc/confluent-local:7.4.3
+    image: confluentinc/cp-kafka:${KAFKA_VERSION:-7.8.0}
     hostname: kafka
     container_name: kafka
     ports:
-      - "9092:9092" # for client connections
-      - "9101:9101" # JMX
-    restart: unless-stopped
+      - "${KAFKA_PORT:-9092}:9092"
+      - "${KAFKA_CONTROLLER_PORT:-29093}:29093"
     environment:
+      # Базовые настройки
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
       KAFKA_NODE_ID: 1
-      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
-      KAFKA_JMX_PORT: 9101
-      KAFKA_JMX_HOSTNAME: localhost
-      KAFKA_PROCESS_ROLES: 'broker,controller'
-      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
-      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
-      CLUSTER_ID: 'K0EA9p0yEe6MkAAAAkKsEg'
+      KAFKA_PROCESS_ROLES: "broker,controller"
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+      CLUSTER_ID: ${KAFKA_CLUSTER_ID:-TestCluster}
+      # Настройки слушателей
+      KAFKA_LISTENERS: "PLAINTEXT://kafka:9092,CONTROLLER://kafka:29093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT"
+      KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
+      KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    networks:
+      - app-network
+    healthcheck:
+      test: kafka-topics --bootstrap-server kafka:9092 --list
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
-  kafka-init-topics:
-    image: confluentinc/confluent-local:7.4.3
-    container_name: kafka-init-topics
+  ##############################################################################
+  # Сервис инициализации топиков (kafka-init)
+  ##############################################################################
+  kafka-init:
+    image: confluentinc/cp-kafka:${KAFKA_VERSION:-7.8.0}
     depends_on:
-      - kafka
-    command: "bash -c \
-                'kafka-topics --create --topic telemetry.sensors.v1 \
-                             --partitions 1 --replication-factor 1 --if-not-exists \
-                             --bootstrap-server kafka:29092 && \
-                kafka-topics --create --topic telemetry.snapshots.v1 \
-                             --partitions 1 --replication-factor 1 --if-not-exists \
-                             --bootstrap-server kafka:29092 && \
-                kafka-topics --create --topic telemetry.hubs.v1 \
-                             --partitions 1 --replication-factor 1 --if-not-exists \
-                             --bootstrap-server kafka:29092'"
-    init: true
+      kafka:
+        condition: service_healthy
+    command: >
+      bash -c '
+        echo "Waiting for Kafka to be ready..."
+        cub kafka-ready -b kafka:9092 1 30
+        echo "Creating topics..."
+        kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --topic telemetry.sensors.v1 --partitions 1 --replication-factor 1
+        kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --topic telemetry.snapshots.v1 --partitions 1 --replication-factor 1
+        kafka-topics --create --if-not-exists --bootstrap-server kafka:9092 --topic telemetry.hubs.v1 --partitions 1 --replication-factor 1
+        echo "Topics created."
+      '
+    networks:
+      - app-network
+
+  ##############################################################################
+  # Schema Registry
+  ##############################################################################
+  schema-registry:
+    image: confluentinc/cp-schema-registry:${SCHEMA_REGISTRY_VERSION:-7.8.0}
+    container_name: schema-registry
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8081:8081"
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka:9092
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_DEBUG: "true"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC: "_schemas"
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/subjects"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  ##############################################################################
+  # Discovery Server
+  ##############################################################################
+  discovery-server:
+    build: infra/discovery-server
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_APPLICATION_NAME: discovery-server
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Config Server
+  ##############################################################################
+  config-server:
+    build: infra/config-server
+    container_name: config-server
+    depends_on:
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_APPLICATION_NAME: config-server
+      SPRING_PROFILES_ACTIVE: native
+      EUREKA_URL: http://discovery-server:8761/eureka/
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Analyzer
+  ##############################################################################
+  analyzer:
+    build: telemetry/analyzer
+    container_name: analyzer
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables, *kafka-common]
+      SPRING_APPLICATION_NAME: analyzer
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/analyzer
+      SPRING_DATASOURCE_USERNAME: ${ANALYZER_DB_USER:-analyzer_user}
+      SPRING_DATASOURCE_PASSWORD: ${ANALYZER_DB_PASSWORD:-analyzer_pass}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: analyzer_schema
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Shopping Cart
+  ##############################################################################
+  shopping-cart:
+    build: commerce/shopping-cart
+    container_name: shopping-cart
+    ports:
+      - "${SHOPPING_CART_PORT:-8180}:${SHOPPING_CART_PORT:-8180}"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables]
+      SPRING_APPLICATION_NAME: shopping-cart
+      API_VERSION: ${CART_API_VERSION:-/api/v1}
+      API_SHOPPING_CART_PATH: ${CART_ENDPOINT:-/shopping-cart}
+      API_CHANGE_QUANTITY_PATH: ${CART_QUANTITY_ENDPOINT:-/change-quantity}
+      API_REMOVE_PATH: ${CART_REMOVE_ENDPOINT:-/remove}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/shopping_cart
+      SPRING_DATASOURCE_USERNAME: ${SHOPPING_CART_DB_USER:-cart_user}
+      SPRING_DATASOURCE_PASSWORD: ${SHOPPING_CART_DB_PASSWORD:-cart_pass}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: cart_schema
+      SERVER_PORT: "${SHOPPING_CART_PORT:-8180}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${SHOPPING_CART_PORT:-8180}/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Shopping Store
+  ##############################################################################
+  shopping-store:
+    build: commerce/shopping-store
+    container_name: shopping-store
+    ports:
+      - "${SHOPPING_STORE_PORT:-8181}:${SHOPPING_STORE_PORT:-8181}"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables]
+      SPRING_APPLICATION_NAME: shopping-store
+      API_VERSION: ${STORE_API_VERSION:-/api/v1}
+      # Настройки путей store
+      API_STORE_PATH: ${STORE_ENDPOINT:-/shopping-store}
+      API_STORE_QUANTITY_PATH: ${STORE_QUANTITY_ENDPOINT:-/quantityState}
+      API_STORE_REMOVE_PATH: ${STORE_REMOVE_ENDPOINT:-/removeProductFromStore}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/shopping_store
+      SPRING_DATASOURCE_USERNAME: ${SHOPPING_STORE_DB_USER:-store_user}
+      SPRING_DATASOURCE_PASSWORD: ${SHOPPING_STORE_DB_PASSWORD:-store_pass}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: store_schema
+      SERVER_PORT: "${SHOPPING_STORE_PORT:-8181}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${SHOPPING_STORE_PORT:-8181}/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Warehouse
+  ##############################################################################
+  warehouse:
+    build: commerce/warehouse
+    container_name: warehouse
+    ports:
+      - "${WAREHOUSE_PORT:-8182}:${WAREHOUSE_PORT:-8182}"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables]
+      API_VERSION: ${WH_API_VERSION:-/api/v1}
+      API_WAREHOUSE_PATH: ${WH_MAIN_PATH:-/warehouse}
+      API_WAREHOUSE_ADD_PATH: ${WH_ADD_PATH:-/add}
+      API_WAREHOUSE_CHECK_PATH: ${WH_CHECK_PATH:-/check}
+      API_WAREHOUSE_ADDRESS_PATH: ${WH_ADDRESS_PATH:-/address}
+      SPRING_APPLICATION_NAME: warehouse
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/warehouse
+      SPRING_DATASOURCE_USERNAME: ${WAREHOUSE_DB_USER:-warehouse_user}
+      SPRING_DATASOURCE_PASSWORD: ${WAREHOUSE_DB_PASSWORD:-warehouse_pass}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: warehouse_schema
+      SERVER_PORT: "${WAREHOUSE_PORT:-8182}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${WAREHOUSE_PORT:-8182}/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Collector
+  ##############################################################################
+  collector:
+    build: telemetry/collector
+    container_name: collector
+    depends_on:
+      config-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables, *kafka-common]
+      SPRING_APPLICATION_NAME: collector
+      GRPC_SERVER_PORT: ${GRPC_SERVER_PORT:-9090}
+    ports:
+      - "${GRPC_SERVER_PORT:-9090}:${GRPC_SERVER_PORT:-9090}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Aggregator
+  ##############################################################################
+  aggregator:
+    build: telemetry/aggregator
+    container_name: aggregator
+    depends_on:
+      config-server:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      schema-registry:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables, *kafka-common]
+      SPRING_APPLICATION_NAME: aggregator
+      KAFKA_CONSUMER_GROUP: aggregator-group
+      SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: org.apache.kafka.common.serialization.StringDeserializer
+      SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      SPRING_KAFKA_PRODUCER_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER: io.confluent.kafka.serializers.KafkaAvroSerializer
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+################################################################################
+# Volumes и Networks
+################################################################################
+
+volumes:
+  postgres-data:
+  kafka-data:
+
+networks:
+  app-network:
+    driver: bridge

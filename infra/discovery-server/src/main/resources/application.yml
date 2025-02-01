@@ -1,11 +1,28 @@
 server:
-  port: 8761  # Порт, на котором будет запущен Eureka Server
+  port: ${EUREKA_PORT:8761}  # Порт Eureka Server из переменной окружения или 8761 по умолчанию
 
 eureka:
   instance:
-    hostname: localhost  # Имя хоста для Eureka Server (локальная машина)
+    hostname: ${EUREKA_HOST:discovery-server}  # Имя хоста из переменной или имя контейнера
   client:
     register-with-eureka: false  # Eureka Server не регистрируется сам в себе
-    fetch-registry: false  # Eureka Server не загружает реестр сервисов, он сам является реестром
+    fetch-registry: false        # Eureka Server не загружает реестр сервисов
     service-url:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/  # URL, по которому Eureka доступен другим сервисам
+      defaultZone: http://${EUREKA_HOST:discovery-server}:${EUREKA_PORT:8761}/eureka/  # URL для других сервисов
+
+# docker-compose.yml
+discovery-server:
+  build: infra/discovery-server
+  container_name: discovery-server
+  ports:
+    - "${EUREKA_PORT:-8761}:8761"  # Порт из переменной или 8761
+  environment:
+    EUREKA_PORT: ${EUREKA_PORT:-8761}
+    EUREKA_HOST: ${EUREKA_HOST:-discovery-server}
+  networks:
+    - app-network  # Сеть для взаимодействия сервисов
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:${EUREKA_PORT:-8761}/actuator/health"]
+    interval: 20s
+    timeout: 5s
+    retries: 5

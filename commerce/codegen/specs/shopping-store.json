@@ -1,0 +1,340 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://192.168.1.96:60458",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Витрина онлайн-магазина",
+      "description": "API для обеспечения работы витрины онлайн магазина"
+    }
+  ],
+  "paths": {
+    "/api/v1/shopping-store": {
+      "get": {
+        "tags": [
+          "Витрина онлайн-магазина"
+        ],
+        "description": "Получение списка товаров по типу в упрощённом \"пагинированном\" виде",
+        "operationId": "getProducts",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "common-schemas.json#/components/schemas/ProductCategory"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Поле для сортировки, например: productName",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Очередная \"страница\" товаров в соответствии с типом",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/PageOfProductDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Витрина онлайн-магазина"
+        ],
+        "description": "Создание нового товара в ассортименте",
+        "operationId": "createNewProduct",
+        "requestBody": {
+          "description": "Описательная часть вновь добавляемого товара в систему",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ProductDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Товар создан с присвоением соответствующего ID",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created – товар добавлен",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Витрина онлайн-магазина"
+        ],
+        "description": "Обновление товара в ассортименте, например уточнение описания, характеристик и т.д.",
+        "operationId": "updateProduct",
+        "requestBody": {
+          "description": "Описательная часть изменяемого товара в системе",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ProductDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Товар обновлён, возвращается информация из БД",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created – товар обновлён, возвращается новая инфо",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shopping-store/{productId}": {
+      "get": {
+        "tags": [
+          "Витрина онлайн-магазина"
+        ],
+        "description": "Получить сведения по товару из БД.",
+        "operationId": "getProduct",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "Идентификатор товара в БД.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Актуальный товар со всеми сведениями из БД",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shopping-store/removeProductFromStore": {
+      "post": {
+        "tags": [
+          "Витрина онлайн-магазина"
+        ],
+        "description": "Удалить товар из ассортимента магазина (перевести в DEACTIVATE). Функция для менеджерского состава.",
+        "operationId": "removeProductFromStore",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "Идентификатор товара в БД на удаление из ассортимента.",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "Идентификатор товара в БД (UUID) на удаление из ассортимента. Если productId не указан в query.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "description": "Идентификатор товара",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Признак успеха операции: true если успешно, false иначе. После этого GET отдаст productState=DEACTIVATE",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "203": {
+            "description": "Non-Authoritative Information – также может указывать, что товар переведён в DEACTIVATE",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/shopping-store/quantityState": {
+      "post": {
+        "tags": [
+          "Витрина онлайн-магазина"
+        ],
+        "description": "Установка статуса по товару (API вызывается со стороны склада). Принимает только query-параметры.",
+        "operationId": "setProductQuantityState",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "UUID идентификатор товара",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "quantityState",
+            "in": "query",
+            "description": "Статус остатка товара (ENDED, FEW, ENOUGH, MANY)",
+            "required": true,
+            "schema": {
+              "$ref": "common-schemas.json#/components/schemas/QuantityState"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Статус успешно обновлён",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created – статус успешно обновлён",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

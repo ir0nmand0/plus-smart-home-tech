@@ -21,7 +21,7 @@
     <modules>
         <!-- Telemetry модуль: отвечает за сбор и обработку телеметрии -->
         <module>telemetry</module>
-        <!-- Infra модуль: предоставляет инфраструктурные компоненты (например, базы данных, брокеры сообщений) -->
+        <!-- Infra модуль: педоставляет инфраструктурные компоненты (например, базы данных, брокеры сообщений) -->
         <module>infra</module>
         <!-- Commerce модуль: отвечает за бизнес-логику электронной коммерции -->
         <module>commerce</module>
@@ -42,9 +42,11 @@
         <protobuf.version>3.23.4</protobuf.version> <!-- Google Protocol Buffers для сериализации данных -->
         <grpc.version>1.63.0</grpc.version> <!-- Библиотеки gRPC -->
         <slf4j.version>1.7.36</slf4j.version> <!-- Логирование через SLF4J -->
+        <logback.version>1.5.16</logback.version>
         <lombok.version>1.18.32</lombok.version> <!-- Lombok: уменьшение шаблонного кода -->
         <spring-cloud-starter-netflix-eureka.version>4.2.0</spring-cloud-starter-netflix-eureka.version>
         <spring-boot-starter-actuator.version>3.4.1</spring-boot-starter-actuator.version>
+        <confluent.version>7.8.0</confluent.version>
 
         <!-- Версии Maven-плагинов -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version> <!-- Компиляция Java -->
@@ -151,6 +153,12 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-simple</artifactId>
                 <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

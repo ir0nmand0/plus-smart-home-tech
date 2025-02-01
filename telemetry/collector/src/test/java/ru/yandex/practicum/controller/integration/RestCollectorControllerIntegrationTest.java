@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecord;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,10 +12,11 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.CollectorApp;
 import ru.yandex.practicum.config.AppConfig;
@@ -42,7 +44,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * <p>
  * Используем интеграционный тест, чтобы загрузить полный контекст Spring и протестировать взаимодействие между компонентами.
  */
+
+@Disabled("требуется eureka, либо отключить в CollectorApp.class @EnableDiscoveryClient")
 @SpringBootTest(classes = CollectorApp.class) // Запускает полный контекст Spring Boot для тестирования
+@ActiveProfiles("test")
+@TestPropertySource(locations = "classpath:application-test.yml")
 @AutoConfigureMockMvc // Автоматически настраивает MockMvc для имитации HTTP-запросов
 @EnableConfigurationProperties // Включает поддержку @ConfigurationProperties
 @TestInstance(TestInstance.Lifecycle.PER_CLASS) // Использует один экземпляр тестового класса для всех тестов

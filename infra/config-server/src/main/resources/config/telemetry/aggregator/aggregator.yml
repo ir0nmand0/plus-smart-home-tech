@@ -1,25 +1,49 @@
+server:
+  port: ${SERVER_PORT:8080}
+
 spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:aggregator}
+  cloud:
+    config:
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
+      retry:
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
     consumer:
-      group-id: aggregator-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      group-id: ${KAFKA_CONSUMER_GROUP:aggregator-group}
+      key-deserializer: ${SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER:-org.apache.kafka.common.serialization.StringDeserializer}
+      value-deserializer: {$SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER:-io.confluent.kafka.serializers.KafkaAvroDeserializer}
       properties:
-        schema.registry.url: http://localhost:8081
-        specific.avro.reader: true
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL:http://localhost:8081}
+        specific.avro.reader: ${KAFKA_AVRO_READER:true}
     producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+      key-serializer: ${SPRING_KAFKA_PRODUCER_KEY_SERIALIZER:-org.apache.kafka.common.serialization.StringSerializer}
+      value-serializer: ${SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER:-io.confluent.kafka.serializers.KafkaAvroSerializer}
       properties:
-        schema.registry.url: http://localhost:8081
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL:http://localhost:8081}
     topics:
       telemetry:
-        sensors: telemetry.sensors.v1
-        snapshots: telemetry.snapshots.v1
+        sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
+        snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
 
-application:
-  name: aggregator
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
+
 logging:
   level:
-    root: INFO
+    root: ${LOG_LEVEL:INFO}
