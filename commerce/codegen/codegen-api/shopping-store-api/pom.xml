@@ -109,6 +109,7 @@
                                 <generateModels>true</generateModels>
                                 <useJakartaEe>true</useJakartaEe>
                                 <library>spring-boot</library>
+                                <useResponseEntity>false</useResponseEntity>
                                 <skipDefaultInterface>true</skipDefaultInterface>
 
                                 <!-- Активация Bean Validation -->

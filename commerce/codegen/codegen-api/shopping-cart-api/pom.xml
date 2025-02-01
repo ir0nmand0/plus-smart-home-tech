@@ -109,6 +109,7 @@
                                 <java8>true</java8>
                                 <dateLibrary>${openapi.generator.java.dateLibrary}</dateLibrary>
                                 <library>spring-boot</library>
+                                <useResponseEntity>false</useResponseEntity>
                                 <serializationLibrary>jackson</serializationLibrary>
 
                                 <!-- Валидация в моделях -->

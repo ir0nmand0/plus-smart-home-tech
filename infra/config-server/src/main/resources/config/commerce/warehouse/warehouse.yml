@@ -1,3 +1,22 @@
+# Эти свойства задают значения по умолчанию для версии API и эндпоинтов сервиса склада.
+# Благодаря механизму Spring Boot (relaxed binding) их можно переопределить через переменные окружения.
+# Например, чтобы переопределить свойство "api.version", нужно задать переменную "API_VERSION",
+# для "api.warehouse.path" - переменную "API_WAREHOUSE_PATH" и т.д.
+
+api:
+  # Базовая версия API
+  version: /api/v1
+
+  warehouse:
+    # Основной путь склада
+    path: /warehouse
+    # Путь для добавления товаров
+    add-path: /add
+    # Путь для проверки наличия
+    check-path: /check
+    # Путь для работы с адресами
+    address-path: /address
+
 server:
   port: ${SERVER_PORT:0}
 

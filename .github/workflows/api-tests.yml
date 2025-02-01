@@ -171,7 +171,7 @@ jobs:
       # и не было ошибок вида "No servers available for service: warehouse"
       - name: Extra wait before tests
         run: |
-          echo "Ждём дополнительные 60с для прогрева Feign/Eureka."
+          echo "Ждём дополнительные 200с для прогрева Feign/Eureka."
           sleep 200
 
       # 12) Установка Node.js

@@ -99,12 +99,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductAlreadyExistsInWarehouseException createProductExistsException() {
-        final ProductAlreadyExistsInWarehouseException warehouseException = new ProductAlreadyExistsInWarehouseException(
-                new ru.yandex.practicum.common.model.SpecifiedProductAlreadyInWarehouseExceptionDto()
-                        .message(PRODUCT_EXISTS_ERROR)
-                        .status(SpecifiedProductAlreadyInWarehouseExceptionDto.StatusEnum.BAD_REQUEST)
-        );
-        return warehouseException;
+        return new ProductAlreadyExistsInWarehouseException(PRODUCT_EXISTS_ERROR);
     }
 
     private void handleWarehouseError(Product product) {

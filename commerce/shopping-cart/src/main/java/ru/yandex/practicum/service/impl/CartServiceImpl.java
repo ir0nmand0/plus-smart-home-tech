@@ -61,7 +61,7 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     @Transactional
-    public ShoppingCartDto getCart(String username) {
+    public ShoppingCartDto getOrCreateCartDto(String username) {
         log.info(GETTING_CART, username);
         validateUsername(username);
 

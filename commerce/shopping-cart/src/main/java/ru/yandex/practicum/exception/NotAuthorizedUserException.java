@@ -4,17 +4,16 @@ import lombok.Getter;
 import ru.yandex.practicum.common.model.NotAuthorizedUserExceptionDto;
 
 /**
- * Исключение при отсутствии авторизации пользователя
+ * Исключение при отсутствии авторизации пользователя.
  */
 @Getter
 public class NotAuthorizedUserException extends RuntimeException {
     private final NotAuthorizedUserExceptionDto exceptionDto;
-    private static final String message = "User authentication required";
+    private static final String DEFAULT_MESSAGE = "User authentication required";
 
     public NotAuthorizedUserException() {
-        super(message);
+        super(DEFAULT_MESSAGE);
         this.exceptionDto = new NotAuthorizedUserExceptionDto()
-                .message(message)
-                .status(NotAuthorizedUserExceptionDto.StatusEnum.UNAUTHORIZED);
+                .message(DEFAULT_MESSAGE);
     }
 }

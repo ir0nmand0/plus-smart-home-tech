@@ -49,19 +49,17 @@ CREATE TABLE IF NOT EXISTS analyzer_schema.scenario_actions (
 
 -- Функция проверки соответствия хаба для связываемых сценария и сенсора
 CREATE OR REPLACE FUNCTION analyzer_schema.check_hub_id()
-RETURNS TRIGGER AS
-$$
+RETURNS TRIGGER
+LANGUAGE plpgsql
+AS '
 BEGIN
-    -- Проверяем, что hub_id у сценария и сенсора совпадают
     IF (SELECT hub_id FROM analyzer_schema.scenarios WHERE id = NEW.scenario_id)
        != (SELECT hub_id FROM analyzer_schema.sensors WHERE id = NEW.sensor_id) THEN
-        RAISE EXCEPTION 'Hub IDs do not match for scenario_id % and sensor_id %',
-                        NEW.scenario_id, NEW.sensor_id;
-END IF;
-RETURN NEW;
+        RAISE EXCEPTION ''Hub IDs do not match for scenario_id % and sensor_id %'', NEW.scenario_id, NEW.sensor_id;
+    END IF;
+    RETURN NEW;
 END;
-$$
-LANGUAGE plpgsql;
+';
 
 -- Триггер для проверки корректности связывания сценария и сенсора через условие
 CREATE OR REPLACE TRIGGER tr_bi_scenario_conditions_hub_id_check

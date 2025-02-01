@@ -1,3 +1,13 @@
+# Эти свойства задают значения по умолчанию для версии API и эндпоинтов сервиса.
+# Благодаря механизму Spring Boot (relaxed binding) их можно переопределить через переменные окружения.
+# Например, чтобы переопределить свойство "api.version", нужно задать переменную "API_VERSION",
+# а для "api.shopping-cart-path" — переменную "API_SHOPPING_CART_PATH", и т.д.
+api:
+  version: /api/v1
+  shopping-cart-path: /shopping-cart
+  change-quantity-path: /change-quantity
+  remove-path: /remove
+
 server:
   # Порт; по умолчанию 0, чтобы занять любой доступный.
   # Можно переопределить переменной SERVER_PORT при запуске.

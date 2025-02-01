@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.common.model.AddProductToWarehouseRequest;
@@ -19,7 +18,7 @@ import ru.yandex.practicum.warehouse.api.ApiApi;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/warehouse")
+@RequestMapping("${api.version}${api.warehouse.path}")
 public class WarehouseController implements ApiApi {
 
     private final WarehouseService warehouseService;
@@ -29,8 +28,9 @@ public class WarehouseController implements ApiApi {
      * (addProductToWarehouse)
      */
     @Override
-    @PostMapping("/add")
-    public ResponseEntity<Void> addProductToWarehouse(
+    @PostMapping("${api.warehouse.add-path}")
+    @ResponseStatus(HttpStatus.OK)
+    public void addProductToWarehouse(
             @Valid @RequestBody AddProductToWarehouseRequest addProductToWarehouseRequest
     ) {
         log.info("REST запрос на добавление товара на склад: {}", addProductToWarehouseRequest);
@@ -39,7 +39,6 @@ public class WarehouseController implements ApiApi {
                 addProductToWarehouseRequest.getQuantity()
         );
         // По спецификации можно вернуть 200 или 201. Выберем 200 как успешное добавление.
-        return ResponseEntity.ok().build();
     }
 
     /**
@@ -47,13 +46,13 @@ public class WarehouseController implements ApiApi {
      * (checkProductQuantityEnoughForShoppingCart)
      */
     @Override
-    @PostMapping("/check")
-    public ResponseEntity<BookedProductsDto> checkProductQuantityEnoughForShoppingCart(
+    @PostMapping("${api.warehouse.check-path}")
+    @ResponseStatus(HttpStatus.OK)
+    public BookedProductsDto  checkProductQuantityEnoughForShoppingCart(
             @Valid @RequestBody ShoppingCartDto shoppingCartDto
     ) {
         log.info("REST запрос на проверку наличия товаров для корзины: {}", shoppingCartDto);
-        BookedProductsDto booked = warehouseService.checkAvailability(shoppingCartDto);
-        return ResponseEntity.ok(booked);
+        return warehouseService.checkAvailability(shoppingCartDto);
     }
 
     /**
@@ -61,11 +60,11 @@ public class WarehouseController implements ApiApi {
      * (getWarehouseAddress)
      */
     @Override
-    @GetMapping("/address")
-    public ResponseEntity<AddressDto> getWarehouseAddress() {
+    @GetMapping("${api.warehouse.address-path}")
+    @ResponseStatus(HttpStatus.OK)
+    public AddressDto getWarehouseAddress() {
         log.info("REST запрос на получение адреса склада");
-        AddressDto address = warehouseService.getAddress();
-        return ResponseEntity.ok(address);
+        return warehouseService.getAddress();
     }
 
     /**
@@ -74,7 +73,8 @@ public class WarehouseController implements ApiApi {
      */
     @Override
     @PutMapping
-    public ResponseEntity<Void> newProductInWarehouse(
+    @ResponseStatus(HttpStatus.CREATED)
+    public void newProductInWarehouse(
             @Valid @RequestBody NewProductInWarehouseRequest newProductInWarehouseRequest
     ) {
         log.info("REST запрос на регистрацию нового товара на складе: {}", newProductInWarehouseRequest);
@@ -84,7 +84,5 @@ public class WarehouseController implements ApiApi {
                 newProductInWarehouseRequest.getWeight(),
                 newProductInWarehouseRequest.getDimension()
         );
-        // По спецификации можно вернуть 200 или 201; выберем 201 для нового товара.
-        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

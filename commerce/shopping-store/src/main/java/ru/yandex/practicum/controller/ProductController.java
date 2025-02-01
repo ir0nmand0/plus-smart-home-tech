@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/shopping-store")
+@RequestMapping("${api.version}${api.store.path}")
 public class ProductController implements ApiApi {
 
     private final ProductService productService;
@@ -48,14 +48,14 @@ public class ProductController implements ApiApi {
      */
     @Override
     @PutMapping
-    public ResponseEntity<ProductDto> createNewProduct(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ProductDto createNewProduct(
             @Valid @RequestBody ProductDto productDto
     ) {
         log.info("Создание товара: {}", productDto);
         Product newProduct = productMapper.toEntity(productDto);
         Product saved = productService.createProduct(newProduct);
-        // Возвращаем 201 (Created)
-        return ResponseEntity.status(HttpStatus.CREATED).body(productMapper.toDto(saved));
+        return productMapper.toDto(saved);
     }
 
     /**
@@ -64,12 +64,13 @@ public class ProductController implements ApiApi {
      */
     @Override
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDto> getProduct(
+    @ResponseStatus(HttpStatus.OK)
+    public ProductDto getProduct(
             @PathVariable("productId") UUID productId
     ) {
         log.info("Получение товара по ID: {}", productId);
         Product product = productService.getProductById(productId);
-        return ResponseEntity.ok(productMapper.toDto(product));
+        return productMapper.toDto(product);
     }
 
     /**
@@ -78,7 +79,8 @@ public class ProductController implements ApiApi {
      */
     @Override
     @GetMapping
-    public ResponseEntity<PageOfProductDto> getProducts(
+    @ResponseStatus(HttpStatus.OK)
+    public PageOfProductDto getProducts(
             @NotNull @Valid @RequestParam(value = "category", required = true) ProductCategory category,
             @Valid @RequestParam(value = "page", required = false) Integer page,
             @Valid @RequestParam(value = "size", required = false) Integer size,
@@ -100,9 +102,7 @@ public class ProductController implements ApiApi {
         Page<Product> pageResult = productService.getProducts(category, pageable);
 
         // 3) Превращаем Page<Product> -> PageOfProductDto
-        PageOfProductDto dto = pageOfProductDtoMapper.toPageDto(pageResult);
-
-        return ResponseEntity.ok(dto);
+        return pageOfProductDtoMapper.toPageDto(pageResult);
     }
 
     /**
@@ -110,15 +110,15 @@ public class ProductController implements ApiApi {
      * (removeProductFromStore)
      */
     @Override
-    @PostMapping("/removeProductFromStore")
-    public ResponseEntity<Boolean> removeProductFromStore(
+    @PostMapping("${api.store.remove-path}")
+    @ResponseStatus(HttpStatus.OK)
+    public Boolean removeProductFromStore(
             @Valid @RequestBody UUID body,
             @Valid @RequestParam(value = "productId", required = false) UUID productId
     ) {
         UUID idToRemove = (productId != null) ? productId : body;
         log.info("Удаление товара с ID: {}", idToRemove);
-        boolean success = productService.deleteProduct(idToRemove);
-        return ResponseEntity.ok(success);
+        return productService.deleteProduct(idToRemove);
     }
 
     /**
@@ -126,14 +126,14 @@ public class ProductController implements ApiApi {
      * (setProductQuantityState)
      */
     @Override
-    @PostMapping("/quantityState")
-    public ResponseEntity<Boolean> setProductQuantityState(
+    @PostMapping("${api.store.quantity-path}")
+    @ResponseStatus(HttpStatus.OK)
+    public Boolean setProductQuantityState(
             @NotNull @Valid @RequestParam(value = "productId", required = true) UUID productId,
             @NotNull @Valid @RequestParam(value = "quantityState", required = true) QuantityState quantityState
     ) {
         log.info("Изменение статуса товара: productId={}, quantityState={}", productId, quantityState);
-        boolean updated = productService.updateQuantityState(productId, quantityState);
-        return ResponseEntity.ok(updated);
+        return productService.updateQuantityState(productId, quantityState);
     }
 
     /**
@@ -142,7 +142,8 @@ public class ProductController implements ApiApi {
      */
     @Override
     @PostMapping
-    public ResponseEntity<ProductDto> updateProduct(
+    @ResponseStatus(HttpStatus.OK)
+    public ProductDto updateProduct(
             @Valid @RequestBody ProductDto productDto
     ) {
         log.info("Обновление товара: {}", productDto);
@@ -155,6 +156,6 @@ public class ProductController implements ApiApi {
         Product toUpdate = productMapper.toEntity(productDto);
         Product updated = productService.updateProduct(id, toUpdate);
 
-        return ResponseEntity.ok(productMapper.toDto(updated));
+        return productMapper.toDto(updated);
     }
 }

@@ -111,6 +111,7 @@
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useJakartaEe>true</useJakartaEe>
                                 <library>spring-boot</library>
+                                <useResponseEntity>false</useResponseEntity>
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <generateApis>true</generateApis>

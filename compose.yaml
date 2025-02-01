@@ -218,6 +218,10 @@ services:
     environment:
       <<: [*common-variables]
       SPRING_APPLICATION_NAME: shopping-cart
+      API_VERSION: ${CART_API_VERSION:-/api/v1}
+      API_SHOPPING_CART_PATH: ${CART_ENDPOINT:-/shopping-cart}
+      API_CHANGE_QUANTITY_PATH: ${CART_QUANTITY_ENDPOINT:-/change-quantity}
+      API_REMOVE_PATH: ${CART_REMOVE_ENDPOINT:-/remove}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/shopping_cart
       SPRING_DATASOURCE_USERNAME: ${SHOPPING_CART_DB_USER:-cart_user}
       SPRING_DATASOURCE_PASSWORD: ${SHOPPING_CART_DB_PASSWORD:-cart_pass}
@@ -247,6 +251,11 @@ services:
     environment:
       <<: [*common-variables]
       SPRING_APPLICATION_NAME: shopping-store
+      API_VERSION: ${STORE_API_VERSION:-/api/v1}
+      # Настройки путей store
+      API_STORE_PATH: ${STORE_ENDPOINT:-/shopping-store}
+      API_STORE_QUANTITY_PATH: ${STORE_QUANTITY_ENDPOINT:-/quantityState}
+      API_STORE_REMOVE_PATH: ${STORE_REMOVE_ENDPOINT:-/removeProductFromStore}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/shopping_store
       SPRING_DATASOURCE_USERNAME: ${SHOPPING_STORE_DB_USER:-store_user}
       SPRING_DATASOURCE_PASSWORD: ${SHOPPING_STORE_DB_PASSWORD:-store_pass}
@@ -275,6 +284,11 @@ services:
         condition: service_healthy
     environment:
       <<: [*common-variables]
+      API_VERSION: ${WH_API_VERSION:-/api/v1}
+      API_WAREHOUSE_PATH: ${WH_MAIN_PATH:-/warehouse}
+      API_WAREHOUSE_ADD_PATH: ${WH_ADD_PATH:-/add}
+      API_WAREHOUSE_CHECK_PATH: ${WH_CHECK_PATH:-/check}
+      API_WAREHOUSE_ADDRESS_PATH: ${WH_ADDRESS_PATH:-/address}
       SPRING_APPLICATION_NAME: warehouse
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/warehouse
       SPRING_DATASOURCE_USERNAME: ${WAREHOUSE_DB_USER:-warehouse_user}

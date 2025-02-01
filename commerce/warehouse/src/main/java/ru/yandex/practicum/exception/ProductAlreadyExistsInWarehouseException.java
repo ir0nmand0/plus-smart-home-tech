@@ -3,18 +3,14 @@ package ru.yandex.practicum.exception;
 import lombok.Getter;
 import ru.yandex.practicum.common.model.SpecifiedProductAlreadyInWarehouseExceptionDto;
 
-/**
- * Исключение при попытке добавить уже существующий на складе товар
- */
 @Getter
 public class ProductAlreadyExistsInWarehouseException extends RuntimeException {
     private final SpecifiedProductAlreadyInWarehouseExceptionDto exceptionDto;
-    private static final String MESSAGE = "Товар уже существует на складе";
+    private static final String DEFAULT_MESSAGE = "Товар уже существует на складе";
 
     public ProductAlreadyExistsInWarehouseException() {
-        super(MESSAGE);
+        super(DEFAULT_MESSAGE);
         this.exceptionDto = new SpecifiedProductAlreadyInWarehouseExceptionDto()
-                .message(MESSAGE)
-                .status(SpecifiedProductAlreadyInWarehouseExceptionDto.StatusEnum.BAD_REQUEST);
+                .message(DEFAULT_MESSAGE);
     }
 }

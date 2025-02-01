@@ -7,69 +7,75 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.yandex.practicum.exception.*;
 import ru.yandex.practicum.common.model.NoSpecifiedProductInWarehouseExceptionDto;
 import ru.yandex.practicum.common.model.ProductInShoppingCartLowQuantityInWarehouseDto;
 import ru.yandex.practicum.common.model.SpecifiedProductAlreadyInWarehouseExceptionDto;
 import ru.yandex.practicum.exception.ApiErrorResponse;
-import ru.yandex.practicum.exception.InsufficientProductQuantityException;
-import ru.yandex.practicum.exception.ProductAlreadyExistsInWarehouseException;
-import ru.yandex.practicum.exception.ProductNotInWarehouseException;
 
 /**
  * Глобальный обработчик исключений для сервиса склада.
+ * Здесь доменные исключения преобразуются в HTTP-ответы через ApiErrorResponse или возвращают DTO ошибок.
  */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Константы для логирования
     private static final String PRODUCT_EXISTS = "Товар уже существует на складе: {}";
     private static final String PRODUCT_NOT_FOUND = "Товар не найден на складе: {}";
     private static final String INSUFFICIENT_QUANTITY = "Недостаточное количество товара: {}";
     private static final String VALIDATION_ERROR = "Ошибка валидации: {}";
-    private static final String INTERNAL_ERROR = "Непредвиденная ошибка: ";
+    private static final String INTERNAL_ERROR = "Непредвиденная ошибка: {}";
 
     private static final String VALIDATION_MESSAGE = "Ошибка валидации данных";
     private static final String INTERNAL_ERROR_MESSAGE = "Внутренняя ошибка сервера";
     private static final String INTERNAL_ERROR_USER_MESSAGE = "Произошла непредвиденная ошибка";
 
     /**
-     * Если товар с таким ID уже существует на складе -> 400
+     * Обработка исключения ProductAlreadyExistsInWarehouseException.
+     *
+     * @param ex исключение ProductAlreadyExistsInWarehouseException
+     * @return SpecifiedProductAlreadyInWarehouseExceptionDto с информацией об ошибке
      */
     @ExceptionHandler(ProductAlreadyExistsInWarehouseException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public SpecifiedProductAlreadyInWarehouseExceptionDto handleProductAlreadyExists(
-            ProductAlreadyExistsInWarehouseException ex
-    ) {
+    public SpecifiedProductAlreadyInWarehouseExceptionDto handleProductAlreadyExists(ProductAlreadyExistsInWarehouseException ex) {
         log.error(PRODUCT_EXISTS, ex.getMessage());
         return ex.getExceptionDto();
     }
 
     /**
-     * Если товар не найден на складе -> 400 (или 404, на ваше усмотрение)
+     * Обработка исключения ProductNotInWarehouseException.
+     *
+     * @param ex исключение ProductNotInWarehouseException
+     * @return NoSpecifiedProductInWarehouseExceptionDto с информацией об ошибке
      */
     @ExceptionHandler(ProductNotInWarehouseException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public NoSpecifiedProductInWarehouseExceptionDto handleProductNotFound(
-            ProductNotInWarehouseException ex
-    ) {
+    public NoSpecifiedProductInWarehouseExceptionDto handleProductNotFound(ProductNotInWarehouseException ex) {
         log.error(PRODUCT_NOT_FOUND, ex.getMessage());
         return ex.getExceptionDto();
     }
 
     /**
-     * Недостаточное количество товара -> 400
+     * Обработка исключения InsufficientProductQuantityException.
+     *
+     * @param ex исключение InsufficientProductQuantityException
+     * @return ProductInShoppingCartLowQuantityInWarehouseDto с информацией об ошибке
      */
     @ExceptionHandler(InsufficientProductQuantityException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ProductInShoppingCartLowQuantityInWarehouseDto handleInsufficientQuantity(
-            InsufficientProductQuantityException ex
-    ) {
+    public ProductInShoppingCartLowQuantityInWarehouseDto handleInsufficientQuantity(InsufficientProductQuantityException ex) {
         log.error(INSUFFICIENT_QUANTITY, ex.getMessage());
         return ex.getExceptionDto();
     }
 
     /**
-     * Ошибки @Valid / @Validated -> 400
+     * Обработка ошибок валидации, выбрасываемых при нарушении правил @Valid.
+     *
+     * @param ex исключение MethodArgumentNotValidException
+     * @return ApiErrorResponse с сообщением об ошибке валидации
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -87,7 +93,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Ошибки ConstraintValidator -> 400
+     * Обработка исключений ConstraintViolationException.
+     *
+     * @param ex исключение ConstraintViolationException
+     * @return ApiErrorResponse с сообщением об ошибке валидации
      */
     @ExceptionHandler(ConstraintViolationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -102,7 +111,10 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Непредвиденные ошибки -> 500
+     * Обработка всех непредвиденных исключений.
+     *
+     * @param ex исключение Exception
+     * @return ApiErrorResponse с сообщением об общей ошибке
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
