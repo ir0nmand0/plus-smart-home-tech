@@ -17,6 +17,8 @@ spring:
         native:
           # Список директорий, из которых читать конфиги
           searchLocations:
+            # Инфраструктурные сервисы
+            - classpath:config/infra/${APP_GATEWAY:gateway}
             # Сервисы телеметрии
             - classpath:config/telemetry/${APP_AGGREGATOR:aggregator}
             - classpath:config/telemetry/${APP_ANALYZER:analyzer}

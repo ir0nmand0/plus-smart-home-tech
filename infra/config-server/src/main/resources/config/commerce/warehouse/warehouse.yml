@@ -75,3 +75,9 @@ eureka:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

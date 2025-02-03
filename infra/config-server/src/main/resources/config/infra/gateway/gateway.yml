@@ -1,0 +1,111 @@
+# Конфигурация основного порта сервера API Gateway
+server:
+  port: ${GATEWAY_PORT:8080}  # По умолчанию 8080, можно переопределить через переменную окружения
+
+spring:
+  cloud:
+    gateway:
+      # Настройки HTTP-клиента для исходящих запросов
+      httpclient:
+        connect-timeout: ${GATEWAY_CONNECT_TIMEOUT:5000}  # Таймаут на установление соединения
+        response-timeout: ${GATEWAY_RESPONSE_TIMEOUT:5s}  # Таймаут ожидания ответа
+
+      # Настройки Service Discovery
+      discovery:
+        locator:
+          enabled: true  # Включаем автоматическое обнаружение сервисов через Eureka
+          lower-case-service-id: true  # Использовать нижний регистр для ID сервисов
+
+      # Определение маршрутов для сервисов
+      routes:
+        # Маршрут для сервиса корзины покупок
+        - id: shopping-cart  # Уникальный идентификатор маршрута
+          uri: lb://shopping-cart  # lb:// означает использование load balancer
+          predicates:  # Условия применения маршрута
+            - Path=/api/v1/shopping-cart/**  # Все запросы, начинающиеся с этого пути
+          filters:  # Фильтры, применяемые к запросам
+            - name: CircuitBreaker  # Circuit Breaker для отказоустойчивости
+              args:
+                name: shopping-cart
+                fallbackUri: forward:/fallback/shopping-cart  # URI для обработки ошибок
+            - RewritePath=/api/v1/shopping-cart/(?<segment>.*), /api/v1/shopping-cart/${segment}  # Преобразование пути
+
+        # Маршрут для сервиса магазина
+        - id: shopping-store
+          uri: lb://shopping-store
+          predicates:
+            - Path=/api/v1/shopping-store/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: shopping-store
+                fallbackUri: forward:/fallback/shopping-store
+            - RewritePath=/api/v1/shopping-store/(?<segment>.*), /api/v1/shopping-store/${segment}
+
+        # Маршрут для сервиса склада
+        - id: warehouse
+          uri: lb://warehouse
+          predicates:
+            - Path=/api/v1/warehouse/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: warehouse
+                fallbackUri: forward:/fallback/warehouse
+            - RewritePath=/api/v1/warehouse/(?<segment>.*), /api/v1/warehouse/${segment}
+
+        # Маршрут для REST эндпоинтов коллектора
+        - id: collector-rest
+          uri: lb://collector
+          predicates:
+            - Path=/events/sensors/**  # Обработка событий от сенсоров
+            - Path=/events/hubs/**     # Обработка событий от хабов
+            - Method=POST             # Только POST запросы
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: collector
+                fallbackUri: forward:/fallback/collector
+            - RewritePath=/events/(?<segment>.*), /events/${segment}
+
+# Конфигурация Resilience4j для Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:  # Конфигурация по умолчанию
+        slidingWindowSize: ${CIRCUIT_BREAKER_WINDOW_SIZE:10}  # Размер окна для анализа ошибок
+        failureRateThreshold: ${CIRCUIT_BREAKER_FAILURE_RATE:50}  # Порог ошибок в процентах
+        waitDurationInOpenState: ${CIRCUIT_BREAKER_WAIT_DURATION:10s}  # Время ожидания перед повторной попыткой
+        permittedNumberOfCallsInHalfOpenState: ${CIRCUIT_BREAKER_PERMITTED_CALLS:5}  # Разрешенное количество запросов в полуоткрытом состоянии
+        registerHealthIndicator: true  # Регистрация индикатора здоровья
+    instances:  # Настройка отдельных экземпляров Circuit Breaker
+      shopping-cart:
+        baseConfig: default  # Использование конфигурации по умолчанию
+      shopping-store:
+        baseConfig: default
+      warehouse:
+        baseConfig: default
+      collector:
+        baseConfig: default
+
+# Настройки логирования
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}  # Общий уровень логирования
+    org.springframework.cloud.gateway: ${GATEWAY_LOG_LEVEL:INFO}  # Детальное логирование Gateway
+    org.springframework.http.server.reactive: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование HTTP-сервера
+    org.springframework.web: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование Spring Web
+    reactor.netty: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование Netty
+    io.github.resilience4j: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование Resilience4j
+
+# Настройки Spring Boot Actuator
+management:
+  endpoint:
+    gateway:
+      enabled: true  # Включение эндпоинта управления Gateway
+    health:
+      show-details: always  # Показывать детальную информацию о состоянии здоровья
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway  # Список доступных эндпоинтов

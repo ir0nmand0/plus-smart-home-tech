@@ -33,22 +33,3 @@ eureka:
     prefer-ip-address: ${EUREKA_PREFER_IP:true}
     lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
     lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
-  health:
-    probes:
-      enabled: true
-
-# Эти свойства задают значения по умолчанию для версии API и эндпоинтов сервиса.
-# Благодаря механизму Spring Boot (relaxed binding) их можно переопределить через переменные окружения.
-# Например, чтобы переопределить свойство "api.version", нужно задать переменную "API_VERSION",
-# а для "api.shopping-cart-path" — переменную "API_SHOPPING_CART_PATH", и т.д.
-api:
-  version: /api/v1
-  shopping-cart-path: /shopping-cart
-  change-quantity-path: /change-quantity
-  remove-path: /remove

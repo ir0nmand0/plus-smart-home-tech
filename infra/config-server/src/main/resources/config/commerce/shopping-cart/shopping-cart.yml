@@ -11,7 +11,7 @@ api:
 server:
   # Порт; по умолчанию 0, чтобы занять любой доступный.
   # Можно переопределить переменной SERVER_PORT при запуске.
-  port: ${SERVER_PORT:0}
+  port: ${SERVER_PORT:8180}
 
 spring:
   application:
@@ -92,3 +92,9 @@ feign:
 logging:
   level:
     root: ${LOG_LEVEL:INFO}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
