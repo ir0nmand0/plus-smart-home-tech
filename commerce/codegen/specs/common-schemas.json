@@ -30,7 +30,7 @@
     "schemas": {
       "HttpStatusEnum": {
         "type": "string",
-        "description": "Список всех поддерживаемых HTTP-статусов в системе",
+        "description": "Перечень всех поддерживаемых HTTP-статусов (расширенный).",
         "enum": [
           "100 CONTINUE",
           "101 SWITCHING_PROTOCOLS",
@@ -103,6 +103,7 @@
           "511 NETWORK_AUTHENTICATION_REQUIRED"
         ]
       },
+
       "AbstractApiExceptionDto": {
         "type": "object",
         "description": "Базовый DTO класс для передачи информации об исключениях между сервисами",
@@ -113,7 +114,7 @@
           },
           "status": {
             "type": "string",
-            "description": "HTTP статус",
+            "description": "Сокращенный статус (BAD_REQUEST, UNAUTHORIZED и т.д.)",
             "enum": [
               "BAD_REQUEST",
               "UNAUTHORIZED",
@@ -128,6 +129,7 @@
           "status"
         ]
       },
+
       "NotAuthorizedUserExceptionDto": {
         "type": "object",
         "description": "DTO для передачи информации об исключении при отсутствии авторизации",
@@ -135,41 +137,20 @@
           {
             "$ref": "#/components/schemas/AbstractApiExceptionDto"
           }
-        ],
-        "example": {
-          "message": "User authentication required",
-          "status": "UNAUTHORIZED"
-        }
+        ]
       },
       "NoProductsInShoppingCartExceptionDto": {
         "type": "object",
-        "description": "DTO для передачи информации об исключении при отсутствии товаров в корзине",
+        "description": "DTO для передачи информации об отсутствии товаров в корзине",
         "allOf": [
           {
             "$ref": "#/components/schemas/AbstractApiExceptionDto"
           }
-        ],
-        "example": {
-          "message": "Shopping cart is empty",
-          "status": "BAD_REQUEST"
-        }
-      },
-      "ProductInShoppingCartNotInWarehouseDto": {
-        "type": "object",
-        "description": "DTO для передачи информации об исключении, когда товар из корзины отсутствует на складе",
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
-          }
-        ],
-        "example": {
-          "message": "Product from shopping cart not found in warehouse",
-          "status": "BAD_REQUEST"
-        }
+        ]
       },
       "ProductNotFoundExceptionDto": {
         "type": "object",
-        "description": "DTO для передачи информации об исключении при отсутствии товара",
+        "description": "DTO для передачи информации об отсутствии товара",
         "allOf": [
           {
             "$ref": "#/components/schemas/AbstractApiExceptionDto"
@@ -184,55 +165,48 @@
         },
         "required": [
           "productId"
-        ],
-        "example": {
-          "message": "Product not found",
-          "status": "NOT_FOUND",
-          "productId": "123e4567-e89b-12d3-a456-426614174000"
-        }
+        ]
       },
       "SpecifiedProductAlreadyInWarehouseExceptionDto": {
         "type": "object",
-        "description": "DTO для передачи информации об исключении, когда добавляемый товар уже есть на складе",
+        "description": "DTO при ошибке: когда добавляемый товар уже есть на складе",
         "allOf": [
           {
             "$ref": "#/components/schemas/AbstractApiExceptionDto"
           }
-        ],
-        "example": {
-          "message": "Product already exists in warehouse",
-          "status": "BAD_REQUEST"
-        }
+        ]
+      },
+      "ProductInShoppingCartNotInWarehouseDto": {
+        "type": "object",
+        "description": "DTO для ошибки: товар из корзины отсутствует на складе",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+          }
+        ]
       },
       "ProductInShoppingCartLowQuantityInWarehouseDto": {
         "type": "object",
-        "description": "DTO для передачи информации об исключении, когда товаров в корзине больше, чем на складе",
+        "description": "DTO для ошибки: на складе меньше товара, чем требуется",
         "allOf": [
           {
             "$ref": "#/components/schemas/AbstractApiExceptionDto"
           }
-        ],
-        "example": {
-          "message": "Insufficient product quantity in warehouse",
-          "status": "BAD_REQUEST"
-        }
+        ]
       },
       "NoSpecifiedProductInWarehouseExceptionDto": {
         "type": "object",
-        "description": "DTO для передачи информации об исключении, когда запрашиваемого товара нет на складе",
+        "description": "DTO для ошибки: запрашиваемый товар отсутствует на складе",
         "allOf": [
           {
             "$ref": "#/components/schemas/AbstractApiExceptionDto"
           }
-        ],
-        "example": {
-          "message": "Product not found in warehouse",
-          "status": "BAD_REQUEST"
-        }
+        ]
       },
+
       "ProductCategory": {
         "type": "string",
-        "description": "Категория товара, используемая для классификации в каталоге",
+        "description": "Категория товара",
         "enum": [
           "LIGHTING",
           "CONTROL",
@@ -241,7 +215,7 @@
       },
       "ProductState": {
         "type": "string",
-        "description": "Статус товара в системе (активен/деактивирован)",
+        "description": "Статус товара (активен/деактивирован)",
         "enum": [
           "ACTIVE",
           "DEACTIVATE"
@@ -249,7 +223,7 @@
       },
       "QuantityState": {
         "type": "string",
-        "description": "Состояние остатка товара на складе",
+        "description": "Состояние остатка товара",
         "enum": [
           "ENDED",
           "FEW",
@@ -257,11 +231,11 @@
           "MANY"
         ]
       },
+
       "ProductDto": {
         "type": "object",
         "description": "DTO товара, продаваемого в интернет-магазине",
         "required": [
-          "productId",
           "productName",
           "description",
           "price",
@@ -271,21 +245,18 @@
         "properties": {
           "productId": {
             "type": "string",
-            "description": "Идентификатор товара в БД",
             "format": "uuid",
-            "nullable": true
+            "nullable": true,
+            "description": "Идентификатор товара в БД (null при создании)"
           },
           "productName": {
-            "type": "string",
-            "description": "Наименование товара"
+            "type": "string"
           },
           "description": {
-            "type": "string",
-            "description": "Описание товара"
+            "type": "string"
           },
           "imageSrc": {
             "type": "string",
-            "description": "Ссылка на картинку во внешнем хранилище или SVG",
             "nullable": true
           },
           "quantityState": {
@@ -299,22 +270,137 @@
           },
           "price": {
             "type": "number",
-            "description": "Цена товара",
-            "minimum": 1,
-            "format": "double"
+            "format": "double",
+            "minimum": 1
           },
           "rating": {
             "type": "integer",
-            "description": "Рейтинг товара",
             "minimum": 0,
             "maximum": 5,
             "nullable": true
           }
         }
       },
+
+      "AddressDto": {
+        "type": "object",
+        "description": "Представление адреса в системе (общая модель)",
+        "properties": {
+          "country": {
+            "type": "string",
+            "description": "Страна"
+          },
+          "city": {
+            "type": "string",
+            "description": "Город"
+          },
+          "street": {
+            "type": "string",
+            "description": "Улица"
+          },
+          "house": {
+            "type": "string",
+            "description": "Дом"
+          },
+          "flat": {
+            "type": "string",
+            "description": "Квартира"
+          }
+        }
+      },
+
+      "OrderDto": {
+        "type": "object",
+        "description": "Представление заказа в системе (общая модель)",
+        "required": [
+          "orderId",
+          "products"
+        ],
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "description": "Идентификатор заказа",
+            "format": "uuid"
+          },
+          "shoppingCartId": {
+            "type": "string",
+            "description": "Идентификатор корзины",
+            "format": "uuid",
+            "nullable": true
+          },
+          "products": {
+            "type": "object",
+            "description": "Отображение productId -> количество",
+            "additionalProperties": {
+              "type": "integer",
+              "description": "Количество",
+              "format": "int64"
+            }
+          },
+          "paymentId": {
+            "type": "string",
+            "description": "Идентификатор оплаты",
+            "format": "uuid"
+          },
+          "deliveryId": {
+            "type": "string",
+            "description": "Идентификатор доставки",
+            "format": "uuid"
+          },
+          "state": {
+            "type": "string",
+            "description": "Статус заказа",
+            "enum": [
+              "NEW",
+              "ON_PAYMENT",
+              "ON_DELIVERY",
+              "DONE",
+              "DELIVERED",
+              "ASSEMBLED",
+              "PAID",
+              "COMPLETED",
+              "DELIVERY_FAILED",
+              "ASSEMBLY_FAILED",
+              "PAYMENT_FAILED",
+              "PRODUCT_RETURNED",
+              "CANCELED"
+            ]
+          },
+          "deliveryWeight": {
+            "type": "number",
+            "description": "Общий вес доставки",
+            "format": "double"
+          },
+          "deliveryVolume": {
+            "type": "number",
+            "description": "Общий объём доставки",
+            "format": "double"
+          },
+          "fragile": {
+            "type": "boolean",
+            "description": "Признак хрупкости"
+          },
+          "totalPrice": {
+            "type": "number",
+			"format": "double",
+            "description": "Общая стоимость"
+          },
+          "deliveryPrice": {
+            "type": "number",
+			"format": "double",
+            "description": "Стоимость доставки"
+          },
+          "productPrice": {
+            "type": "number",
+			"format": "double",
+            "description": "Стоимость товаров"
+          }
+        }
+      },
+
       "ShoppingCartDto": {
         "type": "object",
-        "description": "DTO корзины товаров в онлайн-магазине",
+        "description": "DTO корзины товаров (пример, если нужно вынести в общие)",
         "required": [
           "shoppingCartId",
           "products"
@@ -322,23 +408,22 @@
         "properties": {
           "shoppingCartId": {
             "type": "string",
-            "description": "Уникальный идентификатор корзины в БД",
-            "format": "uuid"
+            "format": "uuid",
+            "description": "Идентификатор корзины"
           },
           "products": {
             "type": "object",
-            "description": "Отображение: идентификатор товара -> количество единиц",
             "additionalProperties": {
               "type": "integer",
-              "description": "Количество товара",
               "format": "int64"
             }
           }
         }
       },
+
       "BookedProductsDto": {
         "type": "object",
-        "description": "DTO с общими сведениями о зарезервированных товарах по корзине",
+        "description": "DTO для резерва товаров",
         "required": [
           "deliveryVolume",
           "deliveryWeight",
@@ -347,22 +432,21 @@
         "properties": {
           "deliveryWeight": {
             "type": "number",
-            "description": "Общий вес доставки",
             "format": "double"
           },
           "deliveryVolume": {
             "type": "number",
-            "description": "Объём доставки",
             "format": "double"
           },
           "fragile": {
-            "type": "boolean",
-            "description": "Есть ли хрупкие товары среди зарезервированных"
+            "type": "boolean"
           }
         }
       },
+
       "Pageable": {
         "type": "object",
+        "description": "Параметры пагинации",
         "properties": {
           "page": {
             "type": "integer",
@@ -380,28 +464,23 @@
             "type": "array",
             "items": {
               "type": "string"
-            },
-            "description": "Сортировка по полям"
+            }
           }
         }
       },
       "SortDto": {
         "type": "object",
-        "description": "Элемент сортировки, хранящий поле (property) и направление (direction).",
+        "description": "Элемент сортировки: поле + направление (ASC / DESC)",
         "properties": {
           "direction": {
             "type": "string",
-            "description": "Направление сортировки. Например: ASC или DESC.",
             "enum": [
               "ASC",
               "DESC"
-            ],
-            "example": "ASC"
+            ]
           },
           "property": {
-            "type": "string",
-            "description": "Имя поля, по которому выполняется сортировка.",
-            "example": "productName"
+            "type": "string"
           }
         },
         "required": [
@@ -411,7 +490,7 @@
       },
       "PageOfProductDto": {
         "type": "object",
-        "description": "Страница товаров с метаданными и сортировкой.",
+        "description": "Страница товаров",
         "properties": {
           "content": {
             "type": "array",
@@ -420,46 +499,38 @@
             }
           },
           "pageable": {
+            "$ref": "#/components/schemas/Pageable"
           },
           "totalPages": {
-            "type": "integer",
-            "example": 5
+            "type": "integer"
           },
           "totalElements": {
             "type": "integer",
-			"format": "int64",
-            "example": 47
+            "format": "int64"
           },
           "last": {
-            "type": "boolean",
-            "example": false
+            "type": "boolean"
           },
           "size": {
-            "type": "integer",
-            "example": 10
+            "type": "integer"
           },
           "number": {
-            "type": "integer",
-            "example": 0
+            "type": "integer"
           },
           "sort": {
             "type": "array",
-            "description": "Массив критериев сортировки",
             "items": {
               "$ref": "#/components/schemas/SortDto"
             }
           },
           "numberOfElements": {
-            "type": "integer",
-            "example": 10
+            "type": "integer"
           },
           "first": {
-            "type": "boolean",
-            "example": true
+            "type": "boolean"
           },
           "empty": {
-            "type": "boolean",
-            "example": false
+            "type": "boolean"
           }
         }
       }

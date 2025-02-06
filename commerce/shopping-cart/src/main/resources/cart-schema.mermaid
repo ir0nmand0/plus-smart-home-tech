@@ -1,0 +1,20 @@
+erDiagram
+    cart ||--o{ cart_items : contains
+    cart {
+        UUID cart_id PK
+        UUID user_id
+        DECIMAL total_amount
+        INT items_count
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    cart_items {
+        UUID item_id PK
+        UUID cart_id FK
+        UUID product_id
+        INT quantity
+        DECIMAL price
+        TIMESTAMP added_at
+    }

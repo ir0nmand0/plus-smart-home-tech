@@ -27,6 +27,9 @@ spring:
             - classpath:config/commerce/${APP_SHOPPING_STORE:shopping-store}
             - classpath:config/commerce/${APP_SHOPPING_CART:shopping-cart}
             - classpath:config/commerce/${APP_WAREHOUSE:warehouse}
+            - classpath:config/commerce/${APP_DELIVERY:delivery}
+            - classpath:config/commerce/${APP_ORDER:order}
+            - classpath:config/commerce/${APP_PAYMENT:payment}
 
 # Настройки Eureka, чтобы Config Server искал и регистрировался
 eureka:

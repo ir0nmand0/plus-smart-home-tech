@@ -22,7 +22,7 @@
         "tags": [
           "Витрина онлайн-магазина"
         ],
-        "description": "Получение списка товаров по типу в упрощённом \"пагинированном\" виде",
+        "description": "Получение списка товаров по типу с пагинацией",
         "operationId": "getProducts",
         "parameters": [
           {
@@ -55,7 +55,7 @@
             "name": "sort",
             "in": "query",
             "required": false,
-            "description": "Поле для сортировки, например: productName",
+            "description": "Поле для сортировки",
             "schema": {
               "type": "string"
             }
@@ -63,7 +63,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Очередная \"страница\" товаров в соответствии с типом",
+            "description": "Очередная страница товаров",
             "content": {
               "application/json": {
                 "schema": {
@@ -81,7 +81,7 @@
         "description": "Создание нового товара в ассортименте",
         "operationId": "createNewProduct",
         "requestBody": {
-          "description": "Описательная часть вновь добавляемого товара в систему",
+          "description": "Описательная часть вновь добавляемого товара",
           "content": {
             "application/json": {
               "schema": {
@@ -93,7 +93,7 @@
         },
         "responses": {
           "200": {
-            "description": "Товар создан с присвоением соответствующего ID",
+            "description": "Товар создан",
             "content": {
               "*/*": {
                 "schema": {
@@ -118,10 +118,10 @@
         "tags": [
           "Витрина онлайн-магазина"
         ],
-        "description": "Обновление товара в ассортименте, например уточнение описания, характеристик и т.д.",
+        "description": "Обновление товара в ассортименте",
         "operationId": "updateProduct",
         "requestBody": {
-          "description": "Описательная часть изменяемого товара в системе",
+          "description": "Описательная часть изменяемого товара",
           "content": {
             "application/json": {
               "schema": {
@@ -133,7 +133,7 @@
         },
         "responses": {
           "404": {
-            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "description": "Товар не найден",
             "content": {
               "*/*": {
                 "schema": {
@@ -143,7 +143,7 @@
             }
           },
           "200": {
-            "description": "Товар обновлён, возвращается информация из БД",
+            "description": "Товар обновлён",
             "content": {
               "*/*": {
                 "schema": {
@@ -153,7 +153,7 @@
             }
           },
           "201": {
-            "description": "Created – товар обновлён, возвращается новая инфо",
+            "description": "Created – товар обновлён",
             "content": {
               "*/*": {
                 "schema": {
@@ -170,13 +170,13 @@
         "tags": [
           "Витрина онлайн-магазина"
         ],
-        "description": "Получить сведения по товару из БД.",
+        "description": "Получить сведения по товару",
         "operationId": "getProduct",
         "parameters": [
           {
             "name": "productId",
             "in": "path",
-            "description": "Идентификатор товара в БД.",
+            "description": "Идентификатор товара",
             "required": true,
             "schema": {
               "type": "string",
@@ -186,7 +186,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Актуальный товар со всеми сведениями из БД",
+            "description": "Актуальный товар со всеми сведениями",
             "content": {
               "*/*": {
                 "schema": {
@@ -196,7 +196,7 @@
             }
           },
           "404": {
-            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "description": "Товар не найден",
             "content": {
               "*/*": {
                 "schema": {
@@ -213,13 +213,13 @@
         "tags": [
           "Витрина онлайн-магазина"
         ],
-        "description": "Удалить товар из ассортимента магазина (перевести в DEACTIVATE). Функция для менеджерского состава.",
+        "description": "Перевести товар в DEACTIVATE",
         "operationId": "removeProductFromStore",
         "parameters": [
           {
             "name": "productId",
             "in": "query",
-            "description": "Идентификатор товара в БД на удаление из ассортимента.",
+            "description": "ID товара на удаление из ассортимента",
             "required": false,
             "schema": {
               "type": "string",
@@ -228,12 +228,11 @@
           }
         ],
         "requestBody": {
-          "description": "Идентификатор товара в БД (UUID) на удаление из ассортимента. Если productId не указан в query.",
+          "description": "UUID товара (если не указан в query)",
           "content": {
             "application/json": {
               "schema": {
                 "type": "string",
-                "description": "Идентификатор товара",
                 "format": "uuid"
               }
             }
@@ -242,7 +241,7 @@
         },
         "responses": {
           "200": {
-            "description": "Признак успеха операции: true если успешно, false иначе. После этого GET отдаст productState=DEACTIVATE",
+            "description": "true / false в зависимости от успеха",
             "content": {
               "*/*": {
                 "schema": {
@@ -252,7 +251,7 @@
             }
           },
           "203": {
-            "description": "Non-Authoritative Information – также может указывать, что товар переведён в DEACTIVATE",
+            "description": "Non-Authoritative Info – тоже может указывать на успех",
             "content": {
               "*/*": {
                 "schema": {
@@ -262,7 +261,7 @@
             }
           },
           "404": {
-            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "description": "Товар не найден",
             "content": {
               "*/*": {
                 "schema": {
@@ -279,13 +278,13 @@
         "tags": [
           "Витрина онлайн-магазина"
         ],
-        "description": "Установка статуса по товару (API вызывается со стороны склада). Принимает только query-параметры.",
+        "description": "Установка статуса остатка (ENDED, FEW, ENOUGH, MANY)",
         "operationId": "setProductQuantityState",
         "parameters": [
           {
             "name": "productId",
             "in": "query",
-            "description": "UUID идентификатор товара",
+            "description": "UUID товара",
             "required": true,
             "schema": {
               "type": "string",
@@ -295,7 +294,7 @@
           {
             "name": "quantityState",
             "in": "query",
-            "description": "Статус остатка товара (ENDED, FEW, ENOUGH, MANY)",
+            "description": "Статус остатка",
             "required": true,
             "schema": {
               "$ref": "common-schemas.json#/components/schemas/QuantityState"
@@ -304,7 +303,7 @@
         ],
         "responses": {
           "404": {
-            "description": "Ошибка, товар по идентификатору в БД не найден",
+            "description": "Товар не найден",
             "content": {
               "*/*": {
                 "schema": {

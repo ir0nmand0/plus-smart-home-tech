@@ -16,6 +16,13 @@ api:
     check-path: /check
     # Путь для работы с адресами
     address-path: /address
+    # Новые пути
+    # Путь для сборки заказа
+    assembly-path: /assembly
+    # Путь для передачи в доставку
+    shipped-path: /shipped
+    # Путь для возврата товаров
+    return-path: /return
 
 server:
   port: ${SERVER_PORT:0}

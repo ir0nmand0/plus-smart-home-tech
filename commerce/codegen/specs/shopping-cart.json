@@ -1,4 +1,4 @@
- {
+{
   "openapi": "3.0.1",
   "info": {
     "title": "Smart Home Technologies API",
@@ -13,7 +13,7 @@
   "tags": [
     {
       "name": "Корзина для онлайн-магазина",
-      "description": "API для обеспечения работы корзины онлайн магазина"
+      "description": "API для работы корзины онлайн магазина"
     }
   ],
   "paths": {
@@ -22,7 +22,7 @@
         "tags": [
           "Корзина для онлайн-магазина"
         ],
-        "description": "Получить актуальную корзину для авторизованного пользователя.",
+        "description": "Получить актуальную корзину для пользователя",
         "operationId": "getShoppingCart",
         "parameters": [
           {
@@ -36,7 +36,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Ранее созданная или новая (если корзины ещё нет) корзина в онлайн магазине",
+            "description": "Существующая или новая корзина",
             "content": {
               "*/*": {
                 "schema": {
@@ -46,7 +46,7 @@
             }
           },
           "401": {
-            "description": "Имя пользователя не должно быть пустым",
+            "description": "Нет имени пользователя",
             "content": {
               "*/*": {
                 "schema": {
@@ -61,7 +61,7 @@
         "tags": [
           "Корзина для онлайн-магазина"
         ],
-        "description": "Добавить товар(ы) в корзину.",
+        "description": "Добавить товар(ы) в корзину",
         "operationId": "addProductToShoppingCart",
         "parameters": [
           {
@@ -75,7 +75,6 @@
           {
             "name": "products",
             "in": "query",
-            "description": "Отображение идентификатора товара на количество.",
             "content": {
               "*/*": {
                 "schema": {
@@ -101,15 +100,14 @@
                 "additionalProperties": {
                   "type": "integer",
                   "format": "int64"
-                },
-                "description": "Отображение идентификатора товара на отобранное количество."
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Корзина товаров с изменениями",
+            "description": "Обновлённая корзина",
             "content": {
               "*/*": {
                 "schema": {
@@ -119,7 +117,7 @@
             }
           },
           "201": {
-            "description": "Корзина товаров с изменениями (Created)",
+            "description": "Created – корзина обновлена",
             "content": {
               "*/*": {
                 "schema": {
@@ -129,7 +127,7 @@
             }
           },
           "401": {
-            "description": "Имя пользователя не должно быть пустым",
+            "description": "Нет имени пользователя",
             "content": {
               "*/*": {
                 "schema": {
@@ -144,7 +142,7 @@
         "tags": [
           "Корзина для онлайн-магазина"
         ],
-        "description": "Деактивация корзины товаров для пользователя.",
+        "description": "Деактивация корзины для пользователя",
         "operationId": "deactivateCurrentShoppingCart",
         "parameters": [
           {
@@ -161,16 +159,16 @@
             "description": "OK"
           },
           "201": {
-            "description": "Created – Корзина деактивирована"
+            "description": "Created – корзина деактивирована"
           },
           "203": {
-            "description": "Non-Authoritative Information – Корзина деактивирована"
+            "description": "Non-Authoritative Info"
           },
           "204": {
-            "description": "No Content – Корзина деактивирована без тела ответа"
+            "description": "No Content"
           },
           "401": {
-            "description": "Имя пользователя не должно быть пустым",
+            "description": "Нет имени пользователя",
             "content": {
               "*/*": {
                 "schema": {
@@ -187,7 +185,7 @@
         "tags": [
           "Корзина для онлайн-магазина"
         ],
-        "description": "Изменить состав товаров в корзине (удалить выбранные).",
+        "description": "Убрать товары из корзины",
         "operationId": "removeFromShoppingCart",
         "parameters": [
           {
@@ -201,7 +199,6 @@
           {
             "name": "products",
             "in": "query",
-            "description": "Отображение идентификатора товара на количество.",
             "content": {
               "*/*": {
                 "schema": {
@@ -227,8 +224,7 @@
                 "additionalProperties": {
                   "type": "integer",
                   "format": "int64"
-                },
-                "description": "Отображение идентификатора товара на отобранное количество."
+                }
               }
             }
           }
@@ -245,7 +241,7 @@
             }
           },
           "200": {
-            "description": "Корзина товаров с изменениями",
+            "description": "Обновлённая корзина",
             "content": {
               "*/*": {
                 "schema": {
@@ -255,7 +251,7 @@
             }
           },
           "201": {
-            "description": "Корзина товаров с изменениями (Created)",
+            "description": "Created – корзина обновлена",
             "content": {
               "*/*": {
                 "schema": {
@@ -265,10 +261,10 @@
             }
           },
           "204": {
-            "description": "No Content – Товары удалены, тело не возвращается"
+            "description": "No Content – товары удалены"
           },
           "401": {
-            "description": "Имя пользователя не должно быть пустым",
+            "description": "Нет имени пользователя",
             "content": {
               "*/*": {
                 "schema": {
@@ -285,7 +281,7 @@
         "tags": [
           "Корзина для онлайн-магазина"
         ],
-        "description": "Изменить количество товаров в корзине.",
+        "description": "Изменить количество товаров в корзине",
         "operationId": "changeProductQuantity",
         "parameters": [
           {
@@ -319,7 +315,7 @@
             }
           },
           "200": {
-            "description": "Актуальная корзина со всеми сведениями",
+            "description": "Актуальная корзина",
             "content": {
               "*/*": {
                 "schema": {
@@ -339,10 +335,10 @@
             }
           },
           "204": {
-            "description": "No Content – корзина обновлена без тела ответа"
+            "description": "No Content – корзина обновлена без тела"
           },
           "401": {
-            "description": "Имя пользователя не должно быть пустым",
+            "description": "Нет имени пользователя",
             "content": {
               "*/*": {
                 "schema": {
@@ -359,7 +355,7 @@
         "tags": [
           "Корзина для онлайн-магазина"
         ],
-        "description": "Зарезервировать товары на складе.",
+        "description": "Зарезервировать товары на складе",
         "operationId": "bookingProductsFromShoppingCart",
         "parameters": [
           {
@@ -373,7 +369,7 @@
         ],
         "responses": {
           "400": {
-            "description": "Ошибка, товар(ы) уже нет на складе",
+            "description": "Ошибка: товара нет на складе",
             "content": {
               "*/*": {
                 "schema": {
@@ -383,7 +379,7 @@
             }
           },
           "200": {
-            "description": "Описательный объект со сведениями о бронировании",
+            "description": "Информация о бронировании",
             "content": {
               "*/*": {
                 "schema": {
@@ -393,7 +389,7 @@
             }
           },
           "401": {
-            "description": "Имя пользователя не должно быть пустым",
+            "description": "Нет имени пользователя",
             "content": {
               "*/*": {
                 "schema": {
@@ -417,16 +413,14 @@
         "properties": {
           "productId": {
             "type": "string",
-            "description": "Идентификатор товара",
             "format": "uuid"
           },
           "newQuantity": {
             "type": "integer",
-            "description": "Новое количество товара",
             "format": "int64"
           }
         },
-        "description": "Запрос на изменение количества единиц товара"
+        "description": "Запрос на изменение количества товара"
       }
     }
   }

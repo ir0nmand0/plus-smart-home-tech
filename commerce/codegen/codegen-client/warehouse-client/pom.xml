@@ -71,6 +71,7 @@
                                 <generateApis>true</generateApis>
                                 <generateModels>true</generateModels>
                                 <library>spring-cloud</library>
+                                <useResponseEntity>false</useResponseEntity>
 
                                 <!-- Включаем Bean Validation в моделях -->
                                 <useBeanValidation>true</useBeanValidation>

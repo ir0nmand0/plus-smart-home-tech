@@ -170,7 +170,7 @@ public class CartServiceImpl implements CartService {
 
         ShoppingCartDto cartDto = cartMapper.toDto(cart);
         try {
-            return warehouseClient.checkProductQuantityEnoughForShoppingCart(cartDto).getBody();
+            return warehouseClient.checkProductQuantityEnoughForShoppingCart(cartDto);
         } catch (Exception e) {
             log.error(ERROR_WAREHOUSE, e.getMessage());
             throw new ProductInShoppingCartNotInWarehouseException();
@@ -254,7 +254,7 @@ public class CartServiceImpl implements CartService {
                 .products(Map.of(productId.toString(), quantity));
 
         try {
-            warehouseClient.checkProductQuantityEnoughForShoppingCart(tempCart).getBody();
+            warehouseClient.checkProductQuantityEnoughForShoppingCart(tempCart);
         } catch (Exception e) {
             log.error(ERROR_WAREHOUSE, e);
             throw new ProductInShoppingCartNotInWarehouseException(

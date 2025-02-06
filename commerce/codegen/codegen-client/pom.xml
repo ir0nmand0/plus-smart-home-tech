@@ -21,5 +21,8 @@
         <module>shopping-cart-client</module>
         <module>warehouse-client</module>
         <module>shopping-store-client</module>
+        <module>payment-client</module>
+        <module>delivery-client</module>
+        <module>order-client</module>
     </modules>
 </project>

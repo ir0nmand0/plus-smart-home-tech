@@ -1,14 +1,14 @@
 # Конфигурация основного порта сервера API Gateway
 server:
-  port: ${GATEWAY_PORT:8080}  # По умолчанию 8080, можно переопределить через переменную окружения
+  port: 8080  # По умолчанию 8080, можно переопределить через переменную окружения
 
 spring:
   cloud:
     gateway:
       # Настройки HTTP-клиента для исходящих запросов
       httpclient:
-        connect-timeout: ${GATEWAY_CONNECT_TIMEOUT:5000}  # Таймаут на установление соединения
-        response-timeout: ${GATEWAY_RESPONSE_TIMEOUT:5s}  # Таймаут ожидания ответа
+        connect-timeout: 5000  # Таймаут на установление соединения
+        response-timeout: 5s  # Таймаут ожидания ответа
 
       # Настройки Service Discovery
       discovery:
@@ -20,15 +20,15 @@ spring:
       routes:
         # Маршрут для сервиса корзины покупок
         - id: shopping-cart  # Уникальный идентификатор маршрута
-          uri: lb://shopping-cart  # lb:// означает использование load balancer
-          predicates:  # Условия применения маршрута
-            - Path=/api/v1/shopping-cart/**  # Все запросы, начинающиеся с этого пути
-          filters:  # Фильтры, применяемые к запросам
-            - name: CircuitBreaker  # Circuit Breaker для отказоустойчивости
+          uri: lb://shopping-cart
+          predicates:
+            - Path=/api/v1/shopping-cart/**
+          filters:
+            - name: CircuitBreaker
               args:
                 name: shopping-cart
-                fallbackUri: forward:/fallback/shopping-cart  # URI для обработки ошибок
-            - RewritePath=/api/v1/shopping-cart/(?<segment>.*), /api/v1/shopping-cart/${segment}  # Преобразование пути
+                fallbackUri: forward:/fallback/shopping-cart
+            - RewritePath=/api/v1/shopping-cart/(?<segment>.*), /api/v1/shopping-cart/${segment}
 
         # Маршрут для сервиса магазина
         - id: shopping-store
@@ -68,35 +68,81 @@ spring:
                 fallbackUri: forward:/fallback/collector
             - RewritePath=/events/(?<segment>.*), /events/${segment}
 
+        ############################################################
+        #  Новые маршруты на основе спецификаций OpenAPI
+        ############################################################
+
+        # Маршрут для сервиса доставки
+        - id: delivery
+          uri: lb://delivery
+          predicates:
+            - Path=/api/v1/delivery/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: delivery
+                fallbackUri: forward:/fallback/delivery
+            - RewritePath=/api/v1/delivery/(?<segment>.*), /api/v1/delivery/${segment}
+
+        # Маршрут для сервиса заказов
+        - id: order
+          uri: lb://order
+          predicates:
+            - Path=/api/v1/order/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: order
+                fallbackUri: forward:/fallback/order
+            - RewritePath=/api/v1/order/(?<segment>.*), /api/v1/order/${segment}
+
+        # Маршрут для платёжного шлюза
+        - id: payment
+          uri: lb://payment
+          predicates:
+            - Path=/api/v1/payment/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: payment
+                fallbackUri: forward:/fallback/payment
+            - RewritePath=/api/v1/payment/(?<segment>.*), /api/v1/payment/${segment}
+
 # Конфигурация Resilience4j для Circuit Breaker
 resilience4j:
   circuitbreaker:
     configs:
       default:  # Конфигурация по умолчанию
-        slidingWindowSize: ${CIRCUIT_BREAKER_WINDOW_SIZE:10}  # Размер окна для анализа ошибок
-        failureRateThreshold: ${CIRCUIT_BREAKER_FAILURE_RATE:50}  # Порог ошибок в процентах
-        waitDurationInOpenState: ${CIRCUIT_BREAKER_WAIT_DURATION:10s}  # Время ожидания перед повторной попыткой
-        permittedNumberOfCallsInHalfOpenState: ${CIRCUIT_BREAKER_PERMITTED_CALLS:5}  # Разрешенное количество запросов в полуоткрытом состоянии
+        slidingWindowSize: 10  # Размер окна для анализа ошибок
+        failureRateThreshold: 50  # Порог ошибок в процентах
+        waitDurationInOpenState: 10s  # Время ожидания перед повторной попыткой
+        permittedNumberOfCallsInHalfOpenState: 5  # Разрешенное количество запросов в полуоткрытом состоянии
         registerHealthIndicator: true  # Регистрация индикатора здоровья
-    instances:  # Настройка отдельных экземпляров Circuit Breaker
+    instances:
       shopping-cart:
-        baseConfig: default  # Использование конфигурации по умолчанию
+        baseConfig: default
       shopping-store:
         baseConfig: default
       warehouse:
         baseConfig: default
       collector:
         baseConfig: default
+      delivery:
+        baseConfig: default
+      order:
+        baseConfig: default
+      payment:
+        baseConfig: default
 
 # Настройки логирования
 logging:
   level:
-    root: ${LOG_LEVEL:INFO}  # Общий уровень логирования
-    org.springframework.cloud.gateway: ${GATEWAY_LOG_LEVEL:INFO}  # Детальное логирование Gateway
-    org.springframework.http.server.reactive: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование HTTP-сервера
-    org.springframework.web: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование Spring Web
-    reactor.netty: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование Netty
-    io.github.resilience4j: ${GATEWAY_LOG_LEVEL:INFO}  # Логирование Resilience4j
+    root: INFO  # Общий уровень логирования
+    org.springframework.cloud.gateway: INFO  # Детальное логирование Gateway
+    org.springframework.http.server.reactive: INFO  # Логирование HTTP-сервера
+    org.springframework.web: INFO  # Логирование Spring Web
+    reactor.netty: INFO  # Логирование Netty
+    io.github.resilience4j: INFO  # Логирование Resilience4j
 
 # Настройки Spring Boot Actuator
 management:
@@ -108,4 +154,4 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,gateway  # Список доступных эндпоинтов
+        include: health,info,gateway

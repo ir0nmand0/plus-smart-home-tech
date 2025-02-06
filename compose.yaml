@@ -212,6 +212,10 @@ services:
         condition: service_healthy
       gateway:
         condition: service_healthy
+      shopping-store:
+        condition: service_healthy
+      warehouse:
+        condition: service_healthy
     environment:
       <<: [*common-variables]
       SPRING_APPLICATION_NAME: shopping-cart
@@ -246,6 +250,8 @@ services:
       postgres-service:
         condition: service_healthy
       gateway:
+        condition: service_healthy
+      warehouse:
         condition: service_healthy
     environment:
       <<: [*common-variables]
@@ -395,6 +401,118 @@ services:
       interval: 30s
       timeout: 5s
       retries: 5
+
+  ##############################################################################
+  # Delivery Service
+  ##############################################################################
+  delivery:
+    build: commerce/delivery
+    container_name: delivery
+    ports:
+      - "${DELIVERY_PORT:-8183}:${DELIVERY_PORT:-8183}"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+      warehouse:
+        condition: service_healthy
+      order:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables]
+      SPRING_APPLICATION_NAME: delivery
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/delivery_service"
+      SPRING_DATASOURCE_USERNAME: ${DELIVERY_DB_USER:-delivery_user}
+      SPRING_DATASOURCE_PASSWORD: ${DELIVERY_DB_PASSWORD:-delivery_pass}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: delivery_schema
+      SERVER_PORT: "${DELIVERY_PORT:-8183}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${DELIVERY_PORT:-8183}/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Payment Service
+  ##############################################################################
+  payment:
+    build: commerce/payment
+    container_name: payment
+    ports:
+      - "${PAYMENT_PORT:-8185}:${PAYMENT_PORT:-8185}"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+      delivery:
+        condition: service_healthy
+      order:
+        condition: service_healthy
+      shopping-store:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables]
+      SPRING_APPLICATION_NAME: payment
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/payment_service"
+      SPRING_DATASOURCE_USERNAME: ${PAYMENT_DB_USER:-payment_user}
+      SPRING_DATASOURCE_PASSWORD: ${PAYMENT_DB_PASSWORD:-payment_pass}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: payment_schema
+      SERVER_PORT: "${PAYMENT_PORT:-8185}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PAYMENT_PORT:-8185}/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  ##############################################################################
+  # Order Service
+  ##############################################################################
+  order:
+    build: commerce/order
+    container_name: order
+    ports:
+      - "${ORDER_PORT:-8184}:${ORDER_PORT:-8184}"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgres-service:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+      shopping-cart:
+        condition: service_healthy
+    environment:
+      <<: [*common-variables]
+      SPRING_APPLICATION_NAME: order
+      SPRING_DATASOURCE_URL: "jdbc:postgresql://${POSTGRES_HOST:-postgres-service}:${POSTGRES_PORT:-5432}/order_service"
+      SPRING_DATASOURCE_USERNAME: ${ORDER_DB_USER:-order_user}
+      SPRING_DATASOURCE_PASSWORD: ${ORDER_DB_PASSWORD:-order_pass}
+      SPRING_JPA_PROPERTIES_HIBERNATE_DEFAULT_SCHEMA: order_schema
+      SERVER_PORT: "${ORDER_PORT:-8184}"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${ORDER_PORT:-8184}/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
 
 ################################################################################
 # Volumes и Networks

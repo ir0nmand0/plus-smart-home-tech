@@ -1,0 +1,326 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:44989",
+      "description": "Generated server url"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Шлюз доставки",
+      "description": "API для расчёта, проведения доставки"
+    }
+  ],
+  "paths": {
+    "/api/v1/delivery": {
+      "put": {
+        "tags": [
+          "Шлюз доставки"
+        ],
+        "description": "Создать новую доставку в БД.",
+        "operationId": "planDelivery",
+        "requestBody": {
+          "description": "Доставка для сохранения.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeliveryDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Указанная заявка с присвоенным идентификатором",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeliveryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delivery/successful": {
+      "post": {
+        "tags": [
+          "Шлюз доставки"
+        ],
+        "description": "Эмуляция успешной доставки товара.",
+        "operationId": "deliverySuccessful",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Не найдена доставка",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delivery/picked": {
+      "post": {
+        "tags": [
+          "Шлюз доставки"
+        ],
+        "description": "Эмуляция получения товара в доставку.",
+        "operationId": "deliveryPicked",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Не найдена доставка для выдачи",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delivery/failed": {
+      "post": {
+        "tags": [
+          "Шлюз доставки"
+        ],
+        "description": "Эмуляция неудачного вручения товара.",
+        "operationId": "deliveryFailed",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Не найдена доставка для сбоя",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delivery/cost": {
+      "post": {
+        "tags": [
+          "Шлюз доставки"
+        ],
+        "description": "Расчёт полной стоимости доставки заказа.",
+        "operationId": "deliveryCost",
+        "requestBody": {
+          "description": "Заказ для расчёта.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/OrderDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Полная стоимость доставки заказа",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "number",
+				  "format": "double"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Не найдена доставка для расчёта",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DeliveryDto": {
+        "required": [
+          "deliveryId",
+          "deliveryState",
+          "fromAddress",
+          "orderId",
+          "toAddress"
+        ],
+        "type": "object",
+        "properties": {
+          "deliveryId": {
+            "type": "string",
+            "description": "Идентификатор доставки.",
+            "format": "uuid"
+          },
+          "fromAddress": {
+            "$ref": "common-schemas.json#/components/schemas/AddressDto"
+          },
+          "toAddress": {
+            "$ref": "common-schemas.json#/components/schemas/AddressDto"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "Идентификатор заказа.",
+            "format": "uuid"
+          },
+          "deliveryState": {
+            "$ref": "#/components/schemas/DeliveryState"
+          }
+        }
+      },
+      "DeliveryState": {
+        "type": "string",
+        "description": "Статус доставки.",
+        "enum": [
+          "CREATED",
+          "IN_PROGRESS",
+          "DELIVERED",
+          "FAILED",
+          "CANCELLED"
+        ]
+      },
+      "NoDeliveryFoundExceptionDto": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "object",
+            "properties": {
+              "stackTrace": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "classLoaderName": { "type": "string" },
+                    "moduleName": { "type": "string" },
+                    "moduleVersion": { "type": "string" },
+                    "methodName": { "type": "string" },
+                    "fileName": { "type": "string" },
+                    "lineNumber": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "className": { "type": "string" },
+                    "nativeMethod": { "type": "boolean" }
+                  }
+                }
+              },
+              "message": { "type": "string" },
+              "localizedMessage": { "type": "string" }
+            }
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classLoaderName": { "type": "string" },
+                "moduleName": { "type": "string" },
+                "moduleVersion": { "type": "string" },
+                "methodName": { "type": "string" },
+                "fileName": { "type": "string" },
+                "lineNumber": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "className": { "type": "string" },
+                "nativeMethod": { "type": "boolean" }
+              }
+            }
+          },
+          "httpStatus": {
+            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnum"
+          },
+          "userMessage": { "type": "string" },
+          "message": { "type": "string" },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": { "type": "string" },
+                      "moduleName": { "type": "string" },
+                      "moduleVersion": { "type": "string" },
+                      "methodName": { "type": "string" },
+                      "fileName": { "type": "string" },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "className": { "type": "string" },
+                      "nativeMethod": { "type": "boolean" }
+                    }
+                  }
+                },
+                "message": { "type": "string" },
+                "localizedMessage": { "type": "string" }
+              }
+            }
+          },
+          "localizedMessage": { "type": "string" }
+        }
+      }
+    }
+  }
+}
