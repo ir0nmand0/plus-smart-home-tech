@@ -7,7 +7,6 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = "ru.yandex.practicum.client")
 public class DeliveryApp {
     public static void main(String[] args) {
         SpringApplication.run(DeliveryApp.class, args);

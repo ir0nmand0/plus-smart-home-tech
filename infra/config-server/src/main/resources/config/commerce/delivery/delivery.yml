@@ -5,6 +5,9 @@ spring:
   application:
     name: delivery
 
+  flyway:
+    enabled: true
+
   jackson:
     mapper:
       accept-case-insensitive-enums: true
