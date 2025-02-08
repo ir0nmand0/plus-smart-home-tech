@@ -1,0 +1,99 @@
+server:
+  port: 8185
+
+spring:
+  application:
+    name: payment
+
+  flyway:
+    enabled: true
+    # Если целевая схема уже содержит данные и отсутствует таблица истории миграций,
+    # текущее состояние фиксируется как базовая отправная точка для последующих миграций (существующие данные не затрагиваются).
+    baselineOnMigrate: true
+
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+      default-view-inclusion: true
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+      accept-empty-string-as-null-object: true
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+      write-null-map-values: false
+    default-property-inclusion: non_null
+
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+      fail-fast: true
+      retry:
+        max-attempts: 5
+        initial-interval: 2000
+        max-interval: 10000
+    circuitbreaker:
+      resilience4j:
+        instances:
+          product-service:
+            slidingWindowSize: 10
+            failureRateThreshold: 50
+            waitDurationInOpenState: 10s
+            permittedNumberOfCallsInHalfOpenState: 5
+            registerHealthIndicator: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payment_service
+    username: payment_user
+    password: payment_pass
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: false
+  sql:
+    init:
+      mode: never
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-server:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+    lease-expiration-duration-in-seconds: 30
+
+feign:
+  circuitbreaker:
+    enabled: true
+  client:
+    config:
+      order-client:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic
+
+logging:
+  level:
+    root: INFO
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+api:
+  payment-version: 1
+  delivery-version: 1
+  order-version: 1
+  shopping-store-version: 1

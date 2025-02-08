@@ -129,12 +129,12 @@
         <!-- API и клиенты для микросервисного взаимодействия -->
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
-            <artifactId>shopping-store-client</artifactId>
+            <artifactId>shopping-store-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
-            <artifactId>warehouse-client</artifactId>
+            <artifactId>warehouse-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>

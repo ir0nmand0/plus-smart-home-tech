@@ -21,5 +21,8 @@
         <module>shopping-cart-api</module>
         <module>warehouse-api</module>
         <module>shopping-store-api</module>
+        <module>delivery-api</module>
+        <module>order-api</module>
+        <module>payment-api</module>
     </modules>
 </project>

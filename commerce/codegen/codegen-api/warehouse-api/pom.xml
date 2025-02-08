@@ -27,6 +27,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>codegen-common</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Spring Boot (Web + Validation) -->
@@ -105,7 +106,6 @@
 
                             <!-- Пакеты для сгенерированных API и моделей -->
                             <apiPackage>ru.yandex.practicum.warehouse.api</apiPackage>
-                            <modelPackage>ru.yandex.practicum.common.model</modelPackage>
 
                             <configOptions>
                                 <useSpringBoot3>true</useSpringBoot3>
@@ -115,18 +115,45 @@
                                 <interfaceOnly>true</interfaceOnly>
                                 <skipDefaultInterface>true</skipDefaultInterface>
                                 <generateApis>true</generateApis>
-                                <generateModels>true</generateModels>
+                                <generateModels>false</generateModels>
 
                                 <!-- Валидация моделей -->
                                 <useBeanValidation>true</useBeanValidation>
                                 <beanValidationModel>true</beanValidationModel>
+
+                                <useTags>true</useTags>
                             </configOptions>
 
-                            <!-- Можно настроить typeMappings, если нужно -->
-                            <globalProperties>
-                                <!-- Если нужно, можно генерировать вспомогательные файлы типа ApiUtil -->
-                                <supportingFiles>ApiUtil.java</supportingFiles>
-                            </globalProperties>
+                            <importMappings>
+                                <!-- Модель для запроса "Добавить новый товар на склад" -->
+                                <importMapping>NewProductInWarehouseRequestDto=ru.yandex.practicum.common.model.NewProductInWarehouseRequestDto</importMapping>
+
+                                <!-- Модель для запроса "Передать товары в доставку" -->
+                                <importMapping>ShippedToDeliveryRequestDto=ru.yandex.practicum.common.model.ShippedToDeliveryRequestDto</importMapping>
+
+                                <!-- Модель для запроса/ответа "Корзина товаров" -->
+                                <importMapping>ShoppingCartDto=ru.yandex.practicum.common.model.ShoppingCartDto</importMapping>
+
+                                <!-- Модель для ответа "Общие сведения по бронированию" -->
+                                <importMapping>BookedProductsDto=ru.yandex.practicum.common.model.BookedProductsDto</importMapping>
+
+                                <!-- Модель для запроса "Собрать товары к заказу" -->
+                                <importMapping>AssemblyProductsForOrderRequestDto=ru.yandex.practicum.common.model.AssemblyProductsForOrderRequestDto</importMapping>
+
+                                <!-- Модель для ошибки "Товар не в нужном количестве" -->
+                                <importMapping>ProductInShoppingCartLowQuantityInWarehouseDto=ru.yandex.practicum.common.model.ProductInShoppingCartLowQuantityInWarehouseDto</importMapping>
+
+                                <!-- Модель для запроса "Увеличить количество товара на складе" -->
+                                <importMapping>AddProductToWarehouseRequestDto=ru.yandex.practicum.common.model.AddProductToWarehouseRequestDto</importMapping>
+
+                                <!-- Модель для ошибки "Товар не найден на складе" -->
+                                <importMapping>NoSpecifiedProductInWarehouseExceptionDto=ru.yandex.practicum.common.model.NoSpecifiedProductInWarehouseExceptionDto</importMapping>
+
+                                <!-- Модель для ответа "Адрес склада" -->
+                                <importMapping>AddressDto=ru.yandex.practicum.common.model.AddressDto</importMapping>
+                            </importMappings>
+
+                            <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                         </configuration>
                     </execution>
                 </executions>

@@ -5,17 +5,7 @@
 
 api:
   # Базовая версия API
-  version: /api/v1
-
-  warehouse:
-    # Основной путь склада
-    path: /warehouse
-    # Путь для добавления товаров
-    add-path: /add
-    # Путь для проверки наличия
-    check-path: /check
-    # Путь для работы с адресами
-    address-path: /address
+  warehouse-version: 1
 
 server:
   port: ${SERVER_PORT:0}

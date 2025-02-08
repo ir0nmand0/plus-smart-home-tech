@@ -8,11 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.WarehouseClient;
-import ru.yandex.practicum.common.model.NewProductInWarehouseRequest;
-import ru.yandex.practicum.common.model.ProductCategory;
-import ru.yandex.practicum.common.model.ProductState;
-import ru.yandex.practicum.common.model.QuantityState;
-import ru.yandex.practicum.common.model.SpecifiedProductAlreadyInWarehouseExceptionDto;
+import ru.yandex.practicum.common.model.NewProductInWarehouseRequestDto;
+import ru.yandex.practicum.common.model.ProductCategoryDto;
+import ru.yandex.practicum.common.model.ProductStateDto;
+import ru.yandex.practicum.common.model.QuantityStateDto;
 import ru.yandex.practicum.entity.Product;
 import ru.yandex.practicum.exception.ProductAlreadyExistsInWarehouseException;
 import ru.yandex.practicum.exception.ProductNotFoundException;
@@ -45,11 +44,11 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<Product> getProducts(ProductCategory category, Pageable pageable) {
+    public Page<Product> getProducts(ProductCategoryDto category, Pageable pageable) {
         log.info("Поиск товаров в категории {}, с пагинацией и сортировкой: {}", category, pageable);
         return productRepository.findByProductCategoryAndProductState(
                 category,
-                ProductState.ACTIVE,
+                ProductStateDto.ACTIVE,
                 pageable
         );
     }
@@ -79,12 +78,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void registerProductInWarehouse(Product product) {
-        NewProductInWarehouseRequest request = buildWarehouseRequest(product);
+        NewProductInWarehouseRequestDto request = buildWarehouseRequest(product);
         warehouseClient.newProductInWarehouse(request);
     }
 
-    private NewProductInWarehouseRequest buildWarehouseRequest(Product product) {
-        return new NewProductInWarehouseRequest()
+    private NewProductInWarehouseRequestDto buildWarehouseRequest(Product product) {
+        return new NewProductInWarehouseRequestDto()
                 .productId(product.getId())
                 .weight(DEFAULT_WEIGHT)
                 .dimension(buildDefaultDimension())
@@ -103,7 +102,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void handleWarehouseError(Product product) {
-        product.setProductState(ProductState.DEACTIVATE);
+        product.setProductState(ProductStateDto.DEACTIVATE);
         productRepository.save(product);
         log.error(PRODUCT_DEACTIVATED, product.getId());
     }
@@ -122,14 +121,14 @@ public class ProductServiceImpl implements ProductService {
     @Transactional
     public boolean deleteProduct(UUID id) {
         Product product = getProductById(id);
-        product.setProductState(ProductState.DEACTIVATE);
+        product.setProductState(ProductStateDto.DEACTIVATE);
         productRepository.save(product);
         return true;
     }
 
     @Override
     @Transactional
-    public boolean updateQuantityState(UUID productId, QuantityState state) {
+    public boolean updateQuantityState(UUID productId, QuantityStateDto state) {
         Product product = getProductById(productId);
         product.setQuantityState(state);
         productRepository.save(product);

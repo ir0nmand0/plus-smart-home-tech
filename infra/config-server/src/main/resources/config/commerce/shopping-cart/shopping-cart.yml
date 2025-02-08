@@ -3,10 +3,9 @@
 # Например, чтобы переопределить свойство "api.version", нужно задать переменную "API_VERSION",
 # а для "api.shopping-cart-path" — переменную "API_SHOPPING_CART_PATH", и т.д.
 api:
-  version: /api/v1
-  shopping-cart-path: /shopping-cart
-  change-quantity-path: /change-quantity
-  remove-path: /remove
+  shopping-cart-version: 1
+  shopping-store-version: 1
+  warehouse-version: 1
 
 server:
   # Порт; по умолчанию 0, чтобы занять любой доступный.

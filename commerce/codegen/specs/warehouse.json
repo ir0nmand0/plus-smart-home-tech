@@ -6,30 +6,30 @@
   },
   "servers": [
     {
-      "url": "http://localhost:38081",
-      "description": "Generated server url"
+      "url": "/warehouse/api/v1/warehouse",
+      "description": "Base path"
     }
   ],
   "tags": [
     {
-      "name": "Склад магазина",
+      "name": "Warehouse",
       "description": "API для обеспечения работы склада онлайн магазина"
     }
   ],
   "paths": {
-    "/api/v1/warehouse": {
+    "/warehouse": {
       "put": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Добавить новый товар на склад.",
         "operationId": "newProductInWarehouse",
         "requestBody": {
-          "description": "Описание нового товара для обработки складом.",
+          "description": "Описание нового товара",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewProductInWarehouseRequest"
+                "$ref": "common-schemas.json#/components/schemas/NewProductInWarehouseRequestDto"
               }
             }
           },
@@ -39,11 +39,8 @@
           "200": {
             "description": "OK"
           },
-          "201": {
-            "description": "Created – новый товар успешно добавлен"
-          },
           "400": {
-            "description": "Ошибка, товар с таким описанием уже зарегистрирован на складе",
+            "description": "Товар уже зарегистрирован",
             "content": {
               "*/*": {
                 "schema": {
@@ -55,15 +52,69 @@
         }
       }
     },
-    "/api/v1/warehouse/check": {
+    "/warehouse/shipped": {
       "post": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
-        "description": "Предварительно проверить, что количество товаров на складе достаточно для данной корзины продуктов.",
+        "description": "Передать товары в доставку.",
+        "operationId": "shippedToDelivery",
+        "requestBody": {
+          "description": "Запрос на передачу в доставку.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ShippedToDeliveryRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/warehouse/return": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Принять возврат товаров на склад",
+        "operationId": "acceptReturn",
+        "requestBody": {
+          "description": "Отображение идентификатора товара -> количество",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/warehouse/check": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Проверить, что на складе достаточно товара под корзину",
         "operationId": "checkProductQuantityEnoughForShoppingCart",
         "requestBody": {
-          "description": "Корзина товаров.",
+          "description": "Корзина товаров",
           "content": {
             "application/json": {
               "schema": {
@@ -85,7 +136,49 @@
             }
           },
           "400": {
-            "description": "Ошибка, товар из корзины не находится в требуемом количестве на складе",
+            "description": "Товар из корзины отсутствует в БД склада",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductInShoppingCartNotInWarehouseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Собрать товары к заказу",
+        "operationId": "assemblyProductsForOrder",
+        "requestBody": {
+          "description": "Корзина товаров",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/AssemblyProductsForOrderRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Общие сведения по бронированию",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/BookedProductsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Товар не в нужном количестве",
             "content": {
               "*/*": {
                 "schema": {
@@ -97,33 +190,27 @@
         }
       }
     },
-    "/api/v1/warehouse/add": {
+    "/warehouse/add": {
       "post": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
-        "description": "Принять товар на склад.",
+        "description": "Увеличить количество товара на складе",
         "operationId": "addProductToWarehouse",
         "requestBody": {
-          "description": "Запрос на добавление определенного количества определенного товара.",
+          "description": "Запрос на добавление товара",
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddProductToWarehouseRequest"
+                "$ref": "common-schemas.json#/components/schemas/AddProductToWarehouseRequestDto"
               }
             }
           },
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "Успешное добавление указанного количества товара на склад"
-          },
-          "201": {
-            "description": "Created – товар успешно добавлен на склад"
-          },
           "400": {
-            "description": "Нет информации о товаре на складе",
+            "description": "Товар не найден на складе",
             "content": {
               "*/*": {
                 "schema": {
@@ -135,12 +222,12 @@
         }
       }
     },
-    "/api/v1/warehouse/address": {
+    "/warehouse/address": {
       "get": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
-        "description": "Предоставить адрес склада для расчёта доставки.",
+        "description": "Предоставить адрес склада",
         "operationId": "getWarehouseAddress",
         "responses": {
           "200": {
@@ -148,120 +235,12 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/AddressDto"
+                  "$ref": "common-schemas.json#/components/schemas/AddressDto"
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "NewProductInWarehouseRequest": {
-        "required": [
-          "dimension",
-          "productId",
-          "weight"
-        ],
-        "type": "object",
-        "properties": {
-          "productId": {
-            "type": "string",
-            "description": "Идентификатор товара в БД",
-            "format": "uuid"
-          },
-          "fragile": {
-            "type": "boolean",
-            "description": "Признак хрупкости"
-          },
-          "dimension": {
-            "$ref": "#/components/schemas/DimensionDto"
-          },
-          "weight": {
-            "minimum": 1,
-            "type": "number",
-            "description": "Вес товара",
-            "format": "double"
-          }
-        },
-        "description": "Запрос на добавление нового товара на склад"
-      },
-      "AddProductToWarehouseRequest": {
-        "required": [
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "productId": {
-            "type": "string",
-            "description": "Идентификатор товара в БД",
-            "format": "uuid"
-          },
-          "quantity": {
-            "minimum": 1,
-            "type": "integer",
-            "description": "Количество единиц товара для добавления на склад",
-            "format": "int64"
-          }
-        },
-        "description": "Запрос на увеличение единиц товара по его идентификатору"
-      },
-      "DimensionDto": {
-        "required": [
-          "depth",
-          "height",
-          "width"
-        ],
-        "type": "object",
-        "properties": {
-          "width": {
-            "minimum": 1,
-            "type": "number",
-            "description": "Ширина",
-            "format": "double"
-          },
-          "height": {
-            "minimum": 1,
-            "type": "number",
-            "description": "Высота",
-            "format": "double"
-          },
-          "depth": {
-            "minimum": 1,
-            "type": "number",
-            "description": "Глубина",
-            "format": "double"
-          }
-        },
-        "description": "Размеры товара"
-      },
-      "AddressDto": {
-        "type": "object",
-        "properties": {
-          "country": {
-            "type": "string",
-            "description": "Страна."
-          },
-          "city": {
-            "type": "string",
-            "description": "Город."
-          },
-          "street": {
-            "type": "string",
-            "description": "Улица."
-          },
-          "house": {
-            "type": "string",
-            "description": "Дом."
-          },
-          "flat": {
-            "type": "string",
-            "description": "Квартира."
-          }
-        },
-        "description": "Представление адреса в системе."
       }
     }
   }

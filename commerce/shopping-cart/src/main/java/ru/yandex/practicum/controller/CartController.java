@@ -1,5 +1,9 @@
 package ru.yandex.practicum.controller;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -7,10 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.common.model.BookedProductsDto;
-import ru.yandex.practicum.common.model.ChangeProductQuantityRequest;
+import ru.yandex.practicum.common.model.ChangeProductQuantityRequestDto;
 import ru.yandex.practicum.common.model.ShoppingCartDto;
+import ru.yandex.practicum.mapper.CartMapper;
 import ru.yandex.practicum.service.CartService;
-import ru.yandex.practicum.shoppingcart.api.DefaultApi;
+import ru.yandex.practicum.cart.api.ShoppingCartApi;
 
 import java.util.*;
 
@@ -18,8 +23,8 @@ import java.util.*;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${api.version}${api.shopping-cart-path}")
-public class CartController implements DefaultApi {
+@RequestMapping("/api/v${api.shopping-cart-version}/shopping-cart")
+public class CartController implements ShoppingCartApi {
 
     private final CartService cartService;
 
@@ -28,10 +33,8 @@ public class CartController implements DefaultApi {
      */
     @Override
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
-    public ShoppingCartDto addProductToShoppingCart(
-            @RequestParam(value = "username", required = true) String username,
-            @RequestParam(value = "products", required = false) List<Map<String, Long>> products,
+    public ShoppingCartDto addProductToShoppingCart(@RequestParam String username,
+            @RequestParam(required = false) List<Map<String, Long>> products,
             @RequestBody(required = false) Map<String, Long> requestBody
     ) {
         log.info("Add product to cart for user '{}'. Body: {}", username, requestBody);
@@ -52,10 +55,7 @@ public class CartController implements DefaultApi {
      */
     @Override
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public ShoppingCartDto getShoppingCart(
-            @RequestParam(value = "username", required = true) String username
-    ) {
+    public ShoppingCartDto getShoppingCart(@RequestParam String username) {
         log.info("Get shopping cart for user '{}'", username);
         return cartService.getOrCreateCartDto(username);
     }
@@ -63,22 +63,18 @@ public class CartController implements DefaultApi {
     /**
      * POST /api/v1/shopping-cart/change-quantity
      */
-    @PostMapping("${api.change-quantity-path}")
+    @Override
+    @PostMapping("/change-quantity")
     @ResponseStatus(HttpStatus.OK)
-    public ShoppingCartDto changeProductQuantity(
-            @RequestParam(value = "username", required = true) String username,
-            ChangeProductQuantityRequest ignoredQueryParam, // часто не используется
-            @RequestBody(required = false) ChangeProductQuantityRequest changeProductQuantityRequest
+    public ShoppingCartDto changeProductQuantity(@NotNull @Valid @RequestParam String username,
+            @Valid @RequestBody(required = false) ChangeProductQuantityRequestDto changeProductQuantityRequest
     ) {
         log.info("Change product quantity for user '{}'. Body: {}", username, changeProductQuantityRequest);
 
-        // Если тело отсутствует
         if (changeProductQuantityRequest == null) {
-            // Вернём текущую корзину
             return cartService.getOrCreateCartDto(username);
         }
 
-        // Иначе, меняем количество
         return cartService.changeQuantity(username, changeProductQuantityRequest);
     }
 
@@ -88,9 +84,7 @@ public class CartController implements DefaultApi {
     @Override
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deactivateCurrentShoppingCart(
-            @RequestParam(value = "username", required = true) String username
-    ) {
+    public void deactivateCurrentShoppingCart(@RequestParam String username) {
         log.info("Deactivate cart for user '{}'", username);
 
         // Если корзины нет, не падаем, а просто ничего не делаем
@@ -102,11 +96,8 @@ public class CartController implements DefaultApi {
      * (booking)
      */
     @Override
-    @PostMapping
-    @ResponseStatus(HttpStatus.OK)
-    public BookedProductsDto bookingProductsFromShoppingCart(
-            @RequestParam(value = "username", required = true) String username
-    ) {
+    @PostMapping("/booking")
+    public BookedProductsDto bookingProductsFromShoppingCart(@RequestParam String username) {
         log.info("Booking products for user '{}'", username);
         return cartService.bookProducts(username);
     }
@@ -115,11 +106,10 @@ public class CartController implements DefaultApi {
      * POST /api/v1/shopping-cart/remove
      */
     @Override
-    @PostMapping("${api.remove-path}")
+    @PostMapping("/remove")
     @ResponseStatus(HttpStatus.OK)
-    public ShoppingCartDto removeFromShoppingCart(
-            @RequestParam(value = "username", required = true) String username,
-            @RequestParam(value = "products", required = false) List<Map<String, Long>> products,
+    public ShoppingCartDto removeFromShoppingCart(@RequestParam String username,
+            @RequestParam(required = false) List<Map<String, Long>> products,
             @RequestBody(required = false) Map<String, Long> requestBody
     ) {
         log.info("Remove products from cart for user '{}'. Body: {}", username, requestBody);
@@ -135,9 +125,7 @@ public class CartController implements DefaultApi {
     /**
      * Вспомогательная функция для слияния JSON-тела и query-параметров
      */
-    private Map<String, Long> mergeMaps(
-            Map<String, Long> body,
-            List<Map<String, Long>> query
+    private Map<String, Long> mergeMaps(Map<String, Long> body, List<Map<String, Long>> query
     ) {
         Map<String, Long> merged = new HashMap<>(body);
         if (query != null) {

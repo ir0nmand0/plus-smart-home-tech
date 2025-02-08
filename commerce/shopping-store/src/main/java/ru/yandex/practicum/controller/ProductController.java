@@ -13,14 +13,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.common.model.PageOfProductDto;
-import ru.yandex.practicum.common.model.ProductCategory;
+import ru.yandex.practicum.common.model.ProductCategoryDto;
 import ru.yandex.practicum.common.model.ProductDto;
-import ru.yandex.practicum.common.model.QuantityState;
+import ru.yandex.practicum.common.model.QuantityStateDto;
 import ru.yandex.practicum.entity.Product;
 import ru.yandex.practicum.mapper.PageOfProductDtoMapper;
 import ru.yandex.practicum.mapper.ProductMapper;
 import ru.yandex.practicum.service.ProductService;
-import ru.yandex.practicum.store.api.ApiApi;
+import ru.yandex.practicum.store.api.StorefrontApi;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +35,8 @@ import java.util.stream.Collectors;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${api.version}${api.store.path}")
-public class ProductController implements ApiApi {
+@RequestMapping("/api/v${api.shopping-store-version}/shopping-store")
+public class ProductController implements StorefrontApi {
 
     private final ProductService productService;
     private final ProductMapper productMapper;
@@ -48,10 +48,7 @@ public class ProductController implements ApiApi {
      */
     @Override
     @PutMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ProductDto createNewProduct(
-            @Valid @RequestBody ProductDto productDto
-    ) {
+    public ProductDto createNewProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("Создание товара: {}", productDto);
         Product newProduct = productMapper.toEntity(productDto);
         Product saved = productService.createProduct(newProduct);
@@ -64,10 +61,7 @@ public class ProductController implements ApiApi {
      */
     @Override
     @GetMapping("/{productId}")
-    @ResponseStatus(HttpStatus.OK)
-    public ProductDto getProduct(
-            @PathVariable("productId") UUID productId
-    ) {
+    public ProductDto getProduct(@PathVariable UUID productId) {
         log.info("Получение товара по ID: {}", productId);
         Product product = productService.getProductById(productId);
         return productMapper.toDto(product);
@@ -79,12 +73,10 @@ public class ProductController implements ApiApi {
      */
     @Override
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
-    public PageOfProductDto getProducts(
-            @NotNull @Valid @RequestParam(value = "category", required = true) ProductCategory category,
-            @Valid @RequestParam(value = "page", required = false) Integer page,
-            @Valid @RequestParam(value = "size", required = false) Integer size,
-            @Valid @RequestParam(value = "sort", required = false) String sort
+    public PageOfProductDto getProducts(@NotNull @Valid @RequestParam ProductCategoryDto category,
+                                        @Valid @RequestParam(required = false) Integer page,
+                                        @Valid @RequestParam(required = false) Integer size,
+                                        @Valid @RequestParam(required = false) String sort
     ) {
         log.info("GET products: category={}, page={}, size={}, sort={}", category, page, size, sort);
 
@@ -110,11 +102,9 @@ public class ProductController implements ApiApi {
      * (removeProductFromStore)
      */
     @Override
-    @PostMapping("${api.store.remove-path}")
-    @ResponseStatus(HttpStatus.OK)
-    public Boolean removeProductFromStore(
-            @Valid @RequestBody UUID body,
-            @Valid @RequestParam(value = "productId", required = false) UUID productId
+    @PostMapping("/removeProductFromStore")
+    public Boolean removeProductFromStore(@Valid @RequestBody UUID body,
+                                          @Valid @RequestParam(required = false) UUID productId
     ) {
         UUID idToRemove = (productId != null) ? productId : body;
         log.info("Удаление товара с ID: {}", idToRemove);
@@ -126,11 +116,10 @@ public class ProductController implements ApiApi {
      * (setProductQuantityState)
      */
     @Override
-    @PostMapping("${api.store.quantity-path}")
+    @PostMapping("/quantityState")
     @ResponseStatus(HttpStatus.OK)
-    public Boolean setProductQuantityState(
-            @NotNull @Valid @RequestParam(value = "productId", required = true) UUID productId,
-            @NotNull @Valid @RequestParam(value = "quantityState", required = true) QuantityState quantityState
+    public Boolean setProductQuantityState(@NotNull @Valid @RequestParam UUID productId,
+            @NotNull @Valid @RequestParam QuantityStateDto quantityState
     ) {
         log.info("Изменение статуса товара: productId={}, quantityState={}", productId, quantityState);
         return productService.updateQuantityState(productId, quantityState);
@@ -143,9 +132,7 @@ public class ProductController implements ApiApi {
     @Override
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public ProductDto updateProduct(
-            @Valid @RequestBody ProductDto productDto
-    ) {
+    public ProductDto updateProduct(@Valid @RequestBody ProductDto productDto) {
         log.info("Обновление товара: {}", productDto);
 
         if (productDto.getProductId() == null || !productDto.getProductId().isPresent()) {

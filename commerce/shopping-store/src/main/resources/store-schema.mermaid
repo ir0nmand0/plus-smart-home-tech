@@ -1,0 +1,31 @@
+erDiagram
+    products ||--o{ product_categories : belongs
+    products ||--o{ product_images : has
+    products {
+        UUID product_id PK
+        VARCHAR name
+        TEXT description
+        DECIMAL price
+        BOOLEAN available
+        INT stock_count
+        DOUBLE weight
+        DOUBLE volume
+        BOOLEAN is_fragile
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    product_categories {
+        UUID category_id PK
+        UUID product_id FK
+        VARCHAR category_name
+        TIMESTAMP created_at
+    }
+    
+    product_images {
+        UUID image_id PK
+        UUID product_id FK
+        VARCHAR image_url
+        BOOLEAN is_main
+        TIMESTAMP uploaded_at
+    }

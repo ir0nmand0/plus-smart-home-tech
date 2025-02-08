@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-  Реализация REST-контроллеров для Shopping Cart.
-  Запускается как Spring Boot-приложение, поддерживающее валидацию и Jackson.
--->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
@@ -25,7 +21,7 @@
             <artifactId>codegen-common</artifactId>
         </dependency>
 
-        <!-- Spring Boot (Web + Validation) -->
+        <!-- Spring Boot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -43,7 +39,6 @@
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
             <artifactId>swagger-models</artifactId>
-            <version>${swagger-annotations.version}</version>
         </dependency>
 
         <!-- Jakarta EE -->
@@ -70,21 +65,10 @@
             <groupId>org.openapitools</groupId>
             <artifactId>jackson-databind-nullable</artifactId>
         </dependency>
-
-        <!-- Lombok (для удобства, без builder) -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 
     <build>
         <plugins>
-            <!--
-              Генерация интерфейсов и моделей Shopping Cart из shopping-cart.json.
-              Включаем аннотации Jakarta, Bean Validation, отключаем builder.
-            -->
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
@@ -98,33 +82,40 @@
                         <configuration>
                             <inputSpec>${project.parent.parent.basedir}/specs/shopping-cart.json</inputSpec>
                             <generatorName>spring</generatorName>
-                            <apiPackage>ru.yandex.practicum.shoppingcart.api</apiPackage>
-                            <modelPackage>ru.yandex.practicum.common.model</modelPackage>
+                            <apiPackage>ru.yandex.practicum.cart.api</apiPackage>
                             <configOptions>
                                 <useJakartaEe>true</useJakartaEe>
                                 <interfaceOnly>true</interfaceOnly>
                                 <generateApis>true</generateApis>
-                                <generateModels>true</generateModels>
                                 <useTags>true</useTags>
                                 <java8>true</java8>
                                 <dateLibrary>${openapi.generator.java.dateLibrary}</dateLibrary>
                                 <library>spring-boot</library>
                                 <useResponseEntity>false</useResponseEntity>
                                 <serializationLibrary>jackson</serializationLibrary>
-
-                                <!-- Валидация в моделях -->
+                                <generateModels>false</generateModels>
                                 <useBeanValidation>true</useBeanValidation>
                                 <beanValidationModel>true</beanValidationModel>
+                                <skipDefaultInterface>true</skipDefaultInterface>
                             </configOptions>
 
-                            <!-- Генерируем вспомогательные файлы при необходимости -->
+                            <!-- Импорты для моделей из codegen-common -->
+                            <importMappings>
+                                <importMapping>ShoppingCartDto=ru.yandex.practicum.common.model.ShoppingCartDto</importMapping>
+                                <importMapping>NotAuthorizedUserExceptionDto=ru.yandex.practicum.common.model.NotAuthorizedUserExceptionDto</importMapping>
+                                <importMapping>NoProductsInShoppingCartExceptionDto=ru.yandex.practicum.common.model.NoProductsInShoppingCartExceptionDto</importMapping>
+                                <importMapping>ProductInShoppingCartNotInWarehouseDto=ru.yandex.practicum.common.model.ProductInShoppingCartNotInWarehouseDto</importMapping>
+                                <importMapping>BookedProductsDto=ru.yandex.practicum.common.model.BookedProductsDto</importMapping>
+                                <importMapping>ChangeProductQuantityRequestDto=ru.yandex.practicum.common.model.ChangeProductQuantityRequestDto</importMapping>
+                            </importMappings>
+
+                            <!-- Генерация вспомогательных файлов -->
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <!-- Добавляем сгенерированный код в пути исходников -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
@@ -142,11 +133,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <!-- Плагин компиляции -->
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

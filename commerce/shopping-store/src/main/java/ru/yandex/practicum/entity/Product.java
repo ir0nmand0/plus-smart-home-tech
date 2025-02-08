@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import ru.yandex.practicum.common.model.ProductCategory;
-import ru.yandex.practicum.common.model.ProductState;
-import ru.yandex.practicum.common.model.QuantityState;
+import ru.yandex.practicum.common.model.ProductCategoryDto;
+import ru.yandex.practicum.common.model.ProductStateDto;
+import ru.yandex.practicum.common.model.QuantityStateDto;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -39,15 +39,15 @@ public class Product {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductCategory productCategory;
+    private ProductCategoryDto productCategory;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private QuantityState quantityState;
+    private QuantityStateDto quantityState;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ProductState productState;
+    private ProductStateDto productState;
 
     private Integer rating;
 

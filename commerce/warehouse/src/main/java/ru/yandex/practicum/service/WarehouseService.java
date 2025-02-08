@@ -1,14 +1,18 @@
 package ru.yandex.practicum.service;
 
-import ru.yandex.practicum.common.model.DimensionDto;
-import ru.yandex.practicum.common.model.ShoppingCartDto;
-import ru.yandex.practicum.common.model.BookedProductsDto;
-import ru.yandex.practicum.common.model.AddressDto;
+import ru.yandex.practicum.common.model.*;
 import ru.yandex.practicum.exception.*;
+import java.util.Map;
 import java.util.UUID;
 
 /**
- * Сервис для работы со складом
+ * Сервис для работы со складом.
+ * Предоставляет методы для:
+ * - управления товарами (добавление, регистрация)
+ * - проверки наличия
+ * - сборки заказов
+ * - работы с доставкой
+ * - обработки возвратов
  */
 public interface WarehouseService {
 
@@ -43,4 +47,38 @@ public interface WarehouseService {
      * @return адрес склада
      */
     AddressDto getAddress();
+
+    /**
+     * Сборка товаров для заказа.
+     * Метод получает список товаров и идентификатор заказа. Выполняется повторная проверка
+     * наличия заказанных товаров в нужном количестве, уменьшается их доступный остаток
+     * и создаётся сущность "Забронированные для заказа товары" (OrderBooking).
+     *
+     * @param request запрос на сборку товаров, содержащий ID заказа и список товаров
+     * @return информация о собранных товарах (вес, объем, наличие хрупких товаров)
+     * @throws InsufficientProductQuantityException если товаров недостаточно
+     * @throws ProductNotInWarehouseException если товар отсутствует на складе
+     */
+    BookedProductsDto assemblyProducts(AssemblyProductsForOrderRequestDto request);
+
+    /**
+     * Передача товаров в доставку.
+     * Метод вызывается из сервиса доставки и обновляет информацию о собранном заказе
+     * в базе данных склада: добавляет идентификатор доставки в сущность OrderBooking
+     * и во внутреннее хранилище собранных товаров заказа.
+     *
+     * @param request запрос на передачу в доставку, содержащий ID заказа и ID доставки
+     * @throws IllegalStateException если бронирование для заказа не найдено
+     */
+    void shipToDelivery(ShippedToDeliveryRequestDto request);
+
+    /**
+     * Возврат товара на склад.
+     * Метод принимает список товаров с количеством и увеличивает доступный остаток
+     * для каждого товара.
+     *
+     * @param returns карта товаров (ключ - ID товара) и их количества для возврата
+     * @throws ProductNotInWarehouseException если товар отсутствует на складе
+     */
+    void returnProducts(Map<String, Long> returns);
 }

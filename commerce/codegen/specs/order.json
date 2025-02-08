@@ -1,0 +1,533 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "/order/api/v1/order",
+      "description": "Base path"
+    }
+  ],
+  "tags": [
+    {
+      "name": "OrderProcessor",
+      "description": "API для работы с заказами"
+    }
+  ],
+  "paths": {
+    "/order": {
+      "get": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Получить заказы пользователя.",
+        "operationId": "getClientOrders",
+        "parameters": [
+          {
+            "name": "username",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Имя пользователя не должно быть пустым",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Список всех заказов пользователя (Точка улучшения и развития - пагинированный вывод)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Создать новый заказ в системе.",
+        "operationId": "createNewOrder",
+        "requestBody": {
+          "description": "Запрос на создание заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/CreateNewOrderRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Нет заказываемого товара на складе",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoSpecifiedProductInWarehouseExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Оформленный заказ пользователя",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/return": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Возврат заказа.",
+        "operationId": "productReturn",
+        "requestBody": {
+          "description": "Запрос на возврат заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ProductReturnRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя после сборки",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/payment": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Оплата заказа.",
+        "operationId": "payment",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Заказ пользователя после оплаты",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/payment/failed": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Оплата заказа произошла с ошибкой.",
+        "operationId": "paymentFailed",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя после ошибки оплаты",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/delivery": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Доставка заказа.",
+        "operationId": "delivery",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя после доставки",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/delivery/failed": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Доставка заказа произошла с ошибкой.",
+        "operationId": "deliveryFailed",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя после ошибки доставки",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/completed": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Завершение заказа.",
+        "operationId": "complete",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя после всех стадий и завершенный",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/calculate/total": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Расчёт стоимости заказа.",
+        "operationId": "calculateTotalCost",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Заказ пользователя с расчётом общей стоимости",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/calculate/delivery": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Расчёт стоимости доставки заказа.",
+        "operationId": "calculateDeliveryCost",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя с расчётом доставки",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/assembly": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Сборка заказа.",
+        "operationId": "assembly",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя после сборки",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/order/assembly/failed": {
+      "post": {
+        "tags": [
+          "OrderProcessor"
+        ],
+        "description": "Сборка заказа произошла с ошибкой.",
+        "operationId": "assemblyFailed",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Заказ пользователя после ошибки сборки",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/OrderDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Не найден заказ",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

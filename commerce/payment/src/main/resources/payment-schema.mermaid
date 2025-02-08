@@ -1,0 +1,25 @@
+erDiagram
+    payments ||--o{ payment_history : tracks
+    
+    payments {
+        UUID payment_id PK
+        UUID order_id
+        DOUBLE total_payment
+        DOUBLE delivery_total
+        DOUBLE product_total
+        DOUBLE tax_total
+        payment_status status
+        VARCHAR payment_method
+        JSONB payment_details
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    payment_history {
+        UUID history_id PK
+        UUID payment_id FK
+        payment_status previous_status
+        payment_status new_status
+        TIMESTAMP changed_at
+        TEXT reason
+    }

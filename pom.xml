@@ -47,6 +47,7 @@
         <spring-cloud-starter-netflix-eureka.version>4.2.0</spring-cloud-starter-netflix-eureka.version>
         <spring-boot-starter-actuator.version>3.4.1</spring-boot-starter-actuator.version>
         <confluent.version>7.8.0</confluent.version>
+        <flyway.version>11.3.1</flyway.version>
 
         <!-- Версии Maven-плагинов -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version> <!-- Компиляция Java -->
@@ -159,6 +160,18 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-postgresql</artifactId>
+                <version>${flyway.version}</version>
             </dependency>
 
             <dependency>

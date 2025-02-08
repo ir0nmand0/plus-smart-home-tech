@@ -6,76 +6,41 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.common.model.AddProductToWarehouseRequest;
-import ru.yandex.practicum.common.model.AddressDto;
-import ru.yandex.practicum.common.model.BookedProductsDto;
-import ru.yandex.practicum.common.model.NewProductInWarehouseRequest;
-import ru.yandex.practicum.common.model.ShoppingCartDto;
+import ru.yandex.practicum.common.model.*;
 import ru.yandex.practicum.service.WarehouseService;
-import ru.yandex.practicum.warehouse.api.ApiApi;
+import ru.yandex.practicum.warehouse.api.WarehouseApi;
+import java.util.Map;
 
+/**
+ * Контроллер для управления складом.
+ * Обеспечивает REST API для всех операций со складом:
+ * - регистрация новых товаров
+ * - добавление товаров
+ * - проверка наличия
+ * - сборка заказов
+ * - передача в доставку
+ * - обработка возвратов
+ */
 @Slf4j
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${api.version}${api.warehouse.path}")
-public class WarehouseController implements ApiApi {
+@RequestMapping("/api/v${api.warehouse-version}/warehouse")
+public class WarehouseController implements WarehouseApi {
 
     private final WarehouseService warehouseService;
 
     /**
-     * POST /api/v1/warehouse/add
-     * (addProductToWarehouse)
-     */
-    @Override
-    @PostMapping("${api.warehouse.add-path}")
-    @ResponseStatus(HttpStatus.OK)
-    public void addProductToWarehouse(
-            @Valid @RequestBody AddProductToWarehouseRequest addProductToWarehouseRequest
-    ) {
-        log.info("REST запрос на добавление товара на склад: {}", addProductToWarehouseRequest);
-        warehouseService.addProduct(
-                addProductToWarehouseRequest.getProductId(),
-                addProductToWarehouseRequest.getQuantity()
-        );
-        // По спецификации можно вернуть 200 или 201. Выберем 200 как успешное добавление.
-    }
-
-    /**
-     * POST /api/v1/warehouse/check
-     * (checkProductQuantityEnoughForShoppingCart)
-     */
-    @Override
-    @PostMapping("${api.warehouse.check-path}")
-    @ResponseStatus(HttpStatus.OK)
-    public BookedProductsDto  checkProductQuantityEnoughForShoppingCart(
-            @Valid @RequestBody ShoppingCartDto shoppingCartDto
-    ) {
-        log.info("REST запрос на проверку наличия товаров для корзины: {}", shoppingCartDto);
-        return warehouseService.checkAvailability(shoppingCartDto);
-    }
-
-    /**
-     * GET /api/v1/warehouse/address
-     * (getWarehouseAddress)
-     */
-    @Override
-    @GetMapping("${api.warehouse.address-path}")
-    @ResponseStatus(HttpStatus.OK)
-    public AddressDto getWarehouseAddress() {
-        log.info("REST запрос на получение адреса склада");
-        return warehouseService.getAddress();
-    }
-
-    /**
+     * Добавление нового товара на склад
      * PUT /api/v1/warehouse
-     * (newProductInWarehouse)
+     *
+     * @param newProductInWarehouseRequest информация о новом товаре
      */
     @Override
     @PutMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void newProductInWarehouse(
-            @Valid @RequestBody NewProductInWarehouseRequest newProductInWarehouseRequest
+            @Valid @RequestBody NewProductInWarehouseRequestDto newProductInWarehouseRequest
     ) {
         log.info("REST запрос на регистрацию нового товара на складе: {}", newProductInWarehouseRequest);
         warehouseService.registerProduct(
@@ -84,5 +49,100 @@ public class WarehouseController implements ApiApi {
                 newProductInWarehouseRequest.getWeight(),
                 newProductInWarehouseRequest.getDimension()
         );
+    }
+
+    /**
+     * Добавление количества существующего товара
+     * POST /api/v1/warehouse/add
+     *
+     * @param addProductToWarehouseRequest информация о добавляемом количестве
+     */
+    @Override
+    @PostMapping("/add")
+    @ResponseStatus(HttpStatus.OK)
+    public void addProductToWarehouse(
+            @Valid @RequestBody AddProductToWarehouseRequestDto addProductToWarehouseRequest
+    ) {
+        log.info("REST запрос на добавление товара на склад: {}", addProductToWarehouseRequest);
+        warehouseService.addProduct(
+                addProductToWarehouseRequest.getProductId(),
+                addProductToWarehouseRequest.getQuantity()
+        );
+    }
+
+    /**
+     * Проверка наличия товаров для корзины
+     * POST /api/v1/warehouse/check
+     *
+     * @param shoppingCartDto информация о товарах в корзине
+     * @return информация о возможности бронирования
+     */
+    @Override
+    @PostMapping("/check")
+    @ResponseStatus(HttpStatus.OK)
+    public BookedProductsDto checkProductQuantityEnoughForShoppingCart(
+            @Valid @RequestBody ShoppingCartDto shoppingCartDto
+    ) {
+        log.info("REST запрос на проверку наличия товаров для корзины: {}", shoppingCartDto);
+        return warehouseService.checkAvailability(shoppingCartDto);
+    }
+
+    /**
+     * Получение адреса склада
+     * GET /api/v1/warehouse/address
+     *
+     * @return адрес склада
+     */
+    @Override
+    @GetMapping("/address")
+    public AddressDto getWarehouseAddress() {
+        log.info("REST запрос на получение адреса склада");
+        return warehouseService.getAddress();
+    }
+
+    /**
+     * Сборка товаров для заказа
+     * POST /api/v1/warehouse/assembly
+     *
+     * @param assemblyProductsForOrderRequest информация о заказе и товарах
+     * @return информация о собранных товарах
+     */
+    @Override
+    @PostMapping("/assembly")
+    public BookedProductsDto assemblyProductsForOrder(
+            @Valid @RequestBody AssemblyProductsForOrderRequestDto assemblyProductsForOrderRequest
+    ) {
+        log.info("REST запрос на сборку товаров для заказа: {}", assemblyProductsForOrderRequest);
+        return warehouseService.assemblyProducts(assemblyProductsForOrderRequest);
+    }
+
+    /**
+     * Передача товаров в доставку
+     * POST /api/v1/warehouse/shipped
+     *
+     * @param shippedToDeliveryRequest информация о заказе и доставке
+     */
+    @Override
+    @PostMapping("/shipped")
+    public void shippedToDelivery(
+            @Valid @RequestBody ShippedToDeliveryRequestDto shippedToDeliveryRequest
+    ) {
+        log.info("REST запрос на передачу товаров в доставку: {}", shippedToDeliveryRequest);
+        warehouseService.shipToDelivery(shippedToDeliveryRequest);
+    }
+
+    /**
+     * Обработка возврата товаров
+     * POST /api/v1/warehouse/return
+     *
+     * @param requestBody карта товаров и их количества для возврата
+     */
+    @Override
+    @PostMapping("/return")
+    public void acceptReturn(
+            @Valid @RequestBody Map<String, Long> requestBody
+    ) {
+        log.info("REST запрос на возврат товаров на склад: {}", requestBody);
+        warehouseService.returnProducts(requestBody);
     }
 }
