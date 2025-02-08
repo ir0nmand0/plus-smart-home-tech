@@ -97,12 +97,10 @@
                             <inputSpec>${project.parent.parent.basedir}/specs/delivery.json</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>ru.yandex.practicum.delivery.api</apiPackage>
-                            <modelPackage>ru.yandex.practicum.common.model</modelPackage>
                             <configOptions>
                                 <useJakartaEe>true</useJakartaEe>
                                 <interfaceOnly>true</interfaceOnly>
                                 <generateApis>true</generateApis>
-                                <generateModels>true</generateModels>
                                 <useTags>true</useTags>
                                 <java8>true</java8>
                                 <dateLibrary>${openapi.generator.java.dateLibrary}</dateLibrary>
@@ -111,7 +109,31 @@
                                 <serializationLibrary>jackson</serializationLibrary>
                                 <useBeanValidation>true</useBeanValidation>
                                 <beanValidationModel>true</beanValidationModel>
+                                <generateModels>false</generateModels>
+                                <useTags>true</useTags>
                             </configOptions>
+
+                            <importMappings>
+                                <!-- Модель доставки (используется в PUT "/" для создания доставки) -->
+                                <importMapping>DeliveryDto=ru.yandex.practicum.common.model.DeliveryDto</importMapping>
+
+                                <!-- Статус доставки, используемый в DeliveryDto -->
+                                <importMapping>DeliveryStateDto=ru.yandex.practicum.common.model.DeliveryStateDto</importMapping>
+
+                                <!-- Модель ошибки: доставка не найдена (используется в операциях "/successful", "/picked", "/failed" и при расчёте "/cost") -->
+                                <importMapping>NoDeliveryFoundExceptionDto=ru.yandex.practicum.common.model.NoDeliveryFoundExceptionDto</importMapping>
+
+                                <!-- Модель адреса, на которую ссылается DeliveryDto -->
+                                <importMapping>AddressDto=ru.yandex.practicum.common.model.AddressDto</importMapping>
+
+                                <!-- Модель заказа, используемая в "/cost" для расчёта стоимости доставки -->
+                                <importMapping>OrderDto=ru.yandex.practicum.common.model.OrderDto</importMapping>
+
+                                <!-- Дополнительная модель, используемая внутри NoDeliveryFoundExceptionDto -->
+                                <importMapping>HttpStatusEnumDto=ru.yandex.practicum.common.model.HttpStatusEnumDto</importMapping>
+
+                            </importMappings>
+
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                         </configuration>
                     </execution>

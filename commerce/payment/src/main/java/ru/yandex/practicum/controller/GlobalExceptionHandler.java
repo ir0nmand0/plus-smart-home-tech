@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
         log.error(PAYMENT_ERROR, ex.getMessage());
         return new NoPaymentFoundExceptionDto()
                 .message(ex.getMessage())
-                .httpStatus(HttpStatusEnum._404_NOT_FOUND);
+                .httpStatus(HttpStatusEnumDto._404_NOT_FOUND);
     }
 
     @ExceptionHandler(NotEnoughInfoInOrderToCalculateException.class)
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
         log.error(PAYMENT_ERROR, ex.getMessage());
         return new NotEnoughInfoInOrderToCalculateExceptionDto()
                 .message(ex.getMessage())
-                .httpStatus(HttpStatusEnum._400_BAD_REQUEST);
+                .httpStatus(HttpStatusEnumDto._400_BAD_REQUEST);
     }
 
     @ExceptionHandler(PaymentCalculationException.class)

@@ -6,21 +6,21 @@
   },
   "servers": [
     {
-      "url": "http://localhost:44989",
-      "description": "Generated server url"
+      "url": "/delivery/api/v1/delivery",
+      "description": "Base path"
     }
   ],
   "tags": [
     {
-      "name": "Шлюз доставки",
+      "name": "DeliveryGateway",
       "description": "API для расчёта, проведения доставки"
     }
   ],
   "paths": {
-    "/api/v1/delivery": {
+    "/delivery": {
       "put": {
         "tags": [
-          "Шлюз доставки"
+          "DeliveryGateway"
         ],
         "description": "Создать новую доставку в БД.",
         "operationId": "planDelivery",
@@ -29,7 +29,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DeliveryDto"
+                "$ref": "common-schemas.json#/components/schemas/DeliveryDto"
               }
             }
           },
@@ -41,7 +41,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/DeliveryDto"
+                  "$ref": "common-schemas.json#/components/schemas/DeliveryDto"
                 }
               }
             }
@@ -49,10 +49,10 @@
         }
       }
     },
-    "/api/v1/delivery/successful": {
+    "/delivery/successful": {
       "post": {
         "tags": [
-          "Шлюз доставки"
+          "DeliveryGateway"
         ],
         "description": "Эмуляция успешной доставки товара.",
         "operationId": "deliverySuccessful",
@@ -74,7 +74,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoDeliveryFoundExceptionDto"
                 }
               }
             }
@@ -82,10 +82,10 @@
         }
       }
     },
-    "/api/v1/delivery/picked": {
+    "/delivery/picked": {
       "post": {
         "tags": [
-          "Шлюз доставки"
+          "DeliveryGateway"
         ],
         "description": "Эмуляция получения товара в доставку.",
         "operationId": "deliveryPicked",
@@ -107,7 +107,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoDeliveryFoundExceptionDto"
                 }
               }
             }
@@ -115,10 +115,10 @@
         }
       }
     },
-    "/api/v1/delivery/failed": {
+    "/delivery/failed": {
       "post": {
         "tags": [
-          "Шлюз доставки"
+          "DeliveryGateway"
         ],
         "description": "Эмуляция неудачного вручения товара.",
         "operationId": "deliveryFailed",
@@ -140,7 +140,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoDeliveryFoundExceptionDto"
                 }
               }
             }
@@ -148,10 +148,10 @@
         }
       }
     },
-    "/api/v1/delivery/cost": {
+    "/delivery/cost": {
       "post": {
         "tags": [
-          "Шлюз доставки"
+          "DeliveryGateway"
         ],
         "description": "Расчёт полной стоимости доставки заказа.",
         "operationId": "deliveryCost",
@@ -183,7 +183,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoDeliveryFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoDeliveryFoundExceptionDto"
                 }
               }
             }
@@ -194,7 +194,7 @@
   },
   "components": {
     "schemas": {
-      "DeliveryDto": {
+      "Delivery": {
         "required": [
           "deliveryId",
           "deliveryState",
@@ -221,7 +221,7 @@
             "format": "uuid"
           },
           "deliveryState": {
-            "$ref": "#/components/schemas/DeliveryState"
+            "$ref": "common-schemas.json#/components/schemas/DeliveryStateDto"
           }
         }
       },
@@ -236,7 +236,7 @@
           "CANCELLED"
         ]
       },
-      "NoDeliveryFoundExceptionDto": {
+      "NoDeliveryFoundException": {
         "type": "object",
         "properties": {
           "cause": {
@@ -285,7 +285,7 @@
             }
           },
           "httpStatus": {
-            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnum"
+            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnumDto"
           },
           "userMessage": { "type": "string" },
           "message": { "type": "string" },

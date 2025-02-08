@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.delivery.api.DefaultApi;
+import ru.yandex.practicum.delivery.api.DeliveryGatewayApi;
 import ru.yandex.practicum.service.DeliveryService;
 import ru.yandex.practicum.common.model.*;
 import java.util.UUID;
@@ -19,8 +19,8 @@ import java.util.UUID;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("${api.version}${api.delivery.path}")
-public class DeliveryController implements DefaultApi {
+@RequestMapping("/api/v${api.delivery-version}/delivery")
+public class DeliveryController implements DeliveryGatewayApi {
 
     private final DeliveryService deliveryService;
 
@@ -30,7 +30,7 @@ public class DeliveryController implements DefaultApi {
      * @return стоимость доставки
      */
     @Override
-    @PostMapping("${api.delivery.cost}")
+    @PostMapping("/cost")
     public Double deliveryCost(@Valid @RequestBody OrderDto orderDto) {
         log.info("Calculate delivery cost for order {}", orderDto.getOrderId());
         return deliveryService.calculateDeliveryCost(orderDto);
@@ -41,7 +41,7 @@ public class DeliveryController implements DefaultApi {
      * @param orderId идентификатор заказа
      */
     @Override
-    @PostMapping("${api.delivery.failed}")
+    @PostMapping("/failed")
     public void deliveryFailed(@Valid @RequestBody UUID orderId) {
         log.info("Mark delivery as failed for order {}", orderId);
         deliveryService.markDeliveryFailed(orderId);
@@ -52,7 +52,7 @@ public class DeliveryController implements DefaultApi {
      * @param orderId идентификатор заказа
      */
     @Override
-    @PostMapping("${api.delivery.picked}")
+    @PostMapping("/picked")
     public void deliveryPicked(@Valid @RequestBody UUID orderId) {
         log.info("Mark delivery as picked for order {}", orderId);
         deliveryService.markDeliveryPicked(orderId);
@@ -63,7 +63,7 @@ public class DeliveryController implements DefaultApi {
      * @param orderId идентификатор заказа
      */
     @Override
-    @PostMapping("${api.delivery.successful}")
+    @PostMapping("/successful")
     public void deliverySuccessful(@Valid @RequestBody UUID orderId) {
         log.info("Mark delivery as successful for order {}", orderId);
         deliveryService.markDeliverySuccessful(orderId);

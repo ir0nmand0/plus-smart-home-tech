@@ -7,6 +7,7 @@ spring:
 
   flyway:
     enabled: true
+    baselineOnMigrate: true
 
   jackson:
     mapper:
@@ -90,10 +91,6 @@ management:
         include: health,info
 
 api:
-  version: /api/v1
-  delivery:
-    path: /delivery
-    cost: /cost
-    failed: /failed
-    picked: /picked
-    successful: /successful
+  delivery-version: v1
+  order-version: v1
+  warehouse-version: v1

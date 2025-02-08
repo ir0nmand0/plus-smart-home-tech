@@ -24,6 +24,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static ru.yandex.practicum.common.model.DeliveryStateDto.CREATED;
 
 @ExtendWith(MockitoExtension.class)
 class DeliveryServiceImplTest {
@@ -111,7 +112,7 @@ class DeliveryServiceImplTest {
                 fromAddressDto,
                 toAddressDto,
                 orderId,
-                ru.yandex.practicum.common.model.DeliveryState.CREATED
+                CREATED
         );
 
         // Создаем тестовый заказ

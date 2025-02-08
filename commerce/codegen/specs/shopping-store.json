@@ -6,21 +6,21 @@
   },
   "servers": [
     {
-      "url": "http://192.168.1.96:60458",
-      "description": "Generated server url"
+      "url": "/shopping-store/api/v1/shopping-store",
+      "description": "Base path"
     }
   ],
   "tags": [
     {
-      "name": "Витрина онлайн-магазина",
+      "name": "Storefront",
       "description": "API для обеспечения работы витрины онлайн магазина"
     }
   ],
   "paths": {
-    "/api/v1/shopping-store": {
+    "/shopping-store": {
       "get": {
         "tags": [
-          "Витрина онлайн-магазина"
+          "Storefront"
         ],
         "description": "Получение списка товаров по типу с пагинацией",
         "operationId": "getProducts",
@@ -30,7 +30,7 @@
             "in": "query",
             "required": true,
             "schema": {
-              "$ref": "common-schemas.json#/components/schemas/ProductCategory"
+              "$ref": "common-schemas.json#/components/schemas/ProductCategoryDto"
             }
           },
           {
@@ -76,7 +76,7 @@
       },
       "put": {
         "tags": [
-          "Витрина онлайн-магазина"
+          "Storefront"
         ],
         "description": "Создание нового товара в ассортименте",
         "operationId": "createNewProduct",
@@ -116,7 +116,7 @@
       },
       "post": {
         "tags": [
-          "Витрина онлайн-магазина"
+          "Storefront"
         ],
         "description": "Обновление товара в ассортименте",
         "operationId": "updateProduct",
@@ -165,10 +165,10 @@
         }
       }
     },
-    "/api/v1/shopping-store/{productId}": {
+    "/shopping-store/{productId}": {
       "get": {
         "tags": [
-          "Витрина онлайн-магазина"
+          "Storefront"
         ],
         "description": "Получить сведения по товару",
         "operationId": "getProduct",
@@ -208,10 +208,10 @@
         }
       }
     },
-    "/api/v1/shopping-store/removeProductFromStore": {
+    "/shopping-store/removeProductFromStore": {
       "post": {
         "tags": [
-          "Витрина онлайн-магазина"
+          "Storefront"
         ],
         "description": "Перевести товар в DEACTIVATE",
         "operationId": "removeProductFromStore",
@@ -273,10 +273,10 @@
         }
       }
     },
-    "/api/v1/shopping-store/quantityState": {
+    "/shopping-store/quantityState": {
       "post": {
         "tags": [
-          "Витрина онлайн-магазина"
+          "Storefront"
         ],
         "description": "Установка статуса остатка (ENDED, FEW, ENOUGH, MANY)",
         "operationId": "setProductQuantityState",
@@ -297,7 +297,7 @@
             "description": "Статус остатка",
             "required": true,
             "schema": {
-              "$ref": "common-schemas.json#/components/schemas/QuantityState"
+              "$ref": "common-schemas.json#/components/schemas/QuantityStateDto"
             }
           }
         ],

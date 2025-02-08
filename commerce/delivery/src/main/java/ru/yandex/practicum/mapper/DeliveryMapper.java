@@ -5,6 +5,7 @@ import org.mapstruct.Mapping;
 import ru.yandex.practicum.common.model.DeliveryDto;
 import ru.yandex.practicum.entity.Address;
 import ru.yandex.practicum.entity.Delivery;
+import ru.yandex.practicum.common.model.AddressDto;
 
 @Mapper(componentModel = "spring")
 public interface DeliveryMapper {
@@ -15,11 +16,11 @@ public interface DeliveryMapper {
     @Mapping(target = "updatedAt", ignore = true)
     Delivery toEntity(DeliveryDto deliveryDto);
 
-    ru.yandex.practicum.common.model.AddressDto addressToAddressDto(Address address);
+    AddressDto addressToAddressDto(Address address);
 
     @Mapping(target = "addressId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    Address addressDtoToAddress(ru.yandex.practicum.common.model.AddressDto addressDto);
+    Address addressDtoToAddress(AddressDto addressDto);
 }
 

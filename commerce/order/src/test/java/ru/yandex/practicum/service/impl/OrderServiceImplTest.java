@@ -120,7 +120,7 @@ class OrderServiceImplTest {
         BookedProductsDto bookedProductsDto = new BookedProductsDto();
 
         // Настройка маппера для правильного преобразования состояний
-        when(cartClient.bookingProductsFromShoppingCart(any())).thenReturn(ResponseEntity.ok(bookedProductsDto));
+        when(cartClient.bookingProductsFromShoppingCart(any())).thenReturn(bookedProductsDto);
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
 

@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import ru.yandex.practicum.common.model.AddressDto;
+import ru.yandex.practicum.common.model.DeliveryDto;
+import ru.yandex.practicum.common.model.DeliveryStateDto;
 import ru.yandex.practicum.common.model.OrderDto;
 import ru.yandex.practicum.config.FeignClientConfiguration;
 import ru.yandex.practicum.entity.Delivery;
@@ -69,18 +72,18 @@ class DeliveryServiceIntegrationTest {
         UUID orderId = UUID.randomUUID();
         UUID deliveryId = UUID.randomUUID();
 
-        ru.yandex.practicum.common.model.AddressDto addressDto = new ru.yandex.practicum.common.model.AddressDto()
+        AddressDto addressDto = new AddressDto()
                 .country("Test")
                 .city("Test")
                 .street("Test")
                 .house("1");
 
-        ru.yandex.practicum.common.model.DeliveryDto deliveryDto = new ru.yandex.practicum.common.model.DeliveryDto(
+        DeliveryDto deliveryDto = new DeliveryDto(
                 deliveryId,
                 addressDto,
                 addressDto,
                 orderId,
-                ru.yandex.practicum.common.model.DeliveryState.CREATED
+                DeliveryStateDto.CREATED
         );
 
         Delivery delivery = Delivery.builder()
@@ -93,7 +96,7 @@ class DeliveryServiceIntegrationTest {
         when(deliveryMapper.toDto(any())).thenReturn(deliveryDto);
 
         // Выполнение
-        ru.yandex.practicum.common.model.DeliveryDto result = deliveryService.planDelivery(deliveryDto);
+        DeliveryDto result = deliveryService.planDelivery(deliveryDto);
 
         // Проверка
         assertNotNull(result);

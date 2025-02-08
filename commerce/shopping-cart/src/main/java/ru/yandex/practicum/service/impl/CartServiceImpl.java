@@ -13,9 +13,9 @@ import ru.yandex.practicum.exception.NoProductsInShoppingCartException;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.exception.ProductInShoppingCartNotInWarehouseException;
 import ru.yandex.practicum.common.model.BookedProductsDto;
-import ru.yandex.practicum.common.model.ChangeProductQuantityRequest;
+import ru.yandex.practicum.common.model.ChangeProductQuantityRequestDto;
 import ru.yandex.practicum.common.model.ProductDto;
-import ru.yandex.practicum.common.model.QuantityState;
+import ru.yandex.practicum.common.model.QuantityStateDto;
 import ru.yandex.practicum.common.model.ShoppingCartDto;
 import ru.yandex.practicum.mapper.CartMapper;
 import ru.yandex.practicum.repository.CartRepository;
@@ -131,7 +131,7 @@ public class CartServiceImpl implements CartService {
      */
     @Override
     @Transactional
-    public ShoppingCartDto changeQuantity(String username, ChangeProductQuantityRequest request) {
+    public ShoppingCartDto changeQuantity(String username, ChangeProductQuantityRequestDto request) {
         log.info(CHANGING_QUANTITY, username, request);
         validateUsername(username);
 
@@ -236,13 +236,13 @@ public class CartServiceImpl implements CartService {
             cartRepository.save(cart);
         }
         // 1) Проверяем наличие в магазине
-        ProductDto product = storeClient.getProduct(productId).getBody();
+        ProductDto product = storeClient.getProduct(productId);
         if (product == null) {
             throw new ProductInShoppingCartNotInWarehouseException(
                     "Product with ID " + productId + " not found in store (empty body)"
             );
         }
-        if (product.getQuantityState() == QuantityState.ENDED) {
+        if (product.getQuantityState() == QuantityStateDto.ENDED) {
             throw new ProductInShoppingCartNotInWarehouseException(
                     "Product with ID " + productId + " ended in store"
             );

@@ -30,7 +30,7 @@ public class GlobalExceptionHandler {
         log.error(DELIVERY_ERROR, ex.getMessage());
         return new NoDeliveryFoundExceptionDto()
                 .message(ex.getMessage())
-                .httpStatus(HttpStatusEnum._404_NOT_FOUND);
+                .httpStatus(HttpStatusEnumDto._404_NOT_FOUND);
     }
 
     /**

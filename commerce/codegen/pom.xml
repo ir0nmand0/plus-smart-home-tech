@@ -22,7 +22,6 @@
     <modules>
         <module>codegen-common</module>
         <module>codegen-api</module>
-        <module>codegen-client</module>
     </modules>
 
     <!-- Настройка профилей сборки (при необходимости) -->
@@ -55,7 +54,7 @@
         <build-helper-maven-plugin.version>3.5.0</build-helper-maven-plugin.version>
 
         <!-- Версии библиотек -->
-        <openapi.generator.version>7.3.0</openapi.generator.version>
+        <openapi.generator.version>7.11.0</openapi.generator.version>
         <jackson.version>2.16.1</jackson.version>
         <jackson.databind.nullable.version>0.2.6</jackson.databind.nullable.version>
         <swagger-annotations.version>2.2.20</swagger-annotations.version>
@@ -226,7 +225,6 @@
                     <artifactId>openapi-generator-maven-plugin</artifactId>
                     <version>${openapi.generator.version}</version>
                     <configuration>
-                        <skipValidateSpec>true</skipValidateSpec>
                         <configOptions>
                             <useJakartaEe>true</useJakartaEe>
                             <dateLibrary>${openapi.generator.java.dateLibrary}</dateLibrary>

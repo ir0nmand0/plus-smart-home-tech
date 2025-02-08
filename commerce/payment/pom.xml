@@ -131,17 +131,17 @@
         </dependency>
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
-            <artifactId>order-client</artifactId>
+            <artifactId>order-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
-            <artifactId>delivery-client</artifactId>
+            <artifactId>delivery-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>ru.yandex.practicum</groupId>
-            <artifactId>shopping-store-client</artifactId>
+            <artifactId>shopping-store-api</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
 

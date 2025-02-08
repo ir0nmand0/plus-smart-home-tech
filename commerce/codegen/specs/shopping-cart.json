@@ -6,21 +6,21 @@
   },
   "servers": [
     {
-      "url": "http://192.168.1.125:55905",
-      "description": "Generated server url"
+      "url": "/shopping-cart/api/v1/shopping-cart",
+      "description": "Base path"
     }
   ],
   "tags": [
     {
-      "name": "Корзина для онлайн-магазина",
+      "name": "ShoppingCart",
       "description": "API для работы корзины онлайн магазина"
     }
   ],
   "paths": {
-    "/api/v1/shopping-cart": {
+    "/shopping-cart": {
       "get": {
         "tags": [
-          "Корзина для онлайн-магазина"
+          "ShoppingCart"
         ],
         "description": "Получить актуальную корзину для пользователя",
         "operationId": "getShoppingCart",
@@ -59,7 +59,7 @@
       },
       "put": {
         "tags": [
-          "Корзина для онлайн-магазина"
+          "ShoppingCart"
         ],
         "description": "Добавить товар(ы) в корзину",
         "operationId": "addProductToShoppingCart",
@@ -140,7 +140,7 @@
       },
       "delete": {
         "tags": [
-          "Корзина для онлайн-магазина"
+          "ShoppingCart"
         ],
         "description": "Деактивация корзины для пользователя",
         "operationId": "deactivateCurrentShoppingCart",
@@ -180,10 +180,10 @@
         }
       }
     },
-    "/api/v1/shopping-cart/remove": {
+    "/shopping-cart/remove": {
       "post": {
         "tags": [
-          "Корзина для онлайн-магазина"
+          "ShoppingCart"
         ],
         "description": "Убрать товары из корзины",
         "operationId": "removeFromShoppingCart",
@@ -276,10 +276,10 @@
         }
       }
     },
-    "/api/v1/shopping-cart/change-quantity": {
+    "/shopping-cart/change-quantity": {
       "post": {
         "tags": [
-          "Корзина для онлайн-магазина"
+          "ShoppingCart"
         ],
         "description": "Изменить количество товаров в корзине",
         "operationId": "changeProductQuantity",
@@ -298,7 +298,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChangeProductQuantityRequest"
+                "$ref": "common-schemas.json#/components/schemas/ChangeProductQuantityRequestDto"
               }
             }
           }
@@ -350,10 +350,10 @@
         }
       }
     },
-    "/api/v1/shopping-cart/booking": {
+    "/shopping-cart/booking": {
       "post": {
         "tags": [
-          "Корзина для онлайн-магазина"
+          "ShoppingCart"
         ],
         "description": "Зарезервировать товары на складе",
         "operationId": "bookingProductsFromShoppingCart",
@@ -399,28 +399,6 @@
             }
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "ChangeProductQuantityRequest": {
-        "required": [
-          "newQuantity",
-          "productId"
-        ],
-        "type": "object",
-        "properties": {
-          "productId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "newQuantity": {
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "description": "Запрос на изменение количества товара"
       }
     }
   }

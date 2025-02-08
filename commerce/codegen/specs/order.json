@@ -6,21 +6,21 @@
   },
   "servers": [
     {
-      "url": "http://localhost:41723",
-      "description": "Generated server url"
+      "url": "/order/api/v1/order",
+      "description": "Base path"
     }
   ],
   "tags": [
     {
-      "name": "Обработка заказов",
+      "name": "OrderProcessor",
       "description": "API для работы с заказами"
     }
   ],
   "paths": {
-    "/api/v1/order": {
+    "/order": {
       "get": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Получить заказы пользователя.",
         "operationId": "getClientOrders",
@@ -40,7 +40,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotAuthorizedUserExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NotAuthorizedUserExceptionDto"
                 }
               }
             }
@@ -62,7 +62,7 @@
       },
       "put": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Создать новый заказ в системе.",
         "operationId": "createNewOrder",
@@ -71,7 +71,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateNewOrderRequestDto"
+                "$ref": "common-schemas.json#/components/schemas/CreateNewOrderRequestDto"
               }
             }
           },
@@ -83,7 +83,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoSpecifiedProductInWarehouseExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoSpecifiedProductInWarehouseExceptionDto"
                 }
               }
             }
@@ -101,10 +101,10 @@
         }
       }
     },
-    "/api/v1/order/return": {
+    "/order/return": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Возврат заказа.",
         "operationId": "productReturn",
@@ -113,7 +113,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProductReturnRequestDto"
+                "$ref": "common-schemas.json#/components/schemas/ProductReturnRequestDto"
               }
             }
           }
@@ -134,7 +134,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -142,10 +142,10 @@
         }
       }
     },
-    "/api/v1/order/payment": {
+    "/order/payment": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Оплата заказа.",
         "operationId": "payment",
@@ -167,7 +167,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -185,10 +185,10 @@
         }
       }
     },
-    "/api/v1/order/payment/failed": {
+    "/order/payment/failed": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Оплата заказа произошла с ошибкой.",
         "operationId": "paymentFailed",
@@ -220,7 +220,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -228,10 +228,10 @@
         }
       }
     },
-    "/api/v1/order/delivery": {
+    "/order/delivery": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Доставка заказа.",
         "operationId": "delivery",
@@ -263,7 +263,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -271,10 +271,10 @@
         }
       }
     },
-    "/api/v1/order/delivery/failed": {
+    "/order/delivery/failed": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Доставка заказа произошла с ошибкой.",
         "operationId": "deliveryFailed",
@@ -306,7 +306,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -314,10 +314,10 @@
         }
       }
     },
-    "/api/v1/order/completed": {
+    "/order/completed": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Завершение заказа.",
         "operationId": "complete",
@@ -349,7 +349,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -357,10 +357,10 @@
         }
       }
     },
-    "/api/v1/order/calculate/total": {
+    "/order/calculate/total": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Расчёт стоимости заказа.",
         "operationId": "calculateTotalCost",
@@ -382,7 +382,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -400,10 +400,10 @@
         }
       }
     },
-    "/api/v1/order/calculate/delivery": {
+    "/order/calculate/delivery": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Расчёт стоимости доставки заказа.",
         "operationId": "calculateDeliveryCost",
@@ -435,7 +435,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -443,10 +443,10 @@
         }
       }
     },
-    "/api/v1/order/assembly": {
+    "/order/assembly": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Сборка заказа.",
         "operationId": "assembly",
@@ -478,7 +478,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
@@ -486,10 +486,10 @@
         }
       }
     },
-    "/api/v1/order/assembly/failed": {
+    "/order/assembly/failed": {
       "post": {
         "tags": [
-          "Обработка заказов"
+          "OrderProcessor"
         ],
         "description": "Сборка заказа произошла с ошибкой.",
         "operationId": "assemblyFailed",
@@ -521,329 +521,11 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoOrderFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoOrderFoundExceptionDto"
                 }
               }
             }
           }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "CreateNewOrderRequestDto": {
-        "required": [
-          "deliveryAddress",
-          "shoppingCart"
-        ],
-        "type": "object",
-        "properties": {
-          "shoppingCart": {
-            "$ref": "#/components/schemas/ShoppingCartDto"
-          },
-          "deliveryAddress": {
-            "$ref": "common-schemas.json#/components/schemas/AddressDto"
-          }
-        }
-      },
-      "ShoppingCartDto": {
-        "required": [
-          "products",
-          "shoppingCartId"
-        ],
-        "type": "object",
-        "properties": {
-          "shoppingCartId": {
-            "type": "string",
-            "description": "Идентификатор корзины в БД",
-            "format": "uuid",
-            "example": "53aa35c8-e659-44b2-882f-f6056e443c99"
-          },
-          "products": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "description": "Отображение идентификатора товара на отобранное количество.",
-              "format": "int64"
-            },
-            "description": "Отображение идентификатора товара на отобранное количество."
-          }
-        },
-        "description": "Корзина товаров в онлайн магазине."
-      },
-      "ProductReturnRequestDto": {
-        "required": [
-          "products"
-        ],
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "products": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        }
-      },
-      "NoSpecifiedProductInWarehouseExceptionDto": {
-        "type": "object",
-        "properties": {
-          "cause": {
-            "type": "object",
-            "properties": {
-              "stackTrace": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "classLoaderName": { "type": "string" },
-                    "moduleName": { "type": "string" },
-                    "moduleVersion": { "type": "string" },
-                    "methodName": { "type": "string" },
-                    "fileName": { "type": "string" },
-                    "lineNumber": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "className": { "type": "string" },
-                    "nativeMethod": { "type": "boolean" }
-                  }
-                }
-              },
-              "message": { "type": "string" },
-              "localizedMessage": { "type": "string" }
-            }
-          },
-          "stackTrace": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "classLoaderName": { "type": "string" },
-                "moduleName": { "type": "string" },
-                "moduleVersion": { "type": "string" },
-                "methodName": { "type": "string" },
-                "fileName": { "type": "string" },
-                "lineNumber": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "className": { "type": "string" },
-                "nativeMethod": { "type": "boolean" }
-              }
-            }
-          },
-          "httpStatus": {
-            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnum"
-          },
-          "userMessage": { "type": "string" },
-          "message": { "type": "string" },
-          "suppressed": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "stackTrace": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "classLoaderName": { "type": "string" },
-                      "moduleName": { "type": "string" },
-                      "moduleVersion": { "type": "string" },
-                      "methodName": { "type": "string" },
-                      "fileName": { "type": "string" },
-                      "lineNumber": {
-                        "type": "integer",
-                        "format": "int32"
-                      },
-                      "className": { "type": "string" },
-                      "nativeMethod": { "type": "boolean" }
-                    }
-                  }
-                },
-                "message": { "type": "string" },
-                "localizedMessage": { "type": "string" }
-              }
-            }
-          },
-          "localizedMessage": { "type": "string" }
-        }
-      },
-      "NoOrderFoundExceptionDto": {
-        "type": "object",
-        "properties": {
-          "cause": {
-            "type": "object",
-            "properties": {
-              "stackTrace": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "classLoaderName": { "type": "string" },
-                    "moduleName": { "type": "string" },
-                    "moduleVersion": { "type": "string" },
-                    "methodName": { "type": "string" },
-                    "fileName": { "type": "string" },
-                    "lineNumber": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "className": { "type": "string" },
-                    "nativeMethod": { "type": "boolean" }
-                  }
-                }
-              },
-              "message": { "type": "string" },
-              "localizedMessage": { "type": "string" }
-            }
-          },
-          "stackTrace": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "classLoaderName": { "type": "string" },
-                "moduleName": { "type": "string" },
-                "moduleVersion": { "type": "string" },
-                "methodName": { "type": "string" },
-                "fileName": { "type": "string" },
-                "lineNumber": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "className": { "type": "string" },
-                "nativeMethod": { "type": "boolean" }
-              }
-            }
-          },
-          "httpStatus": {
-            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnum"
-          },
-          "userMessage": { "type": "string" },
-          "message": { "type": "string" },
-          "suppressed": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "stackTrace": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "classLoaderName": { "type": "string" },
-                      "moduleName": { "type": "string" },
-                      "moduleVersion": { "type": "string" },
-                      "methodName": { "type": "string" },
-                      "fileName": { "type": "string" },
-                      "lineNumber": {
-                        "type": "integer",
-                        "format": "int32"
-                      },
-                      "className": { "type": "string" },
-                      "nativeMethod": { "type": "boolean" }
-                    }
-                  }
-                },
-                "message": { "type": "string" },
-                "localizedMessage": { "type": "string" }
-              }
-            }
-          },
-          "localizedMessage": { "type": "string" }
-        }
-      },
-      "NotAuthorizedUserExceptionDto": {
-        "type": "object",
-        "properties": {
-          "cause": {
-            "type": "object",
-            "properties": {
-              "stackTrace": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "classLoaderName": { "type": "string" },
-                    "moduleName": { "type": "string" },
-                    "moduleVersion": { "type": "string" },
-                    "methodName": { "type": "string" },
-                    "fileName": { "type": "string" },
-                    "lineNumber": {
-                      "type": "integer",
-                      "format": "int32"
-                    },
-                    "className": { "type": "string" },
-                    "nativeMethod": { "type": "boolean" }
-                  }
-                }
-              },
-              "message": { "type": "string" },
-              "localizedMessage": { "type": "string" }
-            }
-          },
-          "stackTrace": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "classLoaderName": { "type": "string" },
-                "moduleName": { "type": "string" },
-                "moduleVersion": { "type": "string" },
-                "methodName": { "type": "string" },
-                "fileName": { "type": "string" },
-                "lineNumber": {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                "className": { "type": "string" },
-                "nativeMethod": { "type": "boolean" }
-              }
-            }
-          },
-          "httpStatus": {
-            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnum"
-          },
-          "userMessage": { "type": "string" },
-          "message": { "type": "string" },
-          "suppressed": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "stackTrace": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "classLoaderName": { "type": "string" },
-                      "moduleName": { "type": "string" },
-                      "moduleVersion": { "type": "string" },
-                      "methodName": { "type": "string" },
-                      "fileName": { "type": "string" },
-                      "lineNumber": {
-                        "type": "integer",
-                        "format": "int32"
-                      },
-                      "className": { "type": "string" },
-                      "nativeMethod": { "type": "boolean" }
-                    }
-                  }
-                },
-                "message": { "type": "string" },
-                "localizedMessage": { "type": "string" }
-              }
-            }
-          },
-          "localizedMessage": { "type": "string" }
         }
       }
     }

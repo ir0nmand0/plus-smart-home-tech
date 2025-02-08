@@ -28,7 +28,7 @@
       }
     ],
     "schemas": {
-      "HttpStatusEnum": {
+      "HttpStatusEnumDto": {
         "type": "string",
         "description": "Перечень всех поддерживаемых HTTP-статусов (расширенный).",
         "enum": [
@@ -104,7 +104,7 @@
         ]
       },
 
-      "AbstractApiExceptionDto": {
+      "AbstractApiException": {
         "type": "object",
         "description": "Базовый DTO класс для передачи информации об исключениях между сервисами",
         "properties": {
@@ -135,7 +135,7 @@
         "description": "DTO для передачи информации об исключении при отсутствии авторизации",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+            "$ref": "#/components/schemas/AbstractApiException"
           }
         ]
       },
@@ -144,7 +144,7 @@
         "description": "DTO для передачи информации об отсутствии товаров в корзине",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+            "$ref": "#/components/schemas/AbstractApiException"
           }
         ]
       },
@@ -153,7 +153,7 @@
         "description": "DTO для передачи информации об отсутствии товара",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+            "$ref": "#/components/schemas/AbstractApiException"
           }
         ],
         "properties": {
@@ -172,7 +172,7 @@
         "description": "DTO при ошибке: когда добавляемый товар уже есть на складе",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+            "$ref": "#/components/schemas/AbstractApiException"
           }
         ]
       },
@@ -181,7 +181,7 @@
         "description": "DTO для ошибки: товар из корзины отсутствует на складе",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+            "$ref": "#/components/schemas/AbstractApiException"
           }
         ]
       },
@@ -190,7 +190,7 @@
         "description": "DTO для ошибки: на складе меньше товара, чем требуется",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+            "$ref": "#/components/schemas/AbstractApiException"
           }
         ]
       },
@@ -199,12 +199,12 @@
         "description": "DTO для ошибки: запрашиваемый товар отсутствует на складе",
         "allOf": [
           {
-            "$ref": "#/components/schemas/AbstractApiExceptionDto"
+            "$ref": "#/components/schemas/AbstractApiException"
           }
         ]
       },
 
-      "ProductCategory": {
+      "ProductCategoryDto": {
         "type": "string",
         "description": "Категория товара",
         "enum": [
@@ -213,7 +213,7 @@
           "SENSORS"
         ]
       },
-      "ProductState": {
+      "ProductStateDto": {
         "type": "string",
         "description": "Статус товара (активен/деактивирован)",
         "enum": [
@@ -221,7 +221,7 @@
           "DEACTIVATE"
         ]
       },
-      "QuantityState": {
+      "QuantityStateDto": {
         "type": "string",
         "description": "Состояние остатка товара",
         "enum": [
@@ -260,13 +260,13 @@
             "nullable": true
           },
           "quantityState": {
-            "$ref": "#/components/schemas/QuantityState"
+            "$ref": "#/components/schemas/QuantityStateDto"
           },
           "productState": {
-            "$ref": "#/components/schemas/ProductState"
+            "$ref": "#/components/schemas/ProductStateDto"
           },
           "productCategory": {
-            "$ref": "#/components/schemas/ProductCategory"
+            "$ref": "#/components/schemas/ProductCategoryDto"
           },
           "price": {
             "type": "number",
@@ -398,29 +398,6 @@
         }
       },
 
-      "ShoppingCartDto": {
-        "type": "object",
-        "description": "DTO корзины товаров (пример, если нужно вынести в общие)",
-        "required": [
-          "shoppingCartId",
-          "products"
-        ],
-        "properties": {
-          "shoppingCartId": {
-            "type": "string",
-            "format": "uuid",
-            "description": "Идентификатор корзины"
-          },
-          "products": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        }
-      },
-
       "BookedProductsDto": {
         "type": "object",
         "description": "DTO для резерва товаров",
@@ -444,7 +421,7 @@
         }
       },
 
-      "Pageable": {
+      "PageableDto": {
         "type": "object",
         "description": "Параметры пагинации",
         "properties": {
@@ -499,7 +476,7 @@
             }
           },
           "pageable": {
-            "$ref": "#/components/schemas/Pageable"
+            "$ref": "#/components/schemas/PageableDto"
           },
           "totalPages": {
             "type": "integer"
@@ -532,6 +509,599 @@
           "empty": {
             "type": "boolean"
           }
+        }
+      },
+      "DimensionDto": {
+        "type": "object",
+        "required": [
+          "depth",
+          "height",
+          "width"
+        ],
+        "properties": {
+          "width": {
+            "minimum": 1,
+            "type": "number",
+            "format": "double"
+          },
+          "height": {
+            "minimum": 1,
+            "type": "number",
+            "format": "double"
+          },
+          "depth": {
+            "minimum": 1,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "description": "Габариты товара"
+      },
+      "NewProductInWarehouseRequestDto": {
+        "required": [
+          "dimension",
+          "productId",
+          "weight"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fragile": {
+            "type": "boolean"
+          },
+          "dimension": {
+            "$ref": "#/components/schemas/DimensionDto"
+          },
+          "weight": {
+            "minimum": 1,
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "description": "Описание нового товара для склада"
+      },
+      "ShippedToDeliveryRequestDto": {
+        "required": [
+          "deliveryId",
+          "orderId"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "deliveryId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "Запрос на передачу товаров в доставку"
+      },
+      "AssemblyProductsForOrderRequestDto": {
+        "required": [
+          "orderId",
+          "products"
+        ],
+        "type": "object",
+        "properties": {
+          "products": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "Запрос на сбор заказа из товаров"
+      },
+      "AddProductToWarehouseRequestDto": {
+        "required": [
+          "quantity"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "quantity": {
+            "minimum": 1,
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "Увеличение единиц товара на складе"
+      },
+      "ChangeProductQuantityRequestDto": {
+        "required": [
+          "newQuantity",
+          "productId"
+        ],
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newQuantity": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "description": "Запрос на изменение количества товара"
+      },
+      "CreateNewOrderRequestDto": {
+        "required": [
+          "deliveryAddress",
+          "shoppingCart"
+        ],
+        "type": "object",
+        "properties": {
+          "shoppingCart": {
+            "$ref": "#/components/schemas/ShoppingCartDto"
+          },
+          "deliveryAddress": {
+            "$ref": "#/components/schemas/AddressDto"
+          }
+        }
+      },
+      "ShoppingCartDto": {
+        "required": [
+          "products",
+          "shoppingCartId"
+        ],
+        "type": "object",
+        "properties": {
+          "shoppingCartId": {
+            "type": "string",
+            "description": "Идентификатор корзины в БД",
+            "format": "uuid",
+            "example": "53aa35c8-e659-44b2-882f-f6056e443c99"
+          },
+          "products": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "description": "Отображение идентификатора товара на отобранное количество.",
+              "format": "int64"
+            },
+            "description": "Отображение идентификатора товара на отобранное количество."
+          }
+        },
+        "description": "Корзина товаров в онлайн магазине."
+      },
+      "ProductReturnRequestDto": {
+        "required": [
+          "products"
+        ],
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "products": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        }
+      },
+      "NoOrderFoundExceptionDto": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "object",
+            "properties": {
+              "stackTrace": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "classLoaderName": { "type": "string" },
+                    "moduleName": { "type": "string" },
+                    "moduleVersion": { "type": "string" },
+                    "methodName": { "type": "string" },
+                    "fileName": { "type": "string" },
+                    "lineNumber": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "className": { "type": "string" },
+                    "nativeMethod": { "type": "boolean" }
+                  }
+                }
+              },
+              "message": { "type": "string" },
+              "localizedMessage": { "type": "string" }
+            }
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classLoaderName": { "type": "string" },
+                "moduleName": { "type": "string" },
+                "moduleVersion": { "type": "string" },
+                "methodName": { "type": "string" },
+                "fileName": { "type": "string" },
+                "lineNumber": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "className": { "type": "string" },
+                "nativeMethod": { "type": "boolean" }
+              }
+            }
+          },
+          "httpStatus": {
+            "$ref": "#/components/schemas/HttpStatusEnumDto"
+          },
+          "userMessage": { "type": "string" },
+          "message": { "type": "string" },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": { "type": "string" },
+                      "moduleName": { "type": "string" },
+                      "moduleVersion": { "type": "string" },
+                      "methodName": { "type": "string" },
+                      "fileName": { "type": "string" },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "className": { "type": "string" },
+                      "nativeMethod": { "type": "boolean" }
+                    }
+                  }
+                },
+                "message": { "type": "string" },
+                "localizedMessage": { "type": "string" }
+              }
+            }
+          },
+          "localizedMessage": { "type": "string" }
+        }
+      },
+      "PaymentDto": {
+        "type": "object",
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "description": "Идентификатор оплаты.",
+            "format": "uuid"
+          },
+          "totalPayment": {
+            "type": "number",
+			"format": "double",
+            "description": "Общая стоимость."
+          },
+          "deliveryTotal": {
+            "type": "number",
+			"format": "double",
+            "description": "Стоимость доставки."
+          },
+          "feeTotal": {
+            "type": "number",
+			"format": "double",
+            "description": "Стоимость налога."
+          }
+        }
+      },
+      "NotEnoughInfoInOrderToCalculateExceptionDto": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "object",
+            "properties": {
+              "stackTrace": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "classLoaderName": { "type": "string" },
+                    "moduleName": { "type": "string" },
+                    "moduleVersion": { "type": "string" },
+                    "methodName": { "type": "string" },
+                    "fileName": { "type": "string" },
+                    "lineNumber": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "className": { "type": "string" },
+                    "nativeMethod": { "type": "boolean" }
+                  }
+                }
+              },
+              "message": { "type": "string" },
+              "localizedMessage": { "type": "string" }
+            }
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classLoaderName": { "type": "string" },
+                "moduleName": { "type": "string" },
+                "moduleVersion": { "type": "string" },
+                "methodName": { "type": "string" },
+                "fileName": { "type": "string" },
+                "lineNumber": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "className": { "type": "string" },
+                "nativeMethod": { "type": "boolean" }
+              }
+            }
+          },
+          "httpStatus": {
+            "$ref": "#/components/schemas/HttpStatusEnumDto"
+          },
+          "userMessage": { "type": "string" },
+          "message": { "type": "string" },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": { "type": "string" },
+                      "moduleName": { "type": "string" },
+                      "moduleVersion": { "type": "string" },
+                      "methodName": { "type": "string" },
+                      "fileName": { "type": "string" },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "className": { "type": "string" },
+                      "nativeMethod": { "type": "boolean" }
+                    }
+                  }
+                },
+                "message": { "type": "string" },
+                "localizedMessage": { "type": "string" }
+              }
+            }
+          },
+          "localizedMessage": { "type": "string" }
+        }
+      },
+      "NoPaymentFoundExceptionDto": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "object",
+            "properties": {
+              "stackTrace": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "classLoaderName": { "type": "string" },
+                    "moduleName": { "type": "string" },
+                    "moduleVersion": { "type": "string" },
+                    "methodName": { "type": "string" },
+                    "fileName": { "type": "string" },
+                    "lineNumber": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "className": { "type": "string" },
+                    "nativeMethod": { "type": "boolean" }
+                  }
+                }
+              },
+              "message": { "type": "string" },
+              "localizedMessage": { "type": "string" }
+            }
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classLoaderName": { "type": "string" },
+                "moduleName": { "type": "string" },
+                "moduleVersion": { "type": "string" },
+                "methodName": { "type": "string" },
+                "fileName": { "type": "string" },
+                "lineNumber": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "className": { "type": "string" },
+                "nativeMethod": { "type": "boolean" }
+              }
+            }
+          },
+          "httpStatus": {
+            "$ref": "#/components/schemas/HttpStatusEnumDto"
+          },
+          "userMessage": { "type": "string" },
+          "message": { "type": "string" },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": { "type": "string" },
+                      "moduleName": { "type": "string" },
+                      "moduleVersion": { "type": "string" },
+                      "methodName": { "type": "string" },
+                      "fileName": { "type": "string" },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "className": { "type": "string" },
+                      "nativeMethod": { "type": "boolean" }
+                    }
+                  }
+                },
+                "message": { "type": "string" },
+                "localizedMessage": { "type": "string" }
+              }
+            }
+          },
+          "localizedMessage": { "type": "string" }
+        }
+      },
+      "DeliveryDto": {
+        "required": [
+          "deliveryId",
+          "deliveryState",
+          "fromAddress",
+          "orderId",
+          "toAddress"
+        ],
+        "type": "object",
+        "properties": {
+          "deliveryId": {
+            "type": "string",
+            "description": "Идентификатор доставки.",
+            "format": "uuid"
+          },
+          "fromAddress": {
+            "$ref": "#/components/schemas/AddressDto"
+          },
+          "toAddress": {
+            "$ref": "#/components/schemas/AddressDto"
+          },
+          "orderId": {
+            "type": "string",
+            "description": "Идентификатор заказа.",
+            "format": "uuid"
+          },
+          "deliveryState": {
+            "$ref": "#/components/schemas/DeliveryStateDto"
+          }
+        }
+      },
+      "DeliveryStateDto": {
+        "type": "string",
+        "description": "Статус доставки.",
+        "enum": [
+          "CREATED",
+          "IN_PROGRESS",
+          "DELIVERED",
+          "FAILED",
+          "CANCELLED"
+        ]
+      },
+      "NoDeliveryFoundExceptionDto": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "object",
+            "properties": {
+              "stackTrace": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "classLoaderName": { "type": "string" },
+                    "moduleName": { "type": "string" },
+                    "moduleVersion": { "type": "string" },
+                    "methodName": { "type": "string" },
+                    "fileName": { "type": "string" },
+                    "lineNumber": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "className": { "type": "string" },
+                    "nativeMethod": { "type": "boolean" }
+                  }
+                }
+              },
+              "message": { "type": "string" },
+              "localizedMessage": { "type": "string" }
+            }
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classLoaderName": { "type": "string" },
+                "moduleName": { "type": "string" },
+                "moduleVersion": { "type": "string" },
+                "methodName": { "type": "string" },
+                "fileName": { "type": "string" },
+                "lineNumber": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "className": { "type": "string" },
+                "nativeMethod": { "type": "boolean" }
+              }
+            }
+          },
+          "httpStatus": {
+            "$ref": "#/components/schemas/HttpStatusEnumDto"
+          },
+          "userMessage": { "type": "string" },
+          "message": { "type": "string" },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": { "type": "string" },
+                      "moduleName": { "type": "string" },
+                      "moduleVersion": { "type": "string" },
+                      "methodName": { "type": "string" },
+                      "fileName": { "type": "string" },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "className": { "type": "string" },
+                      "nativeMethod": { "type": "boolean" }
+                    }
+                  }
+                },
+                "message": { "type": "string" },
+                "localizedMessage": { "type": "string" }
+              }
+            }
+          },
+          "localizedMessage": { "type": "string" }
         }
       }
     }

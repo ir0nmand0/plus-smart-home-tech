@@ -6,21 +6,21 @@
   },
   "servers": [
     {
-      "url": "http://localhost:32999",
-      "description": "Generated server url"
+      "url": "/warehouse/api/v1/warehouse",
+      "description": "Base path"
     }
   ],
   "tags": [
     {
-      "name": "Склад магазина",
+      "name": "Warehouse",
       "description": "API для обеспечения работы склада онлайн магазина"
     }
   ],
   "paths": {
-    "/api/v1/warehouse": {
+    "/warehouse": {
       "put": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Добавить новый товар на склад.",
         "operationId": "newProductInWarehouse",
@@ -29,7 +29,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewProductInWarehouseRequest"
+                "$ref": "common-schemas.json#/components/schemas/NewProductInWarehouseRequestDto"
               }
             }
           },
@@ -52,10 +52,10 @@
         }
       }
     },
-    "/api/v1/warehouse/shipped": {
+    "/warehouse/shipped": {
       "post": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Передать товары в доставку.",
         "operationId": "shippedToDelivery",
@@ -64,7 +64,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ShippedToDeliveryRequest"
+                "$ref": "common-schemas.json#/components/schemas/ShippedToDeliveryRequestDto"
               }
             }
           },
@@ -77,10 +77,10 @@
         }
       }
     },
-    "/api/v1/warehouse/return": {
+    "/warehouse/return": {
       "post": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Принять возврат товаров на склад",
         "operationId": "acceptReturn",
@@ -106,10 +106,10 @@
         }
       }
     },
-    "/api/v1/warehouse/check": {
+    "/warehouse/check": {
       "post": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Проверить, что на складе достаточно товара под корзину",
         "operationId": "checkProductQuantityEnoughForShoppingCart",
@@ -148,10 +148,10 @@
         }
       }
     },
-    "/api/v1/warehouse/assembly": {
+    "/warehouse/assembly": {
       "post": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Собрать товары к заказу",
         "operationId": "assemblyProductsForOrder",
@@ -160,7 +160,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AssemblyProductsForOrderRequest"
+                "$ref": "common-schemas.json#/components/schemas/AssemblyProductsForOrderRequestDto"
               }
             }
           },
@@ -190,10 +190,10 @@
         }
       }
     },
-    "/api/v1/warehouse/add": {
+    "/warehouse/add": {
       "post": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Увеличить количество товара на складе",
         "operationId": "addProductToWarehouse",
@@ -202,7 +202,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AddProductToWarehouseRequest"
+                "$ref": "common-schemas.json#/components/schemas/AddProductToWarehouseRequestDto"
               }
             }
           },
@@ -222,10 +222,10 @@
         }
       }
     },
-    "/api/v1/warehouse/address": {
+    "/warehouse/address": {
       "get": {
         "tags": [
-          "Склад магазина"
+          "Warehouse"
         ],
         "description": "Предоставить адрес склада",
         "operationId": "getWarehouseAddress",
@@ -235,146 +235,12 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/AddressDto"
+                  "$ref": "common-schemas.json#/components/schemas/AddressDto"
                 }
               }
             }
           }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "DimensionDto": {
-        "type": "object",
-        "required": [
-          "depth",
-          "height",
-          "width"
-        ],
-        "properties": {
-          "width": {
-            "minimum": 1,
-            "type": "number",
-            "format": "double"
-          },
-          "height": {
-            "minimum": 1,
-            "type": "number",
-            "format": "double"
-          },
-          "depth": {
-            "minimum": 1,
-            "type": "number",
-            "format": "double"
-          }
-        },
-        "description": "Габариты товара"
-      },
-      "NewProductInWarehouseRequest": {
-        "required": [
-          "dimension",
-          "productId",
-          "weight"
-        ],
-        "type": "object",
-        "properties": {
-          "productId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "fragile": {
-            "type": "boolean"
-          },
-          "dimension": {
-            "$ref": "#/components/schemas/DimensionDto"
-          },
-          "weight": {
-            "minimum": 1,
-            "type": "number",
-            "format": "double"
-          }
-        },
-        "description": "Описание нового товара для склада"
-      },
-      "ShippedToDeliveryRequest": {
-        "required": [
-          "deliveryId",
-          "orderId"
-        ],
-        "type": "object",
-        "properties": {
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "deliveryId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "description": "Запрос на передачу товаров в доставку"
-      },
-      "AssemblyProductsForOrderRequest": {
-        "required": [
-          "orderId",
-          "products"
-        ],
-        "type": "object",
-        "properties": {
-          "products": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          "orderId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "description": "Запрос на сбор заказа из товаров"
-      },
-      "AddProductToWarehouseRequest": {
-        "required": [
-          "quantity"
-        ],
-        "type": "object",
-        "properties": {
-          "productId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "quantity": {
-            "minimum": 1,
-            "type": "integer",
-            "format": "int64"
-          }
-        },
-        "description": "Увеличение единиц товара на складе"
-      },
-      "AddressDto": {
-        "type": "object",
-        "properties": {
-          "country": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
-          },
-          "street": {
-            "type": "string"
-          },
-          "house": {
-            "type": "string"
-          },
-          "flat": {
-            "type": "string"
-          }
-        },
-        "description": "Адрес склада"
       }
     }
   }

@@ -75,7 +75,7 @@ class PaymentServiceImplTest {
 
         // Настраиваем поведение мока StoreClient
         when(storeClient.getProduct(any()))
-                .thenReturn(ResponseEntity.ok(productDto));
+                .thenReturn(productDto);
 
         // Вызываем тестируемый метод
         Double result = paymentService.calculateProductCost(orderDto);
@@ -106,7 +106,7 @@ class PaymentServiceImplTest {
 
         // Настраиваем поведение моков
         when(storeClient.getProduct(any()))
-                .thenReturn(ResponseEntity.ok(productDto));
+                .thenReturn(productDto);
         when(deliveryClient.deliveryCost(any()))
                 .thenReturn(deliveryCost);
 
@@ -137,7 +137,7 @@ class PaymentServiceImplTest {
 
         // Настраиваем поведение моков
         when(storeClient.getProduct(any()))
-                .thenReturn(ResponseEntity.ok(productDto));
+                .thenReturn(productDto);
         when(deliveryClient.deliveryCost(any()))
                 .thenReturn(deliveryCost);
         when(paymentRepository.save(any()))
@@ -224,7 +224,7 @@ class PaymentServiceImplTest {
 
         // Настраиваем поведение моков
         when(storeClient.getProduct(any()))
-                .thenReturn(ResponseEntity.ok(productDto));
+                .thenReturn(productDto);
         when(deliveryClient.deliveryCost(any()))
                 .thenReturn(null);
 

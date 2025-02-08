@@ -8,7 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.common.model.*;
 import ru.yandex.practicum.service.WarehouseService;
-import ru.yandex.practicum.warehouse.api.ApiApi;
+import ru.yandex.practicum.warehouse.api.WarehouseApi;
 import java.util.Map;
 
 /**
@@ -25,8 +25,8 @@ import java.util.Map;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("${api.version}${api.warehouse.path}")
-public class WarehouseController implements ApiApi {
+@RequestMapping("/api/v${api.warehouse-version}/warehouse")
+public class WarehouseController implements WarehouseApi {
 
     private final WarehouseService warehouseService;
 
@@ -40,7 +40,7 @@ public class WarehouseController implements ApiApi {
     @PutMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void newProductInWarehouse(
-            @Valid @RequestBody NewProductInWarehouseRequest newProductInWarehouseRequest
+            @Valid @RequestBody NewProductInWarehouseRequestDto newProductInWarehouseRequest
     ) {
         log.info("REST запрос на регистрацию нового товара на складе: {}", newProductInWarehouseRequest);
         warehouseService.registerProduct(
@@ -58,10 +58,10 @@ public class WarehouseController implements ApiApi {
      * @param addProductToWarehouseRequest информация о добавляемом количестве
      */
     @Override
-    @PostMapping("${api.warehouse.add-path}")
+    @PostMapping("/add")
     @ResponseStatus(HttpStatus.OK)
     public void addProductToWarehouse(
-            @Valid @RequestBody AddProductToWarehouseRequest addProductToWarehouseRequest
+            @Valid @RequestBody AddProductToWarehouseRequestDto addProductToWarehouseRequest
     ) {
         log.info("REST запрос на добавление товара на склад: {}", addProductToWarehouseRequest);
         warehouseService.addProduct(
@@ -78,7 +78,7 @@ public class WarehouseController implements ApiApi {
      * @return информация о возможности бронирования
      */
     @Override
-    @PostMapping("${api.warehouse.check-path}")
+    @PostMapping("/check")
     @ResponseStatus(HttpStatus.OK)
     public BookedProductsDto checkProductQuantityEnoughForShoppingCart(
             @Valid @RequestBody ShoppingCartDto shoppingCartDto
@@ -94,8 +94,7 @@ public class WarehouseController implements ApiApi {
      * @return адрес склада
      */
     @Override
-    @GetMapping("${api.warehouse.address-path}")
-    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/address")
     public AddressDto getWarehouseAddress() {
         log.info("REST запрос на получение адреса склада");
         return warehouseService.getAddress();
@@ -109,10 +108,9 @@ public class WarehouseController implements ApiApi {
      * @return информация о собранных товарах
      */
     @Override
-    @PostMapping("${api.warehouse.assembly-path}")
-    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/assembly")
     public BookedProductsDto assemblyProductsForOrder(
-            @Valid @RequestBody AssemblyProductsForOrderRequest assemblyProductsForOrderRequest
+            @Valid @RequestBody AssemblyProductsForOrderRequestDto assemblyProductsForOrderRequest
     ) {
         log.info("REST запрос на сборку товаров для заказа: {}", assemblyProductsForOrderRequest);
         return warehouseService.assemblyProducts(assemblyProductsForOrderRequest);
@@ -125,10 +123,9 @@ public class WarehouseController implements ApiApi {
      * @param shippedToDeliveryRequest информация о заказе и доставке
      */
     @Override
-    @PostMapping("${api.warehouse.shipped-path}")
-    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/shipped")
     public void shippedToDelivery(
-            @Valid @RequestBody ShippedToDeliveryRequest shippedToDeliveryRequest
+            @Valid @RequestBody ShippedToDeliveryRequestDto shippedToDeliveryRequest
     ) {
         log.info("REST запрос на передачу товаров в доставку: {}", shippedToDeliveryRequest);
         warehouseService.shipToDelivery(shippedToDeliveryRequest);
@@ -141,8 +138,7 @@ public class WarehouseController implements ApiApi {
      * @param requestBody карта товаров и их количества для возврата
      */
     @Override
-    @PostMapping("${api.warehouse.return-path}")
-    @ResponseStatus(HttpStatus.OK)
+    @PostMapping("/return")
     public void acceptReturn(
             @Valid @RequestBody Map<String, Long> requestBody
     ) {

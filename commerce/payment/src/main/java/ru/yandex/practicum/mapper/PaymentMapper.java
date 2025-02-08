@@ -23,8 +23,12 @@ public interface PaymentMapper {
      * Преобразует DTO в сущность Payment
      */
     @Mapping(target = "taxTotal", source = "feeTotal")
+    @Mapping(target = "orderId", ignore = true)
+    @Mapping(target = "productTotal", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "paymentMethod", ignore = true)
+    @Mapping(target = "paymentDetails", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "paymentDetails", ignore = true)
     Payment toEntity(PaymentDto paymentDto);
 }

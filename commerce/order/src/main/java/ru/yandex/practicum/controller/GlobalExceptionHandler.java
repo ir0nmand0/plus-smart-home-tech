@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
         log.error(ORDER_ERROR, ex.getMessage());
         NotAuthorizedUserExceptionDto dto = new NotAuthorizedUserExceptionDto();
         dto.setMessage(ex.getMessage());
-        dto.setHttpStatus(HttpStatusEnum._401_UNAUTHORIZED);
+        dto.setStatus(NotAuthorizedUserExceptionDto.StatusEnum.UNAUTHORIZED);
         return dto;
     }
 
@@ -49,7 +49,7 @@ public class GlobalExceptionHandler {
         log.error(ORDER_ERROR, ex.getMessage());
         NoOrderFoundExceptionDto dto = new NoOrderFoundExceptionDto();
         dto.setMessage(ex.getMessage());
-        dto.setHttpStatus(HttpStatusEnum._404_NOT_FOUND);
+        dto.setHttpStatus(HttpStatusEnumDto._404_NOT_FOUND);
         return dto;
     }
 

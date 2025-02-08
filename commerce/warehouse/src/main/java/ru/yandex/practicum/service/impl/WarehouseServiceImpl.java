@@ -139,7 +139,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     @Override
     @Transactional
-    public BookedProductsDto assemblyProducts(AssemblyProductsForOrderRequest request) {
+    public BookedProductsDto assemblyProducts(AssemblyProductsForOrderRequestDto request) {
         log.info("Сборка товаров для заказа: {}", request);
 
         Map<UUID, Long> bookedItems = new HashMap<>();
@@ -202,7 +202,7 @@ public class WarehouseServiceImpl implements WarehouseService {
      */
     @Override
     @Transactional
-    public void shipToDelivery(ShippedToDeliveryRequest request) {
+    public void shipToDelivery(ShippedToDeliveryRequestDto request) {
         log.info("Передача товаров в доставку (вызов из сервиса доставки): {}", request);
 
         // Поиск бронирования по ID заказа

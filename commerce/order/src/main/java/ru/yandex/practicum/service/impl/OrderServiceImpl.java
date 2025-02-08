@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
 
         var cart = request.getShoppingCart();
         // Здесь используем клиент корзины, передавая cart.getShoppingCartId()
-        ResponseEntity<ru.yandex.practicum.common.model.BookedProductsDto> bookedProducts = cartClient
+        BookedProductsDto bookedProducts = cartClient
                 .bookingProductsFromShoppingCart(cart.getShoppingCartId().toString());
 
         Order order = new Order();

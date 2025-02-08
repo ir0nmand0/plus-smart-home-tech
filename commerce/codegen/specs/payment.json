@@ -6,23 +6,23 @@
   },
   "servers": [
     {
-      "url": "http://localhost:41261",
-      "description": "Generated server url"
+      "url": "/payment/api/v1/payment",
+      "description": "Base path"
     }
   ],
   "tags": [
     {
-      "name": "Платежный шлюз",
+      "name": "PaymentGateway",
       "description": "API для расчёта, проведения оплат"
     }
   ],
   "paths": {
-    "/api/v1/payment": {
+    "/payment": {
       "post": {
         "tags": [
-          "Платежный шлюз"
+          "PaymentGateway"
         ],
-        "description": "Формирование оплаты для заказа (переход в платежный шлюз).",
+        "description": "Формирование оплаты для заказа (переход в PaymentGateway).",
         "operationId": "payment",
         "requestBody": {
           "description": "Заказ для формирования оплаты.",
@@ -37,11 +37,11 @@
         },
         "responses": {
           "200": {
-            "description": "Сформированная оплата заказа (переход в платежный шлюз)",
+            "description": "Сформированная оплата заказа (переход в PaymentGateway)",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/PaymentDto"
+                  "$ref": "common-schemas.json#/components/schemas/PaymentDto"
                 }
               }
             }
@@ -51,7 +51,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
                 }
               }
             }
@@ -59,10 +59,10 @@
         }
       }
     },
-    "/api/v1/payment/totalCost": {
+    "/payment/totalCost": {
       "post": {
         "tags": [
-          "Платежный шлюз"
+          "PaymentGateway"
         ],
         "description": "Расчёт полной стоимости заказа.",
         "operationId": "getTotalCost",
@@ -94,7 +94,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
                 }
               }
             }
@@ -102,10 +102,10 @@
         }
       }
     },
-    "/api/v1/payment/refund": {
+    "/payment/refund": {
       "post": {
         "tags": [
-          "Платежный шлюз"
+          "PaymentGateway"
         ],
         "description": "Метод для эмуляции успешной оплаты в платежного шлюза.",
         "operationId": "paymentSuccess",
@@ -127,7 +127,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoPaymentFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoPaymentFoundExceptionDto"
                 }
               }
             }
@@ -135,10 +135,10 @@
         }
       }
     },
-    "/api/v1/payment/productCost": {
+    "/payment/productCost": {
       "post": {
         "tags": [
-          "Платежный шлюз"
+          "PaymentGateway"
         ],
         "description": "Расчёт стоимости товаров в заказе.",
         "operationId": "productCost",
@@ -159,7 +159,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
                 }
               }
             }
@@ -178,10 +178,10 @@
         }
       }
     },
-    "/api/v1/payment/failed": {
+    "/payment/failed": {
       "post": {
         "tags": [
-          "Платежный шлюз"
+          "PaymentGateway"
         ],
         "description": "Метод для эмуляции отказа в оплате платежного шлюза.",
         "operationId": "paymentFailed",
@@ -203,7 +203,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/NoPaymentFoundExceptionDto"
+                  "$ref": "common-schemas.json#/components/schemas/NoPaymentFoundExceptionDto"
                 }
               }
             }
@@ -214,7 +214,7 @@
   },
   "components": {
     "schemas": {
-      "PaymentDto": {
+      "Payment": {
         "type": "object",
         "properties": {
           "paymentId": {
@@ -239,7 +239,7 @@
           }
         }
       },
-      "NotEnoughInfoInOrderToCalculateExceptionDto": {
+      "NotEnoughInfoInOrderToCalculateException": {
         "type": "object",
         "properties": {
           "cause": {
@@ -288,7 +288,7 @@
             }
           },
           "httpStatus": {
-            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnum"
+            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnumDto"
           },
           "userMessage": { "type": "string" },
           "message": { "type": "string" },
@@ -324,7 +324,7 @@
           "localizedMessage": { "type": "string" }
         }
       },
-      "NoPaymentFoundExceptionDto": {
+      "NoPaymentFoundException": {
         "type": "object",
         "properties": {
           "cause": {
@@ -373,7 +373,7 @@
             }
           },
           "httpStatus": {
-            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnum"
+            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnumDto"
           },
           "userMessage": { "type": "string" },
           "message": { "type": "string" },

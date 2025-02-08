@@ -59,7 +59,7 @@ public interface WarehouseService {
      * @throws InsufficientProductQuantityException если товаров недостаточно
      * @throws ProductNotInWarehouseException если товар отсутствует на складе
      */
-    BookedProductsDto assemblyProducts(AssemblyProductsForOrderRequest request);
+    BookedProductsDto assemblyProducts(AssemblyProductsForOrderRequestDto request);
 
     /**
      * Передача товаров в доставку.
@@ -70,7 +70,7 @@ public interface WarehouseService {
      * @param request запрос на передачу в доставку, содержащий ID заказа и ID доставки
      * @throws IllegalStateException если бронирование для заказа не найдено
      */
-    void shipToDelivery(ShippedToDeliveryRequest request);
+    void shipToDelivery(ShippedToDeliveryRequestDto request);
 
     /**
      * Возврат товара на склад.

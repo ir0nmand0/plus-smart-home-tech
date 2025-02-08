@@ -57,7 +57,7 @@ public class PaymentServiceImpl implements PaymentService {
 
                 // Получаем актуальную цену товара из сервиса магазина
                 var productResponse = storeClient.getProduct(UUID.fromString(productId));
-                var product = productResponse.getBody();
+                var product = productResponse;
 
                 if (product != null && product.getPrice() != null) {
                     totalProductCost += product.getPrice() * quantity;

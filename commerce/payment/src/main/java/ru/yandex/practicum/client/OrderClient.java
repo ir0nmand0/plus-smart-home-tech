@@ -1,7 +1,8 @@
 package ru.yandex.practicum.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
+import ru.yandex.practicum.order.api.OrderProcessorApi;
 
-@FeignClient(name = "order")
-public interface OrderClient extends ru.yandex.practicum.order.client.ApiApi {
+@FeignClient(name = "order", path = "/api/v${api.order-version}")
+public interface OrderClient extends OrderProcessorApi {
 }

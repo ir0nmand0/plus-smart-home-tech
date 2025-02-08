@@ -3,8 +3,8 @@ package ru.yandex.practicum.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import ru.yandex.practicum.common.model.ProductCategory;
-import ru.yandex.practicum.common.model.ProductState;
+import ru.yandex.practicum.common.model.ProductCategoryDto;
+import ru.yandex.practicum.common.model.ProductStateDto;
 import ru.yandex.practicum.entity.Product;
 
 import java.util.UUID;
@@ -17,8 +17,8 @@ import java.util.UUID;
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
     Page<Product> findByProductCategoryAndProductState(
-            ProductCategory category,
-            ProductState state,
+            ProductCategoryDto category,
+            ProductStateDto state,
             Pageable pageable
     );
 }

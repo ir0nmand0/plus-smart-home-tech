@@ -7,6 +7,9 @@ spring:
 
   flyway:
     enabled: true
+    # Если целевая схема уже содержит данные и отсутствует таблица истории миграций,
+    # текущее состояние фиксируется как базовая отправная точка для последующих миграций (существующие данные не затрагиваются).
+    baselineOnMigrate: true
 
   jackson:
     mapper:
@@ -90,9 +93,7 @@ management:
         include: health,info
 
 api:
-  version: /api/v1
-  payment-path: /payment
-  total-cost-path: /payment/totalCost
-  product-cost-path: /payment/productCost
-  refund-path: /payment/refund
-  failed-path: /payment/failed
+  payment-version: 1
+  delivery-version: 1
+  order-version: 1
+  shopping-store-version: 1

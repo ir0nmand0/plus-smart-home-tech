@@ -13,6 +13,8 @@ import ru.yandex.practicum.exception.NoDeliveryFoundException;
 import ru.yandex.practicum.mapper.DeliveryMapper;
 import ru.yandex.practicum.repository.DeliveryRepository;
 import ru.yandex.practicum.service.DeliveryService;
+import ru.yandex.practicum.common.model.OrderDto;
+import ru.yandex.practicum.common.model.AddressDto;
 
 import java.util.List;
 import java.util.UUID;
@@ -40,14 +42,14 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final WarehouseClient warehouseClient;
 
     @Override
-    public Double calculateDeliveryCost(ru.yandex.practicum.common.model.OrderDto orderDto) {
+    public Double calculateDeliveryCost(OrderDto orderDto) {
         log.info("Calculating delivery cost for order: {}", orderDto.getOrderId());
 
         double cost = BASE_COST;
 
         // Получаем адрес склада
-        ru.yandex.practicum.common.model.AddressDto addressResponse = warehouseClient.getWarehouseAddress();
-        ru.yandex.practicum.common.model.AddressDto warehouseAddress = addressResponse;
+        AddressDto addressResponse = warehouseClient.getWarehouseAddress();
+        AddressDto warehouseAddress = addressResponse;
         if (warehouseAddress == null) {
             throw new NoDeliveryFoundException("Warehouse address not found");
         }
@@ -76,7 +78,7 @@ public class DeliveryServiceImpl implements DeliveryService {
 
         // Проверяем улицу доставки
         Delivery delivery = findDeliveryByOrderId(orderDto.getOrderId());
-        ru.yandex.practicum.common.model.DeliveryDto deliveryDto = deliveryMapper.toDto(delivery);
+        DeliveryDto deliveryDto = deliveryMapper.toDto(delivery);
 
         if (!warehouseAddress.getStreet().equals(deliveryDto.getToAddress().getStreet())) {
             cost = cost + (cost * DIFFERENT_STREET_MULTIPLIER);
@@ -112,7 +114,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         orderClient.assembly(orderId);
 
         // Связываем с внутренней учетной системой склада через запрос на отгрузку
-        ShippedToDeliveryRequest shippedRequest = new ShippedToDeliveryRequest()
+        ShippedToDeliveryRequestDto shippedRequest = new ShippedToDeliveryRequestDto()
                 .orderId(orderId)
                 .deliveryId(delivery.getDeliveryId());
 
@@ -134,23 +136,23 @@ public class DeliveryServiceImpl implements DeliveryService {
 
     @Override
     @Transactional
-    public ru.yandex.practicum.common.model.DeliveryDto planDelivery(ru.yandex.practicum.common.model.DeliveryDto deliveryDto) {
+    public DeliveryDto planDelivery(DeliveryDto deliveryDto) {
         log.info("Planning new delivery for order: {}", deliveryDto.getOrderId());
 
         // Проверяем наличие товаров на складе перед планированием доставки
-        List<ru.yandex.practicum.common.model.OrderDto> ordersResponse = orderClient.getClientOrders(deliveryDto.getOrderId().toString());
-        List<ru.yandex.practicum.common.model.OrderDto> orders = ordersResponse;
+        List<OrderDto> ordersResponse = orderClient.getClientOrders(deliveryDto.getOrderId().toString());
+        List<OrderDto> orders = ordersResponse;
         if (orders == null || orders.isEmpty()) {
             throw new NoDeliveryFoundException("Order not found: " + deliveryDto.getOrderId());
         }
 
-        ru.yandex.practicum.common.model.OrderDto order = orders.get(0);
+        OrderDto order = orders.get(0);
         if (!order.getShoppingCartId().isPresent()) {
             throw new NoDeliveryFoundException("Shopping cart ID not found");
         }
         UUID cartId = order.getShoppingCartId().get();
 
-        ru.yandex.practicum.common.model.ShoppingCartDto cart = new ru.yandex.practicum.common.model.ShoppingCartDto()
+        ShoppingCartDto cart = new ShoppingCartDto()
                 .shoppingCartId(cartId)
                 .products(order.getProducts());
 

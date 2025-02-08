@@ -97,12 +97,10 @@
                             <inputSpec>${project.parent.parent.basedir}/specs/payment.json</inputSpec>
                             <generatorName>spring</generatorName>
                             <apiPackage>ru.yandex.practicum.payment.api</apiPackage>
-                            <modelPackage>ru.yandex.practicum.common.model</modelPackage>
                             <configOptions>
                                 <useJakartaEe>true</useJakartaEe>
                                 <interfaceOnly>true</interfaceOnly>
                                 <generateApis>true</generateApis>
-                                <generateModels>true</generateModels>
                                 <useTags>true</useTags>
                                 <java8>true</java8>
                                 <dateLibrary>${openapi.generator.java.dateLibrary}</dateLibrary>
@@ -111,7 +109,24 @@
                                 <serializationLibrary>jackson</serializationLibrary>
                                 <useBeanValidation>true</useBeanValidation>
                                 <beanValidationModel>true</beanValidationModel>
+                                <generateModels>false</generateModels>
+                                <useTags>true</useTags>
                             </configOptions>
+
+                            <importMappings>
+                                <!-- Модель заказа, используемая в качестве запроса для формирования оплаты, расчёта стоимости и т.д. -->
+                                <importMapping>OrderDto=ru.yandex.practicum.common.model.OrderDto</importMapping>
+
+                                <!-- Модель сформированной оплаты, возвращаемая в ответе при успешном формировании оплаты -->
+                                <importMapping>PaymentDto=ru.yandex.practicum.common.model.PaymentDto</importMapping>
+
+                                <!-- Модель ошибки "Недостаточно информации в заказе для расчёта" -->
+                                <importMapping>NotEnoughInfoInOrderToCalculateExceptionDto=ru.yandex.practicum.common.model.NotEnoughInfoInOrderToCalculateExceptionDto</importMapping>
+
+                                <!-- Модель ошибки "Указанная оплата не найдена" -->
+                                <importMapping>NoPaymentFoundExceptionDto=ru.yandex.practicum.common.model.NoPaymentFoundExceptionDto</importMapping>
+                            </importMappings>
+
                             <supportingFilesToGenerate>ApiUtil.java</supportingFilesToGenerate>
                         </configuration>
                     </execution>

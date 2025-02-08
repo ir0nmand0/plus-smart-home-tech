@@ -1,13 +1,8 @@
 api:
   # Базовая версия API
-  version: /api/v1
-  store:
-    # Основной путь магазина
-    path: /shopping-store
-    # Путь для удаления продукта
-    remove-path: /removeProductFromStore
-    # Путь для управления количеством
-    quantity-path: /quantityState
+  shopping-store-version: 1
+  warehouse-version: 1
+
 
 server:
   # 0 означает случайный свободный порт. Можно переопределять SERVER_PORT.

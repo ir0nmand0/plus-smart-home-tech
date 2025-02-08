@@ -28,32 +28,49 @@
     Все версии управляются через родительский POM (отсюда их отсутствие здесь)
     -->
     <dependencies>
-        <!-- Jackson для работы с JSON -->
+        <!-- Spring Boot -->
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
 
-        <!-- Расширение Jackson для поддержки @Nullable аннотаций -->
+        <!-- Swagger/OpenAPI -->
         <dependency>
-            <groupId>org.openapitools</groupId>
-            <artifactId>jackson-databind-nullable</artifactId>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger.core.v3</groupId>
+            <artifactId>swagger-models</artifactId>
         </dependency>
 
-        <!-- API для валидации бинов (Jakarta EE) -->
+        <!-- Jakarta EE -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.annotation</groupId>
+            <artifactId>jakarta.annotation-api</artifactId>
+        </dependency>
         <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
         </dependency>
 
-        <!--
-        Lombok для генерации кода. Scope provided означает, что библиотека
-        нужна только на этапе компиляции и не будет включена в итоговый JAR
-        -->
+        <!-- Jackson -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
         </dependency>
     </dependencies>
 
@@ -81,9 +98,26 @@
                             <output>${project.build.directory}/generated-sources/openapi</output>
                             <modelPackage>ru.yandex.practicum.common.model</modelPackage>
 
+                            <!--
+                            В сгенерированном интерфейсе в проекте shopping-store-api при использовании
+                            <typeMappings>
+                            <typeMapping>Product=ru.yandex.practicum.common.model.ProductDto</typeMapping>
+                            </typeMappings>
+                            <importMappings>
+                            <importMapping>Product=ru.yandex.practicum.common.model.ProductDto</importMapping>
+                            </importMappings>
+                            возвращаемый тип (response) корректно заменяется на
+                            ru.yandex.practicum.common.model.ProductDto,
+                            но параметр запроса (request body) остаётся с именем Product.
+                            Использование vendor extension "x-java-type": "ru.yandex.practicum.common.model.ProductDto"
+                            лишь дополнительно усложняет ситуацию,
+                            поэтому принято решение отказаться от применения <modelNameSuffix>Dto</modelNameSuffix>
+                            и переименовать модели непосредственно в спецификации для единообразия и упрощения поддержки кода.
+                            -->
+
                             <!-- Настройки генерации кода -->
                             <configOptions>
-                                <useLombok>true</useLombok>
+                                <useLombok>false</useLombok>
                                 <useSpringBoot3>true</useSpringBoot3>
                                 <useJakartaEe>true</useJakartaEe>
                                 <generateModels>true</generateModels>
@@ -98,15 +132,8 @@
                                 <useOptional>false</useOptional>
                                 <fieldGenerated>true</fieldGenerated>
                                 <gettersAsAccessors>false</gettersAsAccessors>
+                                <generateBuilders>true</generateBuilders>
                             </configOptions>
-
-                            <!-- Управление генерацией различных типов файлов -->
-                            <globalProperties>
-                                <modelTests>false</modelTests>
-                                <apis>false</apis>
-                                <models>true</models>
-                                <supportingFiles>false</supportingFiles>
-                            </globalProperties>
                         </configuration>
                     </execution>
                 </executions>

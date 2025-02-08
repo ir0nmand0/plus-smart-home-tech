@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.common.model.*;
 import ru.yandex.practicum.service.OrderService;
+import ru.yandex.practicum.order.api.OrderProcessorApi;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,8 +21,8 @@ import java.util.UUID;
 @RestController
 @Validated
 @RequiredArgsConstructor
-@RequestMapping("${api.version}${api.order-path}")
-public class OrderController implements ru.yandex.practicum.order.api.DefaultApi {
+@RequestMapping("/api/v${api.order-version}/order")
+public class OrderController implements OrderProcessorApi {
 
     private final OrderService orderService;
 
@@ -41,70 +42,70 @@ public class OrderController implements ru.yandex.practicum.order.api.DefaultApi
     }
 
     @Override
-    @PostMapping("${api.return-path}")
+    @PostMapping("/return")
     public OrderDto productReturn(@Valid @RequestParam ProductReturnRequestDto productReturnRequest) {
         log.info("Возврат заказа {}", productReturnRequest.getOrderId());
         return orderService.returnProducts(productReturnRequest);
     }
 
     @Override
-    @PostMapping("${api.payment-path}")
+    @PostMapping("/payment")
     public OrderDto payment(@Valid @RequestBody UUID orderId) {
         log.info("Оплата заказа {}", orderId);
         return orderService.processPayment(orderId);
     }
 
     @Override
-    @PostMapping("${api.payment-failed-path}")
+    @PostMapping("/payment/failed")
     public OrderDto paymentFailed(@Valid @RequestBody UUID orderId) {
         log.info("Ошибка оплаты заказа {}", orderId);
         return orderService.handlePaymentFailure(orderId);
     }
 
     @Override
-    @PostMapping("${api.delivery-path}")
+    @PostMapping("/delivery")
     public OrderDto delivery(@Valid @RequestBody UUID orderId) {
         log.info("Доставка заказа {}", orderId);
         return orderService.processDelivery(orderId);
     }
 
     @Override
-    @PostMapping("${api.delivery-failed-path}")
+    @PostMapping("/delivery/failed")
     public OrderDto deliveryFailed(@Valid @RequestBody UUID orderId) {
         log.info("Ошибка доставки заказа {}", orderId);
         return orderService.handleDeliveryFailure(orderId);
     }
 
     @Override
-    @PostMapping("${api.completed-path}")
+    @PostMapping("/completed")
     public OrderDto complete(@Valid @RequestBody UUID orderId) {
         log.info("Завершение заказа {}", orderId);
         return orderService.completeOrder(orderId);
     }
 
     @Override
-    @PostMapping("${api.calculate-total-cost-path}")
+    @PostMapping("/calculate/total")
     public OrderDto calculateTotalCost(@Valid @RequestBody UUID orderId) {
         log.info("Расчет общей стоимости заказа {}", orderId);
         return orderService.calculateTotalCost(orderId);
     }
 
     @Override
-    @PostMapping("${api.calculate-delivery-cost-path}")
+    @PostMapping("/calculate/delivery")
     public OrderDto calculateDeliveryCost(@Valid @RequestBody UUID orderId) {
         log.info("Расчет стоимости доставки для заказа {}", orderId);
         return orderService.calculateDeliveryCost(orderId);
     }
 
     @Override
-    @PostMapping("${api.assembly-path}")
+    @PostMapping("/assembly")
     public OrderDto assembly(@Valid @RequestBody UUID orderId) {
         log.info("Сборка заказа {}", orderId);
         return orderService.assembleOrder(orderId);
     }
 
     @Override
-    @PostMapping("${api.assembly-failed-path}")
+    @PostMapping("/assembly/failed")
     public OrderDto assemblyFailed(@Valid @RequestBody UUID orderId) {
         log.info("Ошибка сборки заказа {}", orderId);
         return orderService.handleAssemblyFailure(orderId);
