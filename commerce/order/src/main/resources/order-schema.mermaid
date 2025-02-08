@@ -1,0 +1,25 @@
+erDiagram
+    orders ||--o{ order_items : contains
+    
+    orders {
+        UUID order_id PK
+        UUID shopping_cart_id
+        UUID delivery_id
+        UUID payment_id
+        VARCHAR username
+        order_state state
+        DOUBLE delivery_weight
+        DOUBLE delivery_volume
+        BOOLEAN fragile
+        DOUBLE total_price
+        DOUBLE delivery_price
+        DOUBLE product_price
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    order_items {
+        UUID order_id PK,FK
+        UUID product_id PK
+        INTEGER quantity
+    }

@@ -1,0 +1,339 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "/shopping-store/api/v1/shopping-store",
+      "description": "Base path"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Storefront",
+      "description": "API для обеспечения работы витрины онлайн магазина"
+    }
+  ],
+  "paths": {
+    "/shopping-store": {
+      "get": {
+        "tags": [
+          "Storefront"
+        ],
+        "description": "Получение списка товаров по типу с пагинацией",
+        "operationId": "getProducts",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "common-schemas.json#/components/schemas/ProductCategoryDto"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "description": "Поле для сортировки",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Очередная страница товаров",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/PageOfProductDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Storefront"
+        ],
+        "description": "Создание нового товара в ассортименте",
+        "operationId": "createNewProduct",
+        "requestBody": {
+          "description": "Описательная часть вновь добавляемого товара",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ProductDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Товар создан",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created – товар добавлен",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Storefront"
+        ],
+        "description": "Обновление товара в ассортименте",
+        "operationId": "updateProduct",
+        "requestBody": {
+          "description": "Описательная часть изменяемого товара",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ProductDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Товар не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Товар обновлён",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created – товар обновлён",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shopping-store/{productId}": {
+      "get": {
+        "tags": [
+          "Storefront"
+        ],
+        "description": "Получить сведения по товару",
+        "operationId": "getProduct",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "path",
+            "description": "Идентификатор товара",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Актуальный товар со всеми сведениями",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Товар не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shopping-store/removeProductFromStore": {
+      "post": {
+        "tags": [
+          "Storefront"
+        ],
+        "description": "Перевести товар в DEACTIVATE",
+        "operationId": "removeProductFromStore",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "ID товара на удаление из ассортимента",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "description": "UUID товара (если не указан в query)",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "true / false в зависимости от успеха",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "203": {
+            "description": "Non-Authoritative Info – тоже может указывать на успех",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Товар не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shopping-store/quantityState": {
+      "post": {
+        "tags": [
+          "Storefront"
+        ],
+        "description": "Установка статуса остатка (ENDED, FEW, ENOUGH, MANY)",
+        "operationId": "setProductQuantityState",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "description": "UUID товара",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "quantityState",
+            "in": "query",
+            "description": "Статус остатка",
+            "required": true,
+            "schema": {
+              "$ref": "common-schemas.json#/components/schemas/QuantityStateDto"
+            }
+          }
+        ],
+        "responses": {
+          "404": {
+            "description": "Товар не найден",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductNotFoundExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Статус успешно обновлён",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created – статус успешно обновлён",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

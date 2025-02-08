@@ -1,0 +1,30 @@
+erDiagram
+    inventory ||--o{ inventory_history : tracks
+    warehouse ||--o{ inventory : contains
+    
+    warehouse {
+        UUID warehouse_id PK
+        VARCHAR name
+        VARCHAR location
+        BOOLEAN is_active
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    inventory {
+        UUID inventory_id PK
+        UUID warehouse_id FK
+        UUID product_id
+        INT quantity
+        VARCHAR location_code
+        TIMESTAMP last_updated
+    }
+    
+    inventory_history {
+        UUID history_id PK
+        UUID inventory_id FK
+        VARCHAR operation_type
+        INT quantity_change
+        TIMESTAMP changed_at
+        VARCHAR changed_by
+    }

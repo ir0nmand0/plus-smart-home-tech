@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:9093}
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:analyzer}
+  cloud:
+    config:
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
+      retry:
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    properties:
+      schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL:http://localhost:8081}
+    consumer:
+      group-id: ${KAFKA_CONSUMER_GROUP:analyzer-group}
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL:http://localhost:8081}
+        specific.avro.reader: true
+    topics:
+      telemetry:
+        sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
+        snapshots: ${KAFKA_TOPIC_SNAPSHOTS:telemetry.snapshots.v1}
+        hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/analyzer}
+    username: ${SPRING_DATASOURCE_USERNAME:analyzer_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:analyzer_pass}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: ${SHOW_SQL:false}
+  sql:
+    init:
+      mode: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

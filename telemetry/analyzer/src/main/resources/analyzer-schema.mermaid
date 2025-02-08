@@ -1,0 +1,22 @@
+erDiagram
+    analytics ||--o{ analytics_details : contains
+    
+    analytics {
+        UUID analytics_id PK
+        VARCHAR event_type
+        JSONB event_data
+        TIMESTAMP event_time
+        VARCHAR user_id
+        VARCHAR session_id
+        VARCHAR ip_address
+        VARCHAR user_agent
+    }
+    
+    analytics_details {
+        UUID detail_id PK
+        UUID analytics_id FK
+        VARCHAR metric_name
+        DOUBLE metric_value
+        JSONB additional_data
+        TIMESTAMP recorded_at
+    }

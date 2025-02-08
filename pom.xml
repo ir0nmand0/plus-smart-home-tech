@@ -21,7 +21,7 @@
     <modules>
         <!-- Telemetry модуль: отвечает за сбор и обработку телеметрии -->
         <module>telemetry</module>
-        <!-- Infra модуль: предоставляет инфраструктурные компоненты (например, базы данных, брокеры сообщений) -->
+        <!-- Infra модуль: педоставляет инфраструктурные компоненты (например, базы данных, брокеры сообщений) -->
         <module>infra</module>
         <!-- Commerce модуль: отвечает за бизнес-логику электронной коммерции -->
         <module>commerce</module>
@@ -35,22 +35,37 @@
         <!-- Версии зависимостей -->
         <avro.version>1.11.3</avro.version> <!-- Apache Avro: сериализация данных -->
         <kafka-clients.version>3.6.1</kafka-clients.version> <!-- Kafka-клиент для работы с Apache Kafka -->
-        <springdoc-openapi-starter.version>2.6.0</springdoc-openapi-starter.version> <!-- OpenAPI для документации API -->
-        <grpc-spring-boot-starter.version>3.1.0.RELEASE</grpc-spring-boot-starter.version> <!-- gRPC для микросервисов -->
+        <springdoc-openapi-starter.version>2.6.0
+        </springdoc-openapi-starter.version> <!-- OpenAPI для документации API -->
+        <grpc-spring-boot-starter.version>3.1.0.RELEASE
+        </grpc-spring-boot-starter.version> <!-- gRPC для микросервисов -->
         <protobuf.version>3.23.4</protobuf.version> <!-- Google Protocol Buffers для сериализации данных -->
         <grpc.version>1.63.0</grpc.version> <!-- Библиотеки gRPC -->
         <slf4j.version>1.7.36</slf4j.version> <!-- Логирование через SLF4J -->
+        <logback.version>1.5.16</logback.version>
         <lombok.version>1.18.32</lombok.version> <!-- Lombok: уменьшение шаблонного кода -->
+        <spring-cloud-starter-netflix-eureka.version>4.2.0</spring-cloud-starter-netflix-eureka.version>
+        <spring-boot-starter-actuator.version>3.4.1</spring-boot-starter-actuator.version>
+        <confluent.version>7.8.0</confluent.version>
+        <flyway.version>11.3.1</flyway.version>
 
         <!-- Версии Maven-плагинов -->
         <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version> <!-- Компиляция Java -->
         <avro-maven-plugin.version>${avro.version}</avro-maven-plugin.version> <!-- Плагин для работы с Avro -->
         <protobuf-plugin.version>2.4.0</protobuf-plugin.version> <!-- Плагин для обработки .proto файлов -->
+        <spring-cloud-dependencies.version>2023.0.3</spring-cloud-dependencies.version>
     </properties>
 
     <!-- Централизованное управление версиями зависимостей -->
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud-dependencies.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <!-- Apache Avro для сериализации данных -->
             <dependency>
                 <groupId>org.apache.avro</groupId>
@@ -92,6 +107,79 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-protobuf</artifactId>
                 <version>${grpc.version}</version>
+            </dependency>
+            <!-- Eureka Client -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+                <version>${spring-cloud-starter-netflix-eureka.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId>
+                <version>${spring-cloud-starter-netflix-eureka.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-actuator</artifactId>
+                <version>${spring-boot-starter-actuator.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-starter-logging</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <!-- SLF4J API версии 1.7.x для совместимости с Avro -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <!-- Реализация логгера SLF4J Simple -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>${logback.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-database-postgresql</artifactId>
+                <version>${flyway.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+                <optional>true</optional>
             </dependency>
         </dependencies>
     </dependencyManagement>

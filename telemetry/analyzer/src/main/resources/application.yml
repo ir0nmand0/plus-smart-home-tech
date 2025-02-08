@@ -1,40 +1,41 @@
 spring:
-  kafka:
-    consumer:
-      group-id: analyzer-group # Идентификатор группы для Kafka-консьюмера, обеспечивает обработку сообщений одной группой
-      properties:
-        specific.avro.reader: true # Использование Avro-десериализации для чтения сообщений с конкретной схемой
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer # Ключи сообщений сериализуются в строки
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer # Значения сообщений сериализуются в формате Avro
-    properties:
-      schema.registry.url: http://localhost:8081 # URL для схемы Avro, используемой для сериализации и десериализации
-    topics:
-      telemetry:
-        snapshots: telemetry.snapshots.v1 # Топик для снапшотов состояния хабов
-        sensors: telemetry.sensors.v1 # Топик для событий от сенсоров
-        hubs: telemetry.hubs.v1 # Топик для событий, связанных с хабами
+  application:
+    name: ${SPRING_APPLICATION_NAME:analyzer}
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
+      retry:
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
+    loadbalancer:
+      cache:
+        enabled: false
+    service-registry:
+      auto-registration:
+        enabled: true
+        fail-fast: true
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/analyzer # URL подключения к базе данных PostgreSQL
-    username: analyzer_user # Имя пользователя для доступа к базе данных
-    password: analyzer_pass # Пароль для подключения к базе данных
-    driver-class-name: org.postgresql.Driver # JDBC-драйвер PostgreSQL
-    jpa:
-      hibernate:
-        ddl-auto: none # Отключение автоматического изменения структуры таблиц
-    properties:
-      hibernate:
-        format_sql: true # Форматирует SQL-запросы для удобства чтения
-        show_sql: true # Показывает SQL-запросы в логах
-        jdbc:
-          lob:
-            non_contextual_creation: true # Ускорение работы с большими объектами (LOB)
-
-grpc:
+eureka:
   client:
-    hub-router:
-      address: 'static://localhost:59090' # Адрес gRPC-сервера для отправки команд хабу
-      enableKeepAlive: true # Включает KeepAlive для поддержания соединения
-      keepAliveWithoutCalls: true # Поддерживает KeepAlive даже без активных вызовов
-      negotiationType: plaintext # Устанавливает нешифрованное соединение (plaintext)
+    service-url:
+      defaultZone: ${EUREKA_URL:http://discovery-server:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
+  instance:
+    hostname: ${spring.application.name}
+    instance-id: ${spring.application.name}:${random.uuid}
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -1,0 +1,157 @@
+# Конфигурация основного порта сервера API Gateway
+server:
+  port: 8080  # По умолчанию 8080, можно переопределить через переменную окружения
+
+spring:
+  cloud:
+    gateway:
+      # Настройки HTTP-клиента для исходящих запросов
+      httpclient:
+        connect-timeout: 5000  # Таймаут на установление соединения
+        response-timeout: 5s  # Таймаут ожидания ответа
+
+      # Настройки Service Discovery
+      discovery:
+        locator:
+          enabled: true  # Включаем автоматическое обнаружение сервисов через Eureka
+          lower-case-service-id: true  # Использовать нижний регистр для ID сервисов
+
+      # Определение маршрутов для сервисов
+      routes:
+        # Маршрут для сервиса корзины покупок
+        - id: shopping-cart  # Уникальный идентификатор маршрута
+          uri: lb://shopping-cart
+          predicates:
+            - Path=/api/v1/shopping-cart/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: shopping-cart
+                fallbackUri: forward:/fallback/shopping-cart
+            - RewritePath=/api/v1/shopping-cart/(?<segment>.*), /api/v1/shopping-cart/${segment}
+
+        # Маршрут для сервиса магазина
+        - id: shopping-store
+          uri: lb://shopping-store
+          predicates:
+            - Path=/api/v1/shopping-store/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: shopping-store
+                fallbackUri: forward:/fallback/shopping-store
+            - RewritePath=/api/v1/shopping-store/(?<segment>.*), /api/v1/shopping-store/${segment}
+
+        # Маршрут для сервиса склада
+        - id: warehouse
+          uri: lb://warehouse
+          predicates:
+            - Path=/api/v1/warehouse/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: warehouse
+                fallbackUri: forward:/fallback/warehouse
+            - RewritePath=/api/v1/warehouse/(?<segment>.*), /api/v1/warehouse/${segment}
+
+        # Маршрут для REST эндпоинтов коллектора
+        - id: collector-rest
+          uri: lb://collector
+          predicates:
+            - Path=/events/sensors/**  # Обработка событий от сенсоров
+            - Path=/events/hubs/**     # Обработка событий от хабов
+            - Method=POST             # Только POST запросы
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: collector
+                fallbackUri: forward:/fallback/collector
+            - RewritePath=/events/(?<segment>.*), /events/${segment}
+
+        ############################################################
+        #  Новые маршруты на основе спецификаций OpenAPI
+        ############################################################
+
+        # Маршрут для сервиса доставки
+        - id: delivery
+          uri: lb://delivery
+          predicates:
+            - Path=/api/v1/delivery/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: delivery
+                fallbackUri: forward:/fallback/delivery
+            - RewritePath=/api/v1/delivery/(?<segment>.*), /api/v1/delivery/${segment}
+
+        # Маршрут для сервиса заказов
+        - id: order
+          uri: lb://order
+          predicates:
+            - Path=/api/v1/order/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: order
+                fallbackUri: forward:/fallback/order
+            - RewritePath=/api/v1/order/(?<segment>.*), /api/v1/order/${segment}
+
+        # Маршрут для платёжного шлюза
+        - id: payment
+          uri: lb://payment
+          predicates:
+            - Path=/api/v1/payment/**
+          filters:
+            - name: CircuitBreaker
+              args:
+                name: payment
+                fallbackUri: forward:/fallback/payment
+            - RewritePath=/api/v1/payment/(?<segment>.*), /api/v1/payment/${segment}
+
+# Конфигурация Resilience4j для Circuit Breaker
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:  # Конфигурация по умолчанию
+        slidingWindowSize: 10  # Размер окна для анализа ошибок
+        failureRateThreshold: 50  # Порог ошибок в процентах
+        waitDurationInOpenState: 10s  # Время ожидания перед повторной попыткой
+        permittedNumberOfCallsInHalfOpenState: 5  # Разрешенное количество запросов в полуоткрытом состоянии
+        registerHealthIndicator: true  # Регистрация индикатора здоровья
+    instances:
+      shopping-cart:
+        baseConfig: default
+      shopping-store:
+        baseConfig: default
+      warehouse:
+        baseConfig: default
+      collector:
+        baseConfig: default
+      delivery:
+        baseConfig: default
+      order:
+        baseConfig: default
+      payment:
+        baseConfig: default
+
+# Настройки логирования
+logging:
+  level:
+    root: INFO  # Общий уровень логирования
+    org.springframework.cloud.gateway: INFO  # Детальное логирование Gateway
+    org.springframework.http.server.reactive: INFO  # Логирование HTTP-сервера
+    org.springframework.web: INFO  # Логирование Spring Web
+    reactor.netty: INFO  # Логирование Netty
+    io.github.resilience4j: INFO  # Логирование Resilience4j
+
+# Настройки Spring Boot Actuator
+management:
+  endpoint:
+    gateway:
+      enabled: true  # Включение эндпоинта управления Gateway
+    health:
+      show-details: always  # Показывать детальную информацию о состоянии здоровья
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

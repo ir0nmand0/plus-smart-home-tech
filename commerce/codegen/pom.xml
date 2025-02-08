@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+      Родительский модуль для всех подпроектов codegen.
+      Здесь задаются общие свойства и версии плагинов.
+    -->
+    <parent>
+        <groupId>ru.yandex.practicum</groupId>
+        <artifactId>commerce</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>codegen</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <!-- Описание модулей codegen -->
+    <modules>
+        <module>codegen-common</module>
+        <module>codegen-api</module>
+    </modules>
+
+    <!-- Настройка профилей сборки (при необходимости) -->
+    <profiles>
+        <profile>
+            <id>default</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <defaultGoal>clean install</defaultGoal>
+            </build>
+        </profile>
+    </profiles>
+
+    <properties>
+        <!-- Версии Java -->
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Версии Maven-плагинов -->
+        <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.12.1</maven-compiler-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
+        <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
+        <build-helper-maven-plugin.version>3.5.0</build-helper-maven-plugin.version>
+
+        <!-- Версии библиотек -->
+        <openapi.generator.version>7.11.0</openapi.generator.version>
+        <jackson.version>2.16.1</jackson.version>
+        <jackson.databind.nullable.version>0.2.6</jackson.databind.nullable.version>
+        <swagger-annotations.version>2.2.20</swagger-annotations.version>
+        <lombok.version>1.18.30</lombok.version>
+        <jakarta.validation-api.version>3.1.0</jakarta.validation-api.version>
+        <jakarta.annotation-api.version>3.0.0</jakarta.annotation-api.version>
+        <feign.form.version>3.8.0</feign.form.version>
+        <feign.version>13.1</feign.version>
+
+        <!-- Общие настройки для OpenAPI Generator -->
+        <openapi.generator.base.package>ru.yandex.practicum</openapi.generator.base.package>
+        <openapi.generator.java.dateLibrary>java8</openapi.generator.java.dateLibrary>
+        <openapi.generator.spring.library>spring-boot</openapi.generator.spring.library>
+        <openapi.generator.feign.library>feign</openapi.generator.feign.library>
+    </properties>
+
+    <!-- Управление версиями зависимостей (dependencyManagement) -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Внутренние модули -->
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>codegen-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Jackson (основа для JSON-сериализации) -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <!-- Поддержка Nullable-аннотаций для Jackson -->
+            <dependency>
+                <groupId>org.openapitools</groupId>
+                <artifactId>jackson-databind-nullable</artifactId>
+                <version>${jackson.databind.nullable.version}</version>
+            </dependency>
+
+            <!-- Swagger/OpenAPI аннотации -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-models</artifactId>
+                <version>${swagger-annotations.version}</version>
+            </dependency>
+
+            <!-- Lombok (упрощает написание DTO и пр.) -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Feign (HTTP-клиент) -->
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-core</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-jackson</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-okhttp</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+
+            <!-- Jakarta Validation (Bean Validation) -->
+            <dependency>
+                <groupId>jakarta.validation</groupId>
+                <artifactId>jakarta.validation-api</artifactId>
+                <version>${jakarta.validation-api.version}</version>
+            </dependency>
+
+            <!-- Jakarta Annotation (замена javax.annotation) -->
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta.annotation-api.version}</version>
+            </dependency>
+
+            <!-- Дополнительные зависимости для Feign -->
+            <dependency>
+                <groupId>io.github.openfeign.form</groupId>
+                <artifactId>feign-form</artifactId>
+                <version>${feign.form.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.openfeign</groupId>
+                <artifactId>feign-slf4j</artifactId>
+                <version>${feign.version}</version>
+            </dependency>
+
+            <!-- Поддержка Java 8 (JSR310) типов дат для Jackson -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- Управление плагинами (pluginManagement) -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Плагин очистки (mvn clean) -->
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven-clean-plugin.version}</version>
+                </plugin>
+
+                <!-- Плагин для работы с ресурсами (копирование, фильтрация) -->
+                <plugin>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
+                </plugin>
+
+                <!-- Плагин компиляции -->
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+
+                <!-- Плагин для тестов -->
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+
+                <!-- Плагин упаковки в JAR -->
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
+                </plugin>
+
+                <!-- Установка в локальный репозиторий -->
+                <plugin>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven-install-plugin.version}</version>
+                </plugin>
+
+                <!-- Деплой в удалённый репозиторий -->
+                <plugin>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
+                </plugin>
+
+                <!-- Build Helper для добавления сгенерированных исходников -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>${build-helper-maven-plugin.version}</version>
+                </plugin>
+
+                <!-- Плагин OpenAPI Generator (управление версией) -->
+                <plugin>
+                    <groupId>org.openapitools</groupId>
+                    <artifactId>openapi-generator-maven-plugin</artifactId>
+                    <version>${openapi.generator.version}</version>
+                    <configuration>
+                        <configOptions>
+                            <useJakartaEe>true</useJakartaEe>
+                            <dateLibrary>${openapi.generator.java.dateLibrary}</dateLibrary>
+                            <sourceFolder>src/main/java</sourceFolder>
+                            <useBeanValidation>true</useBeanValidation>
+                        </configOptions>
+                        <globalProperties>
+                            <modelNameSuffix>Dto</modelNameSuffix>
+                            <apiTests>false</apiTests>
+                            <modelTests>false</modelTests>
+                        </globalProperties>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

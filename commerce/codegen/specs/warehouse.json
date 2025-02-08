@@ -1,0 +1,247 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "/warehouse/api/v1/warehouse",
+      "description": "Base path"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Warehouse",
+      "description": "API для обеспечения работы склада онлайн магазина"
+    }
+  ],
+  "paths": {
+    "/warehouse": {
+      "put": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Добавить новый товар на склад.",
+        "operationId": "newProductInWarehouse",
+        "requestBody": {
+          "description": "Описание нового товара",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/NewProductInWarehouseRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Товар уже зарегистрирован",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/SpecifiedProductAlreadyInWarehouseExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/shipped": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Передать товары в доставку.",
+        "operationId": "shippedToDelivery",
+        "requestBody": {
+          "description": "Запрос на передачу в доставку.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ShippedToDeliveryRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/warehouse/return": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Принять возврат товаров на склад",
+        "operationId": "acceptReturn",
+        "requestBody": {
+          "description": "Отображение идентификатора товара -> количество",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "integer",
+                  "format": "int64"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/warehouse/check": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Проверить, что на складе достаточно товара под корзину",
+        "operationId": "checkProductQuantityEnoughForShoppingCart",
+        "requestBody": {
+          "description": "Корзина товаров",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/ShoppingCartDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Общие сведения по бронированию",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/BookedProductsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Товар из корзины отсутствует в БД склада",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductInShoppingCartNotInWarehouseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/assembly": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Собрать товары к заказу",
+        "operationId": "assemblyProductsForOrder",
+        "requestBody": {
+          "description": "Корзина товаров",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/AssemblyProductsForOrderRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Общие сведения по бронированию",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/BookedProductsDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Товар не в нужном количестве",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/ProductInShoppingCartLowQuantityInWarehouseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/add": {
+      "post": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Увеличить количество товара на складе",
+        "operationId": "addProductToWarehouse",
+        "requestBody": {
+          "description": "Запрос на добавление товара",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/AddProductToWarehouseRequestDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Товар не найден на складе",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoSpecifiedProductInWarehouseExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/warehouse/address": {
+      "get": {
+        "tags": [
+          "Warehouse"
+        ],
+        "description": "Предоставить адрес склада",
+        "operationId": "getWarehouseAddress",
+        "responses": {
+          "200": {
+            "description": "Актуальный адрес склада",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/AddressDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

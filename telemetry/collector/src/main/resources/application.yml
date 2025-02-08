@@ -1,34 +1,35 @@
 spring:
-  kafka:
-    bootstrap-servers: localhost:9092 # Адрес брокеров Kafka
-    properties:
-      schema.registry.url: http://localhost:8081 # Добавляем schema.registry.url
-      linger.ms: 5 # Задержка для повышения пропускной способности
-      compression.type: lz4 # Компрессия сообщений
-      acks: all # Подтверждение всеми репликами
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
-    topics:
-      sensors: telemetry.sensors.v1
-      hubs: telemetry.hubs.v1
+  application:
+    name: ${SPRING_APPLICATION_NAME:collector}
+  config:
+    import: "configserver:"
+  cloud:
+    config:
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
+      retry:
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
+    loadbalancer:
+      cache:
+        enabled: false
+    service-registry:
+      auto-registration:
+        enabled: true
+        fail-fast: true
 
-  logging:
-    level:
-      # Общий уровень логирования
-      root: INFO
-      # Логирование для пакета ru.yandex.practicum
-      ru.yandex.practicum: INFO
-
-endpoints:
-  # Базовый URL для обработки REST-запросов
-  root: /events
-  # URL для обработки запросов, связанных с сенсорами
-  sensors: /sensors
-  # URL для обработки запросов, связанных с хабами
-  hubs: /hubs
-
-grpc:
-  server:
-    # Порт для gRPC сервера
-    port: 9090
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://discovery-server:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
+  instance:
+    hostname: ${spring.application.name}
+    instance-id: ${spring.application.name}:${random.uuid}
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}

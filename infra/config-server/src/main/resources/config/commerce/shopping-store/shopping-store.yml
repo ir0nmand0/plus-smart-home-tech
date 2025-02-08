@@ -1,0 +1,94 @@
+api:
+  # Базовая версия API
+  shopping-store-version: 1
+  warehouse-version: 1
+
+
+server:
+  # 0 означает случайный свободный порт. Можно переопределять SERVER_PORT.
+  port: ${SERVER_PORT:0}
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:shopping-store}
+  jackson:
+    mapper:
+      accept-case-insensitive-enums: true
+      default-view-inclusion: true
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+      accept-empty-string-as-null-object: true
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+      write-null-map-values: false
+    default-property-inclusion: non_null
+
+  cloud:
+    config:
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
+      retry:
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
+    circuitbreaker:
+      resilience4j:
+        instances:
+          warehouse:
+            slidingWindowSize: ${CIRCUIT_BREAKER_WINDOW_SIZE:10}
+            failureRateThreshold: ${CIRCUIT_BREAKER_FAILURE_RATE:50}
+            waitDurationInOpenState: ${CIRCUIT_BREAKER_WAIT_DURATION:10s}
+            permittedNumberOfCallsInHalfOpenState: ${CIRCUIT_BREAKER_PERMITTED_CALLS:5}
+            registerHealthIndicator: true
+
+  datasource:
+    # Настройки подключения к PostgreSQL
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/shopping_store}
+    username: ${SPRING_DATASOURCE_USERNAME:store_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:store_pass}
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: ${SHOW_SQL:false}
+  sql:
+    init:
+      mode: always
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
+
+feign:
+  circuitbreaker:
+    enabled: true
+  client:
+    config:
+      warehouse-client:
+        connectTimeout: ${FEIGN_CONNECT_TIMEOUT:5000}
+        readTimeout: ${FEIGN_READ_TIMEOUT:5000}
+        loggerLevel: ${FEIGN_LOGGER_LEVEL:basic}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

@@ -1,0 +1,33 @@
+erDiagram
+    deliveries ||--o{ delivery_history : tracks
+    deliveries }o--|| addresses : "from address"
+    deliveries }o--|| addresses : "to address"
+    
+    deliveries {
+        UUID delivery_id PK
+        UUID order_id
+        UUID from_address_id FK
+        UUID to_address_id FK
+        delivery_state delivery_state
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }
+    
+    delivery_history {
+        UUID history_id PK
+        UUID delivery_id FK
+        delivery_state previous_state
+        delivery_state new_state
+        TIMESTAMP changed_at
+    }
+    
+    addresses {
+        UUID address_id PK
+        VARCHAR country
+        VARCHAR city
+        VARCHAR street
+        VARCHAR house
+        VARCHAR flat
+        TIMESTAMP created_at
+        TIMESTAMP updated_at
+    }

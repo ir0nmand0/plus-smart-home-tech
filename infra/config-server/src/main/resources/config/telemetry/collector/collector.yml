@@ -1,0 +1,59 @@
+server:
+  port: ${SERVER_PORT:9091}
+
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME:collector}
+  cloud:
+    config:
+      discovery:
+        enabled: ${CONFIG_DISCOVERY_ENABLED:true}
+        service-id: ${CONFIG_SERVER_ID:config-server}
+      fail-fast: ${CONFIG_FAIL_FAST:true}
+      retry:
+        max-attempts: ${CONFIG_RETRY_ATTEMPTS:5}
+        initial-interval: ${CONFIG_RETRY_INITIAL:2000}
+        max-interval: ${CONFIG_RETRY_MAX:10000}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP:localhost:9092}
+    properties:
+      schema.registry.url: ${KAFKA_SCHEMA_REGISTRY_URL:http://localhost:8081}
+      linger.ms: ${KAFKA_LINGER_MS:5}
+      compression.type: ${KAFKA_COMPRESSION:lz4}
+      acks: ${KAFKA_ACKS:all}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: io.confluent.kafka.serializers.KafkaAvroSerializer
+    topics:
+      sensors: ${KAFKA_TOPIC_SENSORS:telemetry.sensors.v1}
+      hubs: ${KAFKA_TOPIC_HUBS:telemetry.hubs.v1}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+    register-with-eureka: ${EUREKA_REGISTER:true}
+    fetch-registry: ${EUREKA_FETCH_REGISTRY:true}
+  instance:
+    prefer-ip-address: ${EUREKA_PREFER_IP:true}
+    lease-renewal-interval-in-seconds: ${EUREKA_LEASE_RENEW:10}
+    lease-expiration-duration-in-seconds: ${EUREKA_LEASE_EXPIRE:30}
+
+logging:
+  level:
+    root: ${LOG_LEVEL:INFO}
+
+endpoints:
+  root: ${COLLECTOR_ROOT:/events}
+  sensors: ${COLLECTOR_SENSORS:/sensors}
+  hubs: ${COLLECTOR_HUBS:/hubs}
+
+grpc:
+  server:
+    port: ${GRPC_SERVER_PORT:9090}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

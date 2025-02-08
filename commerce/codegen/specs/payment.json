@@ -1,0 +1,414 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Smart Home Technologies API",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "/payment/api/v1/payment",
+      "description": "Base path"
+    }
+  ],
+  "tags": [
+    {
+      "name": "PaymentGateway",
+      "description": "API для расчёта, проведения оплат"
+    }
+  ],
+  "paths": {
+    "/payment": {
+      "post": {
+        "tags": [
+          "PaymentGateway"
+        ],
+        "description": "Формирование оплаты для заказа (переход в PaymentGateway).",
+        "operationId": "payment",
+        "requestBody": {
+          "description": "Заказ для формирования оплаты.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/OrderDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Сформированная оплата заказа (переход в PaymentGateway)",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/PaymentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Недостаточно информации в заказе для расчёта",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment/totalCost": {
+      "post": {
+        "tags": [
+          "PaymentGateway"
+        ],
+        "description": "Расчёт полной стоимости заказа.",
+        "operationId": "getTotalCost",
+        "requestBody": {
+          "description": "Заказ для расчёта.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/OrderDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Полная стоимость заказа",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "number",
+				  "format": "double"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Недостаточно информации в заказе для расчёта",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment/refund": {
+      "post": {
+        "tags": [
+          "PaymentGateway"
+        ],
+        "description": "Метод для эмуляции успешной оплаты в платежного шлюза.",
+        "operationId": "paymentSuccess",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Указанная оплата не найдена",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoPaymentFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment/productCost": {
+      "post": {
+        "tags": [
+          "PaymentGateway"
+        ],
+        "description": "Расчёт стоимости товаров в заказе.",
+        "operationId": "productCost",
+        "requestBody": {
+          "description": "Заказ для расчёта.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "common-schemas.json#/components/schemas/OrderDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "400": {
+            "description": "Недостаточно информации в заказе для расчёта",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NotEnoughInfoInOrderToCalculateExceptionDto"
+                }
+              }
+            }
+          },
+          "200": {
+            "description": "Расчёт стоимости товаров в заказе",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "number",
+				  "format": "double"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/payment/failed": {
+      "post": {
+        "tags": [
+          "PaymentGateway"
+        ],
+        "description": "Метод для эмуляции отказа в оплате платежного шлюза.",
+        "operationId": "paymentFailed",
+        "requestBody": {
+          "description": "Идентификатор заказа.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string",
+                "format": "uuid"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "404": {
+            "description": "Указанная оплата не найдена",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "common-schemas.json#/components/schemas/NoPaymentFoundExceptionDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "paymentId": {
+            "type": "string",
+            "description": "Идентификатор оплаты.",
+            "format": "uuid"
+          },
+          "totalPayment": {
+            "type": "number",
+			"format": "double",
+            "description": "Общая стоимость."
+          },
+          "deliveryTotal": {
+            "type": "number",
+			"format": "double",
+            "description": "Стоимость доставки."
+          },
+          "feeTotal": {
+            "type": "number",
+			"format": "double",
+            "description": "Стоимость налога."
+          }
+        }
+      },
+      "NotEnoughInfoInOrderToCalculateException": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "object",
+            "properties": {
+              "stackTrace": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "classLoaderName": { "type": "string" },
+                    "moduleName": { "type": "string" },
+                    "moduleVersion": { "type": "string" },
+                    "methodName": { "type": "string" },
+                    "fileName": { "type": "string" },
+                    "lineNumber": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "className": { "type": "string" },
+                    "nativeMethod": { "type": "boolean" }
+                  }
+                }
+              },
+              "message": { "type": "string" },
+              "localizedMessage": { "type": "string" }
+            }
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classLoaderName": { "type": "string" },
+                "moduleName": { "type": "string" },
+                "moduleVersion": { "type": "string" },
+                "methodName": { "type": "string" },
+                "fileName": { "type": "string" },
+                "lineNumber": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "className": { "type": "string" },
+                "nativeMethod": { "type": "boolean" }
+              }
+            }
+          },
+          "httpStatus": {
+            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnumDto"
+          },
+          "userMessage": { "type": "string" },
+          "message": { "type": "string" },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": { "type": "string" },
+                      "moduleName": { "type": "string" },
+                      "moduleVersion": { "type": "string" },
+                      "methodName": { "type": "string" },
+                      "fileName": { "type": "string" },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "className": { "type": "string" },
+                      "nativeMethod": { "type": "boolean" }
+                    }
+                  }
+                },
+                "message": { "type": "string" },
+                "localizedMessage": { "type": "string" }
+              }
+            }
+          },
+          "localizedMessage": { "type": "string" }
+        }
+      },
+      "NoPaymentFoundException": {
+        "type": "object",
+        "properties": {
+          "cause": {
+            "type": "object",
+            "properties": {
+              "stackTrace": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "classLoaderName": { "type": "string" },
+                    "moduleName": { "type": "string" },
+                    "moduleVersion": { "type": "string" },
+                    "methodName": { "type": "string" },
+                    "fileName": { "type": "string" },
+                    "lineNumber": {
+                      "type": "integer",
+                      "format": "int32"
+                    },
+                    "className": { "type": "string" },
+                    "nativeMethod": { "type": "boolean" }
+                  }
+                }
+              },
+              "message": { "type": "string" },
+              "localizedMessage": { "type": "string" }
+            }
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "classLoaderName": { "type": "string" },
+                "moduleName": { "type": "string" },
+                "moduleVersion": { "type": "string" },
+                "methodName": { "type": "string" },
+                "fileName": { "type": "string" },
+                "lineNumber": {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                "className": { "type": "string" },
+                "nativeMethod": { "type": "boolean" }
+              }
+            }
+          },
+          "httpStatus": {
+            "$ref": "common-schemas.json#/components/schemas/HttpStatusEnumDto"
+          },
+          "userMessage": { "type": "string" },
+          "message": { "type": "string" },
+          "suppressed": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "stackTrace": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "classLoaderName": { "type": "string" },
+                      "moduleName": { "type": "string" },
+                      "moduleVersion": { "type": "string" },
+                      "methodName": { "type": "string" },
+                      "fileName": { "type": "string" },
+                      "lineNumber": {
+                        "type": "integer",
+                        "format": "int32"
+                      },
+                      "className": { "type": "string" },
+                      "nativeMethod": { "type": "boolean" }
+                    }
+                  }
+                },
+                "message": { "type": "string" },
+                "localizedMessage": { "type": "string" }
+              }
+            }
+          },
+          "localizedMessage": { "type": "string" }
+        }
+      }
+    }
+  }
+}
